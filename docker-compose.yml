@@ -18,5 +18,68 @@ services:
       timeout: 5s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:4.3.6-management-alpine
+    container_name: pcshop-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # management UI (http://localhost:15672)
+    volumes:
+      - pcshop-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: pcshop-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - pcshop-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # KRaft mode (no ZooKeeper), single-broker dev cluster. Services run on the HOST
+  # via `mvn spring-boot:run` (not containerized), so the broker exposes a
+  # host-reachable EXTERNAL listener alongside the internal PLAINTEXT one.
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: pcshop-kafka
+    restart: unless-stopped
+    environment:
+      CLUSTER_ID: "fBTMcTq2Rx--FtWWppGltw"
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "controller,broker"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      # Single-broker dev cluster: the defaults (RF=3) can never be satisfied,
+      # which silently breaks consumer-group coordination because
+      # __consumer_offsets never gets created.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+    ports:
+      - "29092:29092"
+    volumes:
+      - pcshop-kafka-data:/var/lib/kafka/data
+
 volumes:
   pcshop-postgres-data:
+  pcshop-rabbitmq-data:
+  pcshop-redis-data:
+  pcshop-kafka-data:

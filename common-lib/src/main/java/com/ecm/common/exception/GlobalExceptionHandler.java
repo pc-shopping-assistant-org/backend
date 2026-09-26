@@ -44,11 +44,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(CommonErrorCode.VALIDATION_ERROR.getCode(), ex.getMessage()));
     }
 
-    // Note: security filter-chain rejections (e.g. authorizeHttpRequests denying a request
-    // before it reaches the DispatcherServlet) are handled by Spring Security's own
-    // AccessDeniedHandler/AuthenticationEntryPoint, not by this @ControllerAdvice. These
-    // two handlers cover exceptions thrown from inside controller/service code, e.g. a
-    // @PreAuthorize check on a method or a manual throw.
+    /*
+     * Note: security filter-chain rejections (e.g. authorizeHttpRequests denying a request
+     * before it reaches the DispatcherServlet) are handled by Spring Security's own
+     * AccessDeniedHandler/AuthenticationEntryPoint, not by this @ControllerAdvice. These
+     * two handlers cover exceptions thrown from inside controller/service code, e.g. a
+     * @PreAuthorize check on a method or a manual throw.
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity.status(CommonErrorCode.FORBIDDEN.getHttpStatus())
