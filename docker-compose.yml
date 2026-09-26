@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:18.3-alpine
+    container_name: pcshop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: identity_db,catalog_db,order_db,payment_db,promotion_db,search_db,media_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pcshop-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pcshop-postgres-data:

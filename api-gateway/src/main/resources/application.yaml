@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: identity-service
+              uri: lb://identity-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /identity-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+            - id: catalog-service
+              uri: lb://catalog-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /catalog-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /order-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+            - id: payment-service
+              uri: lb://payment-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /payment-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+            - id: promotion-service
+              uri: lb://promotion-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /promotion-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+            - id: search-service
+              uri: lb://search-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /search-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+            - id: media-service
+              uri: lb://media-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /media-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
