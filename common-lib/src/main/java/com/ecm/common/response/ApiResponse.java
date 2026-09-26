@@ -22,11 +22,11 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(true, "OK", "Success", data);
+        return new ApiResponse<>(true, "SUCCESS", "Success", data);
     }
 
     public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(true, "OK", message, data);
+        return new ApiResponse<>(true, "SUCCESS", message, data);
     }
 
     public static <T> ApiResponse<T> error(String code, String message) {
