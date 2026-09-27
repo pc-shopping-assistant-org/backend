@@ -1,16 +1,7 @@
 package com.ecm.catalog.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -69,7 +60,9 @@ public class ProductVariant {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    /** ref -> Identity Service (employees.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (employees.account_id), no cross-DB FK.
+     */
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
@@ -77,7 +70,9 @@ public class ProductVariant {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    /** ref -> Identity Service (employees.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (employees.account_id), no cross-DB FK.
+     */
     @Column(name = "updated_by")
     private UUID updatedBy;
 }

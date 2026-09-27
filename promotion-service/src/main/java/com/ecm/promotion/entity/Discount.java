@@ -1,16 +1,7 @@
 package com.ecm.promotion.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -43,7 +34,9 @@ public class Discount {
     @Column(name = "discount_type", nullable = false, length = 10)
     private DiscountType discountType;
 
-    /** Percent (1-100) or a fixed amount (> 0) depending on {@link #discountType}; enforced by a DB CHECK. */
+    /**
+     * Percent (1-100) or a fixed amount (> 0) depending on {@link #discountType}; enforced by a DB CHECK.
+     */
     @Column(name = "value", nullable = false)
     private int value;
 
@@ -63,11 +56,15 @@ public class Discount {
     @Column(name = "description")
     private String description;
 
-    /** ref -> Identity Service (employees.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (employees.account_id), no cross-DB FK.
+     */
     @Column(name = "created_by")
     private UUID createdBy;
 
-    /** ref -> Identity Service (employees.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (employees.account_id), no cross-DB FK.
+     */
     @Column(name = "updated_by")
     private UUID updatedBy;
 

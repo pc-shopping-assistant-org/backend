@@ -23,7 +23,7 @@ public class InvalidStateException extends BusinessException {
     }
 
     public InvalidStateException(ErrorCode errorCode, String resourceName, Object identifier, String currentState,
-            String attemptedAction) {
+                                 String attemptedAction) {
         super(errorCode, buildMessage(resourceName, identifier, currentState, attemptedAction));
     }
 

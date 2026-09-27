@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-/** Called before accepting a product review, to confirm the order item belongs to the reviewer and the order is COMPLETED. */
+/**
+ * Called before accepting a product review, to confirm the order item belongs to the reviewer and the order is COMPLETED.
+ */
 @FeignClient(name = "order-service")
 public interface OrderServiceClient {
 

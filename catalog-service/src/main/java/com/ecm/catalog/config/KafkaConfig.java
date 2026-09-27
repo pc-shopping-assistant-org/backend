@@ -1,13 +1,13 @@
 package com.ecm.catalog.config;
 
 import com.ecm.catalog.messaging.kafka.KafkaTopics;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
@@ -15,11 +15,15 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Map;
 
-/** catalog-service is the producer of these topics, so it owns their declaration. */
+/**
+ * catalog-service is the producer of these topics, so it owns their declaration.
+ */
 @Configuration
 public class KafkaConfig {
 
-    /** Declared explicitly (not relying on autoconfiguration) so NewTopic beans below are reliably created on startup. */
+    /**
+     * Declared explicitly (not relying on autoconfiguration) so NewTopic beans below are reliably created on startup.
+     */
     @Bean
     public KafkaAdmin kafkaAdmin(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         return new KafkaAdmin(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers));

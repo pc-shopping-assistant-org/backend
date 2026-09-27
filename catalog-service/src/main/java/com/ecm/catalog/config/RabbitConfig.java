@@ -3,16 +3,11 @@ package com.ecm.catalog.config;
 import com.ecm.catalog.messaging.rabbitmq.RabbitTopology;
 import com.ecm.catalog.messaging.rabbitmq.command.ReleaseStockCommand;
 import com.ecm.catalog.messaging.rabbitmq.command.ReserveStockCommand;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +34,7 @@ public class RabbitConfig {
         classMapper.setIdClassMapping(Map.of(
                 "ReserveStockCommand", ReserveStockCommand.class,
                 "ReleaseStockCommand", ReleaseStockCommand.class));
-        var converter = new Jackson2JsonMessageConverter();
+        var converter = new JacksonJsonMessageConverter();
         converter.setClassMapper(classMapper);
         return converter;
     }

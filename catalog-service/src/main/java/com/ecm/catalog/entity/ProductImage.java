@@ -1,16 +1,7 @@
 package com.ecm.catalog.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
@@ -38,7 +29,9 @@ public class ProductImage {
     @Column(name = "product_variant_id", nullable = false)
     private UUID productVariantId;
 
-    /** ref -> Media Service (files.id), no cross-DB FK. */
+    /**
+     * ref -> Media Service (files.id), no cross-DB FK.
+     */
     @Column(name = "file_id", nullable = false)
     private UUID fileId;
 

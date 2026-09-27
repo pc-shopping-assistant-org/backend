@@ -1,16 +1,7 @@
 package com.ecm.order.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -20,7 +11,9 @@ import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 import java.util.UUID;
 
-/** A row written in the same transaction as a business change; {@link com.ecm.order.messaging.OutboxRelay} publishes it later. */
+/**
+ * A row written in the same transaction as a business change; {@link com.ecm.order.messaging.OutboxRelay} publishes it later.
+ */
 @Entity
 @Table(name = "outbox_events")
 @Getter
@@ -48,7 +41,9 @@ public class OutboxEvent {
     @Column(name = "channel", nullable = false, length = 10)
     private OutboxChannel channel;
 
-    /** Kafka topic or RabbitMQ routing key. */
+    /**
+     * Kafka topic or RabbitMQ routing key.
+     */
     @Column(name = "destination", nullable = false)
     private String destination;
 

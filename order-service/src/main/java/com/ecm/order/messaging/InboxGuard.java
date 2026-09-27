@@ -8,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Kafka/RabbitMQ deliver at-least-once; this makes re-delivery of the same event a no-op. */
+/**
+ * Kafka/RabbitMQ deliver at-least-once; this makes re-delivery of the same event a no-op.
+ */
 @Component
 @RequiredArgsConstructor
 public class InboxGuard {

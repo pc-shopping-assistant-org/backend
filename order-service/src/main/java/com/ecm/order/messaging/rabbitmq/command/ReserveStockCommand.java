@@ -2,7 +2,9 @@ package com.ecm.order.messaging.rabbitmq.command;
 
 import java.util.UUID;
 
-/** Published by order-service, consumed by catalog-service. Own copy per service — see service-structure.md Rule 4. */
+/**
+ * Published by order-service, consumed by catalog-service. Own copy per service — see service-structure.md Rule 4.
+ */
 public record ReserveStockCommand(
         UUID commandId,
         UUID orderId,

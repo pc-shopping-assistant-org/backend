@@ -1,5 +1,6 @@
 package com.ecm.order.messaging.kafka.consumer;
 
+import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.order.client.PaymentServiceClient;
 import com.ecm.order.dto.request.CreatePaymentRequest;
 import com.ecm.order.entity.Order;
@@ -9,7 +10,6 @@ import com.ecm.order.messaging.event.StockReserveFailedEvent;
 import com.ecm.order.messaging.event.StockReservedEvent;
 import com.ecm.order.messaging.kafka.KafkaTopics;
 import com.ecm.order.repository.OrderRepository;
-import com.ecm.common.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -17,7 +17,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Reacts to catalog-service's stock reservation result — the next step of the checkout saga. */
+/**
+ * Reacts to catalog-service's stock reservation result — the next step of the checkout saga.
+ */
 @Component
 @RequiredArgsConstructor
 public class StockEventConsumer {

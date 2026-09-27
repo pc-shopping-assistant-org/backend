@@ -1,16 +1,7 @@
 package com.ecm.order.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -39,7 +30,9 @@ public class ShippingMethod {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    /** Current tariff in minor currency units; snapshotted into {@code orders.shipping_fee} at checkout. */
+    /**
+     * Current tariff in minor currency units; snapshotted into {@code orders.shipping_fee} at checkout.
+     */
     @Column(name = "fee", nullable = false)
     private Long fee;
 

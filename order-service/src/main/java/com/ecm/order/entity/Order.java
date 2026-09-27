@@ -1,16 +1,7 @@
 package com.ecm.order.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -33,11 +24,15 @@ public class Order {
     @Column(name = "id", insertable = false, updatable = false, nullable = false)
     private UUID id;
 
-    /** ref -> Identity Service (customers.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (customers.account_id), no cross-DB FK.
+     */
     @Column(name = "customer_id")
     private UUID customerId;
 
-    /** ref -> Promotion Service (discounts.id), no cross-DB FK. */
+    /**
+     * ref -> Promotion Service (discounts.id), no cross-DB FK.
+     */
     @Column(name = "order_discount_id")
     private UUID orderDiscountId;
 
@@ -50,7 +45,9 @@ public class Order {
     @Column(name = "discount_amount", nullable = false)
     private Long discountAmount;
 
-    /** Snapshot of the shipping fee at order time — not recalculated if the method's fee changes later. */
+    /**
+     * Snapshot of the shipping fee at order time — not recalculated if the method's fee changes later.
+     */
     @Column(name = "shipping_fee", nullable = false)
     private Long shippingFee;
 
@@ -63,7 +60,9 @@ public class Order {
     @Column(name = "note")
     private String note;
 
-    /** Snapshot of the delivery address at order time. */
+    /**
+     * Snapshot of the delivery address at order time.
+     */
     @Column(name = "delivery_address", nullable = false, length = 500)
     private String deliveryAddress;
 
@@ -80,7 +79,9 @@ public class Order {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    /** ref -> Identity Service (employees.account_id) — the staff member who created the order on the customer's behalf, if any. */
+    /**
+     * ref -> Identity Service (employees.account_id) — the staff member who created the order on the customer's behalf, if any.
+     */
     @Column(name = "created_by")
     private UUID createdBy;
 
@@ -88,7 +89,9 @@ public class Order {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    /** ref -> Identity Service (employees.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (employees.account_id), no cross-DB FK.
+     */
     @Column(name = "updated_by")
     private UUID updatedBy;
 

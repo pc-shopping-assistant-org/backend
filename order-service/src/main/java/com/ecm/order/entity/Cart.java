@@ -1,16 +1,7 @@
 package com.ecm.order.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -37,7 +28,9 @@ public class Cart {
     @Column(name = "id", insertable = false, updatable = false, nullable = false)
     private UUID id;
 
-    /** ref -> Identity Service (customers.account_id), no cross-DB FK. */
+    /**
+     * ref -> Identity Service (customers.account_id), no cross-DB FK.
+     */
     @Column(name = "customer_id")
     private UUID customerId;
 

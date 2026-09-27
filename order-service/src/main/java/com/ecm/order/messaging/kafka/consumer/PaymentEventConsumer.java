@@ -1,11 +1,7 @@
 package com.ecm.order.messaging.kafka.consumer;
 
-import com.ecm.order.entity.Order;
-import com.ecm.order.entity.OrderItem;
-import com.ecm.order.entity.OrderStatus;
-import com.ecm.order.entity.OutboxChannel;
-import com.ecm.order.entity.OutboxEvent;
-import com.ecm.order.entity.OutboxStatus;
+import com.ecm.common.exception.ResourceNotFoundException;
+import com.ecm.order.entity.*;
 import com.ecm.order.messaging.InboxGuard;
 import com.ecm.order.messaging.event.PaymentCompletedEvent;
 import com.ecm.order.messaging.event.PaymentFailedEvent;
@@ -15,7 +11,6 @@ import com.ecm.order.messaging.rabbitmq.command.ReleaseStockCommand;
 import com.ecm.order.repository.OrderItemRepository;
 import com.ecm.order.repository.OrderRepository;
 import com.ecm.order.repository.OutboxEventRepository;
-import com.ecm.common.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -25,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Reacts to payment-service's outcome for a payment — the final saga step: confirm or roll back the order. */
+/**
+ * Reacts to payment-service's outcome for a payment — the final saga step: confirm or roll back the order.
+ */
 @Component
 @RequiredArgsConstructor
 public class PaymentEventConsumer {

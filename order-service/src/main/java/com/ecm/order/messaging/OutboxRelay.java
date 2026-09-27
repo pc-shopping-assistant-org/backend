@@ -47,7 +47,8 @@ public class OutboxRelay {
 
     private void dispatch(OutboxEvent event) {
         switch (event.getChannel()) {
-            case KAFKA -> kafkaTemplate.send(event.getDestination(), event.getAggregateId().toString(), event.getPayload());
+            case KAFKA ->
+                    kafkaTemplate.send(event.getDestination(), event.getAggregateId().toString(), event.getPayload());
             // "__TypeId__" lets catalog-service's ClassMapper pick the right local command
             // class by name, since the two services declare separate copies of it (see
             // service-structure.md Rule 4) rather than sharing the class itself.

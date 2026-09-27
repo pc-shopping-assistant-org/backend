@@ -1,16 +1,7 @@
 package com.ecm.catalog.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
@@ -18,7 +9,9 @@ import org.hibernate.generator.EventType;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Named {@code Option}, not {@code Options}, to match Java class-naming convention — maps to the {@code options} table. */
+/**
+ * Named {@code Option}, not {@code Options}, to match Java class-naming convention — maps to the {@code options} table.
+ */
 @Entity
 @Table(name = "options")
 @Getter

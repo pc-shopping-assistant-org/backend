@@ -13,7 +13,9 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.Map;
 
-/** Failed listener invocations are retried 3 times, then routed to "<topic>.DLT" instead of blocking the partition forever. */
+/**
+ * Failed listener invocations are retried 3 times, then routed to "<topic>.DLT" instead of blocking the partition forever.
+ */
 @Configuration
 public class KafkaConfig {
 

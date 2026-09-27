@@ -1,6 +1,8 @@
 package com.ecm.catalog.messaging.rabbitmq;
 
-/** Exchange/queue/routing-key names for the RabbitMQ topology shared with order-service (duplicated there, not shared as code). */
+/**
+ * Exchange/queue/routing-key names for the RabbitMQ topology shared with order-service (duplicated there, not shared as code).
+ */
 public final class RabbitTopology {
 
     public static final String COMMANDS_EXCHANGE = "catalog.commands.exchange";
