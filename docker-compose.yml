@@ -78,6 +78,29 @@ services:
     volumes:
       - pcshop-kafka-data:/var/lib/kafka/data
 
+  zipkin:
+    image: openzipkin/zipkin:3.6.0
+    container_name: pcshop-zipkin
+    restart: unless-stopped
+    ports:
+      - "9411:9411" # UI + query API (http://localhost:9411)
+
+  # Services run on the HOST (not containerized), so the collector's OTLP
+  # receiver is exposed on host-reachable ports; it then forwards spans to
+  # zipkin over the internal compose network.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.153.0
+    container_name: pcshop-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./docker/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+    depends_on:
+      - zipkin
+
 volumes:
   pcshop-postgres-data:
   pcshop-rabbitmq-data:

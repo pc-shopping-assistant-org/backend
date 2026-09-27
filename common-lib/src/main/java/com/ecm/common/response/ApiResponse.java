@@ -1,6 +1,8 @@
 package com.ecm.common.response;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
@@ -14,11 +16,24 @@ public class ApiResponse<T> {
     private final Instant timestamp;
 
     private ApiResponse(boolean success, String code, String message, T data) {
+        this(success, code, message, data, Instant.now());
+    }
+
+    // Every controller response is wrapped in this envelope, so a Feign client decoding
+    // another service's response needs Jackson to be able to reconstruct it — without this
+    // creator, deserialization fails with "no Creators, like default constructor, exist".
+    @JsonCreator
+    private ApiResponse(
+            @JsonProperty("success") boolean success,
+            @JsonProperty("code") String code,
+            @JsonProperty("message") String message,
+            @JsonProperty("data") T data,
+            @JsonProperty("timestamp") Instant timestamp) {
         this.success = success;
         this.code = code;
         this.message = message;
         this.data = data;
-        this.timestamp = Instant.now();
+        this.timestamp = timestamp;
     }
 
     public static <T> ApiResponse<T> success(T data) {
