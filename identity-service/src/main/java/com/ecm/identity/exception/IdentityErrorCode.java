@@ -10,7 +10,11 @@ import org.springframework.http.HttpStatus;
 public enum IdentityErrorCode implements ErrorCode {
 
     USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "Username already exists"),
-    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid username or password"),
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
+    PHONE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Phone number already exists"),
+    INVALID_OTP(HttpStatus.BAD_REQUEST, "Invalid or expired OTP code"),
+    ROLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Default role is not configured");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;

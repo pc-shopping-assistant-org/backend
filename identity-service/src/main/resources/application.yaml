@@ -12,9 +12,34 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 server:
   port: 8081
+
+jwt:
+  # Local-dev placeholder key — override via JWT_SECRET_KEY in any real environment.
+  secret-key: ${JWT_SECRET_KEY:dGhpc19pc19hX3Zlcnlfc2VjdXJlX2tleV9mb3Jfand0X3NpZ25pbmdfYXV0aGVudGljYXRpb25fMjAyNg==}
+  access-token-expiration-ms: 86400000   # 24h
+  refresh-token-expiration-ms: 604800000 # 7d
 
 management:
   tracing:

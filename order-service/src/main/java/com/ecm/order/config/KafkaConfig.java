@@ -19,6 +19,9 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
+    private static final long RETRY_BACKOFF_MS = 1000L;
+    private static final long RETRY_MAX_ATTEMPTS = 3L;
+
     /**
      * Spring Boot autoconfigures a {@code KafkaTemplate<Object, Object>} bean, which does not
      * satisfy an injection point declared as {@code KafkaTemplate<String, String>} (Spring
@@ -40,6 +43,6 @@ public class KafkaConfig {
     @Bean
     public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, String> kafkaTemplate) {
         var recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
-        return new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3L));
+        return new DefaultErrorHandler(recoverer, new FixedBackOff(RETRY_BACKOFF_MS, RETRY_MAX_ATTEMPTS));
     }
 }

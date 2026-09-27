@@ -25,11 +25,13 @@ import java.time.Instant;
 @Slf4j
 public class OutboxRelay {
 
+    private static final long POLL_INTERVAL_MS = 2000;
+
     private final OutboxEventRepository outboxEventRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final RabbitTemplate rabbitTemplate;
 
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelay = POLL_INTERVAL_MS)
     public void publishPending() {
         var pending = outboxEventRepository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING);
         for (OutboxEvent event : pending) {

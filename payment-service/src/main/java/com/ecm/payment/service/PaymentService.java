@@ -26,6 +26,7 @@ import java.util.UUID;
 public class PaymentService {
 
     private static final String AGGREGATE_TYPE_PAYMENT = "PAYMENT";
+    private static final String WEBHOOK_STATUS_PAID = "PAID";
 
     private final PaymentRepository paymentRepository;
     private final OutboxEventRepository outboxEventRepository;
@@ -52,7 +53,7 @@ public class PaymentService {
         }
 
         // 2. Apply the gateway's outcome to the payment record.
-        boolean paid = "PAID".equalsIgnoreCase(request.status());
+        boolean paid = WEBHOOK_STATUS_PAID.equalsIgnoreCase(request.status());
         payment.setStatus(paid ? PaymentStatus.PAID : PaymentStatus.FAILED);
         payment.setProviderTransactionCode(request.providerTransactionCode());
         if (paid) {
