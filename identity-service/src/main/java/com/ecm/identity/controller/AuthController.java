@@ -1,6 +1,7 @@
 package com.ecm.identity.controller;
 
 import com.ecm.common.response.ApiResponse;
+import com.ecm.identity.dto.request.LoginRequest;
 import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.dto.request.ResendOtpRequest;
 import com.ecm.identity.dto.request.VerifyOtpRequest;
@@ -21,6 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
+    @PostMapping("/login")
+    public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.success("Login successful", authService.login(request));
+    }
 
     @PostMapping("/register")
     public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request) {

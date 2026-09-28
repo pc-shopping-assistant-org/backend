@@ -14,7 +14,9 @@ public enum IdentityErrorCode implements ErrorCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
     PHONE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Phone number already exists"),
     INVALID_OTP(HttpStatus.BAD_REQUEST, "Invalid or expired OTP code"),
-    ROLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Default role is not configured");
+    ROLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Default role is not configured"),
+    ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "Account is locked"),
+    ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "Account is not active");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;
