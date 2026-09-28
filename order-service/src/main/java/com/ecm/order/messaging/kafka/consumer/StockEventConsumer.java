@@ -42,10 +42,10 @@ public class StockEventConsumer {
         Order order = orderRepository.findById(event.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order", event.orderId()));
 
-        // 1. Stock is reserved — start the payment attempt for this order.
-        // NOTE: paymentMethodId should come from the order's chosen payment method once the
-        // checkout API exists; there is no such field/flow yet, so it is left null here.
-        paymentServiceClient.create(new CreatePaymentRequest(order.getId(), null, order.getTotalAmount()));
+        // 1. Stock is reserved — start the payment attempt for this order. Keyed by this
+        // event's id so a Feign retry/event redelivery can't create a second PENDING payment.
+        paymentServiceClient.create(new CreatePaymentRequest(
+                order.getId(), order.getPaymentMethodId(), order.getTotalAmount(), event.eventId().toString()));
     }
 
     @KafkaListener(topics = KafkaTopics.STOCK_RESERVE_FAILED)

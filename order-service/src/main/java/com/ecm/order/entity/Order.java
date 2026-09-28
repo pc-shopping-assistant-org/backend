@@ -39,6 +39,21 @@ public class Order {
     @Column(name = "shipping_method_id", nullable = false)
     private UUID shippingMethodId;
 
+    /**
+     * ref -> Payment Service (payment_methods.id), no cross-DB FK. Threaded through to the
+     * payment attempt created later by {@code StockEventConsumer} once stock is reserved.
+     */
+    @Column(name = "payment_method_id")
+    private UUID paymentMethodId;
+
+    /**
+     * Client-supplied key that makes {@code POST /orders} safe to retry — a duplicate
+     * checkout submission with the same key returns the already-created order instead of
+     * inserting a second one.
+     */
+    @Column(name = "idempotency_key")
+    private String idempotencyKey;
+
     @Column(name = "subtotal_amount", nullable = false)
     private Long subtotalAmount;
 

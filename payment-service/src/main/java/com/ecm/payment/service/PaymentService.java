@@ -1,5 +1,7 @@
 package com.ecm.payment.service;
 
+import com.ecm.common.exception.BusinessException;
+import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.InvalidStateException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.payment.dto.request.CreatePaymentRequest;
@@ -15,10 +17,12 @@ import com.ecm.payment.repository.PaymentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,9 +39,28 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse create(CreatePaymentRequest request) {
+        // 1. A retried call (Feign timeout, event redelivery) with the same idempotency key
+        // must not create a second row — return the one already created by the first call.
+        if (request.idempotencyKey() != null) {
+            Optional<Payment> existing = paymentRepository.findByIdempotencyKey(request.idempotencyKey());
+            if (existing.isPresent()) {
+                return paymentMapper.toResponse(existing.get());
+            }
+        }
+
+        // 2. Persist the new payment attempt. A concurrent retry with the same key can still
+        // race past the check above — the unique index is the real guard. A Postgres
+        // transaction is aborted after any constraint violation, so this can't recover by
+        // querying again in the same transaction; translate to a clean error instead and let
+        // the caller retry, which will then hit the fast path in step 1.
         Payment payment = paymentMapper.toEntity(request);
         payment.setStatus(PaymentStatus.PENDING);
-        payment = paymentRepository.save(payment);
+        try {
+            payment = paymentRepository.save(payment);
+        } catch (DataIntegrityViolationException ex) {
+            throw new BusinessException(CommonErrorCode.CONFLICT,
+                    "A payment for this attempt was already created concurrently; please retry", ex);
+        }
         return paymentMapper.toResponse(payment);
     }
 

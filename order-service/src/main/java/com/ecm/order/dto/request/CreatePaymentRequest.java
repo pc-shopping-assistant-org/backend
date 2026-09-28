@@ -5,6 +5,7 @@ import java.util.UUID;
 public record CreatePaymentRequest(
         UUID orderId,
         UUID paymentMethodId,
-        Long amount
+        Long amount,
+        String idempotencyKey
 ) {
 }

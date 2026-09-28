@@ -47,6 +47,14 @@ public class Payment {
     @Column(name = "provider_transaction_code", unique = true, length = 100)
     private String providerTransactionCode;
 
+    /**
+     * Identifies the specific caller attempt that created this row (the saga's triggering
+     * event id) — lets a retried create-payment call return the existing row instead of
+     * inserting a duplicate PENDING payment. Optional: null for payments created manually.
+     */
+    @Column(name = "idempotency_key")
+    private String idempotencyKey;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

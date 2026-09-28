@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface CatalogServiceClient {
 
     @GetMapping("/product-variants/{id}")
-    ProductVariantResponse getVariant(@PathVariable("id") UUID id);
+    ApiResponse<ProductVariantResponse> getVariant(@PathVariable("id") UUID id);
 
     /**
      * Throwaway call used to verify trace propagation end to end.
