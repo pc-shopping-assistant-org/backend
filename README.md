@@ -204,7 +204,22 @@ The services require PostgreSQL and Eureka at startup. `catalog-service` and `or
 
 ## Calling APIs Through the Gateway
 
-The gateway routes requests by service-name prefix and removes the prefix before forwarding:
+The gateway supports concise resource-based paths for the current public controllers:
+
+```text
+http://localhost:8080/auth/**
+http://localhost:8080/product-variants/**
+http://localhost:8080/orders/**
+http://localhost:8080/payments/**
+```
+
+For example, an endpoint mapped to `/auth/login` in `identity-service` is called through:
+
+```text
+http://localhost:8080/auth/login
+```
+
+The original service-prefixed paths remain available for backward compatibility and for services or endpoints that do not yet have a unique resource path:
 
 ```text
 http://localhost:8080/identity-service/**
@@ -216,10 +231,12 @@ http://localhost:8080/search-service/**
 http://localhost:8080/media-service/**
 ```
 
-For example, a controller mapped to `/users` in `identity-service` is called through:
+The gateway forwards concise paths without removing a prefix. Therefore, a controller mapped to `/auth` in `identity-service` receives the same `/auth` path after routing.
+
+For example, the current identity controller is mapped to `/auth`, so login is called through:
 
 ```text
-http://localhost:8080/identity-service/users
+http://localhost:8080/auth/login
 ```
 
 ## Stop the Environment

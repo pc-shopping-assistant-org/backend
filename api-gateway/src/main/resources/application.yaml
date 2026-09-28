@@ -6,6 +6,30 @@ spring:
       server:
         webmvc:
           routes:
+            - id: identity-public-api
+              uri: lb://identity-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /auth/**
+            - id: catalog-public-api
+              uri: lb://catalog-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /product-variants/**
+            - id: order-public-api
+              uri: lb://order-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /orders/**
+            - id: payment-public-api
+              uri: lb://payment-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /payments/**
             - id: identity-service
               uri: lb://identity-service
               predicates:
