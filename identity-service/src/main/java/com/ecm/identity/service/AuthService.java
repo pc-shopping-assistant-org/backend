@@ -6,6 +6,7 @@ import com.ecm.common.exception.ExpiredException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.identity.config.JwtProperties;
 import com.ecm.identity.config.JwtTokenProvider;
+import com.ecm.identity.dto.request.GoogleLoginRequest;
 import com.ecm.identity.dto.request.LoginRequest;
 import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.dto.request.ResendOtpRequest;
@@ -25,11 +26,14 @@ import com.ecm.identity.repository.CustomerAddressRepository;
 import com.ecm.identity.repository.CustomerRepository;
 import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.repository.RoleRepository;
+import com.ecm.identity.service.google.GoogleIdentity;
+import com.ecm.identity.service.google.GoogleIdentityVerifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Locale;
 
@@ -50,6 +54,7 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final JwtProperties jwtProperties;
     private final OtpService otpService;
+    private final GoogleIdentityVerifier googleIdentityVerifier;
     private final CustomerMapper customerMapper;
     private final EmployeeMapper employeeMapper;
 
@@ -88,6 +93,42 @@ public class AuthService {
         }
 
         // 4. Resolve the role and issue a fresh token pair.
+        Role role = roleRepository.findById(account.getRoleId())
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
+        return issueTokenPair(account, role, buildUserSummary(account, role));
+    }
+
+    @Transactional
+    public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
+        // 1. Verify Google ID token signature, issuer, audience and email_verified
+        GoogleIdentity identity = googleIdentityVerifier.verify(request.idToken());
+
+        // 2. Look up by stable Google subject if already linked
+        Account account = accountRepository.findByGoogleSubject(identity.subject()).orElse(null);
+
+        if (account == null) {
+            // 3. First time: link to existing local account by email
+            account = accountRepository.findByEmailIgnoreCase(identity.email())
+                    .orElseThrow(() -> new BusinessException(IdentityErrorCode.GOOGLE_ACCOUNT_NOT_LINKED));
+
+            // 4. Prevent re-linking if another Google identity is already bound
+            if (StringUtils.hasText(account.getGoogleSubject())
+                    && !identity.subject().equals(account.getGoogleSubject())) {
+                throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+            }
+
+            // 5. Check account is active before linking
+            ensureAccountUsable(account);
+
+            // 6. Persist the link
+            account.setGoogleSubject(identity.subject());
+            account = accountRepository.save(account);
+        } else {
+            // Already linked — just validate usability
+            ensureAccountUsable(account);
+        }
+
+        // 7. Issue token pair
         Role role = roleRepository.findById(account.getRoleId())
                 .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
         return issueTokenPair(account, role, buildUserSummary(account, role));

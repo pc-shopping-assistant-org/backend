@@ -41,6 +41,11 @@ jwt:
   access-token-expiration-ms: 86400000   # 24h
   refresh-token-expiration-ms: 604800000 # 7d
 
+google:
+  # Google OAuth 2.0 client ID for verifying ID tokens from Google Identity Services.
+  # Configure via GOOGLE_CLIENT_ID environment variable.
+  client-id: ${GOOGLE_CLIENT_ID:}
+
 management:
   tracing:
     sampling:

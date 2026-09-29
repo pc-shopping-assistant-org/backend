@@ -1,6 +1,7 @@
 package com.ecm.identity.controller;
 
 import com.ecm.common.response.ApiResponse;
+import com.ecm.identity.dto.request.GoogleLoginRequest;
 import com.ecm.identity.dto.request.LoginRequest;
 import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.dto.request.ResendOtpRequest;
@@ -44,5 +45,10 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         return ApiResponse.success("Account created successfully", authService.verifyRegistrationOtp(request));
+    }
+
+    @PostMapping("/google")
+    public ApiResponse<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        return ApiResponse.success("Login successful", authService.loginWithGoogle(request));
     }
 }

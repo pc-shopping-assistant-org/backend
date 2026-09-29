@@ -16,7 +16,8 @@ public enum IdentityErrorCode implements ErrorCode {
     INVALID_OTP(HttpStatus.BAD_REQUEST, "Invalid or expired OTP code"),
     ROLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Default role is not configured"),
     ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "Account is locked"),
-    ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "Account is not active");
+    ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "Account is not active"),
+    GOOGLE_ACCOUNT_NOT_LINKED(HttpStatus.UNAUTHORIZED, "Google account is not linked to any local account");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;
