@@ -1,4 +1,4 @@
-package com.ecm.catalog.config;
+package com.ecm.media.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,11 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * F2-CATALOG security configuration.
- * Catalog read endpoints are public (browsing, search, detail).
- * Write operations require authentication (admin product/category management).
- */
 @Configuration
 public class SecurityConfig {
 
@@ -20,14 +15,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public catalog browsing
-                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/brands/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/product-variants/**").permitAll()
-                        // Actuator health check
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                        // Everything else requires authentication
+                        .requestMatchers(HttpMethod.GET, "/files/**", "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults());
         return http.build();
