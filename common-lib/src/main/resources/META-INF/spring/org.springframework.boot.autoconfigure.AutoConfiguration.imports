@@ -1,1 +1,2 @@
 com.ecm.common.config.CommonAutoConfiguration
+com.ecm.common.security.JwtAuthenticationAutoConfiguration

@@ -278,7 +278,7 @@ Start `discovery-server` first and verify http://localhost:8761 before starting 
 
 ### OTP emails are not sent
 
-Verify that `MAIL_USERNAME`, `MAIL_PASSWORD`, and `JWT_SECRET_KEY` were loaded into the same PowerShell session used to start `identity-service`. Gmail accounts generally require an app password rather than the normal account password.
+Verify that `MAIL_USERNAME` and `MAIL_PASSWORD` were loaded into the same PowerShell session used to start `identity-service`. Gmail accounts generally require an app password rather than the normal account password. Identity now signs access and refresh tokens with RS256 and publishes its public key at `/.well-known/jwks.json`; local development generates and persists a key pair under `identity-service/.local`. For non-local deployments, set `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` to Base64-encoded PKCS#8 and X.509 key bytes and set `JWT_ALLOW_DEV_KEY_GENERATION=false`. Set `JWT_JWKS_URI` and `JWT_SECURITY_ISSUER` consistently on the gateway and resource services.
 
 ### Port already in use
 

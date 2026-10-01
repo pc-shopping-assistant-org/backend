@@ -8,15 +8,9 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record CreateOrderRequest(
-
-        // Client-generated once per checkout attempt (e.g. when the checkout page opens) and
-        // resent unchanged on retry — lets the server recognize a duplicate submission.
         @NotBlank(message = "Idempotency key is required")
         @Size(max = 100, message = "Idempotency key cannot exceed 100 characters")
         String idempotencyKey,
-
-        @NotNull(message = "Cart id is required")
-        UUID cartId,
 
         @NotNull(message = "Shipping method id is required")
         UUID shippingMethodId,

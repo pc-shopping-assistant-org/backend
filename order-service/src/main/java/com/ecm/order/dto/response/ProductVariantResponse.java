@@ -2,13 +2,15 @@ package com.ecm.order.dto.response;
 
 import java.util.UUID;
 
-/**
- * Mirrors catalog-service's variant response shape; duplicated here rather than shared.
- */
 public record ProductVariantResponse(
         UUID id,
+        UUID productId,
         Long listPrice,
         Integer quantity,
-        String status
+        String sku,
+        String model,
+        String status,
+        String productName,
+        String mainImageUrl
 ) {
 }

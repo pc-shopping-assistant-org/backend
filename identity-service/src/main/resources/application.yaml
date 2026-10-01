@@ -36,8 +36,12 @@ server:
   port: 8081
 
 jwt:
-  # Local-dev placeholder key — override via JWT_SECRET_KEY in any real environment.
-  secret-key: ${JWT_SECRET_KEY:dGhpc19pc19hX3Zlcnlfc2VjdXJlX2tleV9mb3Jfand0X3NpZ25pbmdfYXV0aGVudGljYXRpb25fMjAyNg==}
+  # RSA private/public keys are Base64-encoded PEM content without PEM markers.
+  private-key: ${JWT_PRIVATE_KEY:}
+  public-key: ${JWT_PUBLIC_KEY:}
+  key-id: ${JWT_KEY_ID:identity-key-1}
+  issuer: ${JWT_ISSUER:http://identity-service}
+  allow-dev-key-generation: ${JWT_ALLOW_DEV_KEY_GENERATION:true}
   access-token-expiration-ms: 86400000   # 24h
   refresh-token-expiration-ms: 604800000 # 7d
 

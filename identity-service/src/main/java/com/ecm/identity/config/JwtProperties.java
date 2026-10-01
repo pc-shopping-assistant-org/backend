@@ -11,7 +11,11 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 
-    private String secretKey;
+    private String privateKey;
+    private String publicKey;
+    private String keyId = "identity-key-1";
+    private String issuer = "http://identity-service";
+    private boolean allowDevKeyGeneration = true;
     private long accessTokenExpirationMs;
     private long refreshTokenExpirationMs;
 }
