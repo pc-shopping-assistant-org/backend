@@ -88,23 +88,51 @@ public class OrderService {
     @Transactional
     @SneakyThrows
     public OrderResponse cancelCustomerOrder(UUID orderId, Authentication authentication) {
-        // 1. Verify customer identity and find an owned order that is still cancellable.
+        // 1. Verify customer identity and lock the order to prevent concurrent state changes.
         UUID accountId = requireCustomerAccountId(authentication);
-        Order order = orderRepository.findByIdAndCustomerIdAndStatus(orderId, accountId, OrderStatus.PENDING_CONFIRMATION)
+        Order order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
 
-        // 2. Cancel the order and its items in the current transaction.
+        // 2. Verify ownership and cancellable status.
+        if (!order.getCustomerId().equals(accountId)) {
+            throw new BusinessException(CommonErrorCode.FORBIDDEN);
+        }
+        if (order.getStatus() != OrderStatus.PENDING_CONFIRMATION) {
+            throw new BusinessException(OrderErrorCode.ORDER_NOT_CANCELLABLE);
+        }
+
+        // 3. Cancel the order and its items in the current transaction.
         List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
         order.setStatus(OrderStatus.CANCELLED);
         items.forEach(item -> item.setStatus(OrderItemStatus.CANCELLED));
         orderItemRepository.saveAll(items);
         orderRepository.save(order);
 
-        // 3. Release reserved stock through the transactional outbox.
+        // 4. Release reserved stock through the transactional outbox.
         enqueueStockReleases(order, items);
 
-        // 4. Map the cancelled order to the API response.
+        // 5. Map the cancelled order to the API response.
         return toResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> searchCustomerOrders(Authentication authentication, String keyword, int page, int size) {
+        // 1. Verify customer identity.
+        UUID accountId = requireCustomerAccountId(authentication);
+
+        // 2. Validate pagination and search only this customer's orders.
+        if (page < DEFAULT_PAGE || size < 1 || size > MAX_PAGE_SIZE) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+        if (keyword == null || keyword.isBlank()) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderTime"));
+        Page<Order> orders = orderRepository.searchByCustomerAndKeyword(accountId, keyword.trim(), pageable);
+
+        // 3. Convert the result page to its API representation.
+        return PageResponse.of(orders.map(this::toResponse));
     }
 
     private UUID requireCustomerAccountId(Authentication authentication) {

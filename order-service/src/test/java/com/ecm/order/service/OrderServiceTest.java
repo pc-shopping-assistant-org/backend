@@ -1,6 +1,7 @@
 package com.ecm.order.service;
 
 import com.ecm.common.response.ApiResponse;
+import com.ecm.common.response.PageResponse;
 import com.ecm.order.client.CatalogServiceClient;
 import com.ecm.order.dto.request.CreateOrderRequest;
 import com.ecm.order.dto.response.OrderResponse;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
@@ -101,5 +105,169 @@ class OrderServiceTest {
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("key-2", shippingId,
                 UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
         verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void checksIdempotencyKeyAndReturnsExistingOrder() {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID();
+        Order existing = Order.builder().id(orderId).customerId(user).status(OrderStatus.PENDING_CONFIRMATION).build();
+        OrderResponse response = mock(OrderResponse.class);
+        when(orderRepository.findByIdempotencyKey("duplicate-key")).thenReturn(Optional.of(existing));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of());
+        when(orderMapper.toResponse(eq(existing), anyList())).thenReturn(response);
+        var auth = customerAuth(user);
+
+        assertSame(response, orderService.createOrder(new CreateOrderRequest("duplicate-key", UUID.randomUUID(),
+                UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+        verify(cartRepository, never()).lockActiveByCustomerId(any(), any());
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void rejectsCheckoutForEmptyCart() {
+        UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), shippingId = UUID.randomUUID();
+        Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
+        when(orderRepository.findByIdempotencyKey("empty-cart")).thenReturn(Optional.empty());
+        when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of());
+        var auth = customerAuth(user);
+
+        assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("empty-cart",
+                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+        verify(catalogServiceClient, never()).getVariant(any());
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void rejectsCheckoutForInsufficientStock() {
+        UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), variantId = UUID.randomUUID(), shippingId = UUID.randomUUID();
+        Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
+        CartItem line = CartItem.builder().cartId(cartId).variantId(variantId).quantity(10).build();
+        ProductVariantResponse variant = new ProductVariantResponse(variantId, UUID.randomUUID(), 100L, 3,
+                "sku", "model", "ACTIVE", null, null, List.of());
+        when(orderRepository.findByIdempotencyKey("low-stock")).thenReturn(Optional.empty());
+        when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(line));
+        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok", variant));
+        var auth = customerAuth(user);
+
+        assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("low-stock",
+                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void returnsCustomerOrdersWithPaginationAndStatusFilter() {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID();
+        Order order = Order.builder().id(orderId).customerId(user).status(OrderStatus.PENDING_CONFIRMATION).build();
+        OrderResponse response = mock(OrderResponse.class);
+        Page<Order> page = new PageImpl<>(List.of(order));
+        when(orderRepository.findByCustomerIdAndStatus(eq(user), eq(OrderStatus.PENDING_CONFIRMATION), any(Pageable.class)))
+                .thenReturn(page);
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of());
+        when(orderMapper.toResponse(eq(order), anyList())).thenReturn(response);
+        var auth = customerAuth(user);
+
+        PageResponse<OrderResponse> result = orderService.getCustomerOrders(auth, OrderStatus.PENDING_CONFIRMATION, 0, 20);
+        assertEquals(1, result.getContent().size());
+        assertSame(response, result.getContent().get(0));
+        assertEquals(0, result.getPage());
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void returnsCustomerOrderByIdWhenOwned() {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID();
+        Order order = Order.builder().id(orderId).customerId(user).status(OrderStatus.PENDING_CONFIRMATION).build();
+        OrderResponse response = mock(OrderResponse.class);
+        when(orderRepository.findByIdAndCustomerId(orderId, user)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of());
+        when(orderMapper.toResponse(eq(order), anyList())).thenReturn(response);
+        var auth = customerAuth(user);
+
+        assertSame(response, orderService.getCustomerOrder(orderId, auth));
+    }
+
+    @Test
+    void rejectsGetOrderWhenNotOwned() {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndCustomerId(orderId, user)).thenReturn(Optional.empty());
+        var auth = customerAuth(user);
+
+        assertThrows(RuntimeException.class, () -> orderService.getCustomerOrder(orderId, auth));
+        verify(orderMapper, never()).toResponse(any(), any());
+    }
+
+    @Test
+    void cancelsOrderAndWritesReleaseStockCommands() throws Exception {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID(), item1 = UUID.randomUUID(), item2 = UUID.randomUUID();
+        UUID variant1 = UUID.randomUUID(), variant2 = UUID.randomUUID();
+        Order order = Order.builder().id(orderId).customerId(user).status(OrderStatus.PENDING_CONFIRMATION).build();
+        OrderItem line1 = OrderItem.builder().id(item1).orderId(orderId).productVariantId(variant1).quantity(2).status(OrderItemStatus.ACTIVE).build();
+        OrderItem line2 = OrderItem.builder().id(item2).orderId(orderId).productVariantId(variant2).quantity(1).status(OrderItemStatus.ACTIVE).build();
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(line1, line2));
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(outboxEventRepository.save(any(OutboxEvent.class))).thenAnswer(call -> call.getArgument(0));
+        OrderResponse response = mock(OrderResponse.class);
+        when(orderMapper.toResponse(eq(order), anyList())).thenReturn(response);
+        var auth = customerAuth(user);
+
+        assertSame(response, orderService.cancelCustomerOrder(orderId, auth));
+        assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        assertEquals(OrderItemStatus.CANCELLED, line1.getStatus());
+        assertEquals(OrderItemStatus.CANCELLED, line2.getStatus());
+        verify(orderRepository).save(order);
+        verify(orderItemRepository).saveAll(List.of(line1, line2));
+        verify(outboxEventRepository, times(2)).save(any(OutboxEvent.class));
+    }
+
+    @Test
+    void rejectsCancelWhenOrderNotOwnedOrNotCancellable() {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID();
+        Order order = Order.builder().id(orderId).customerId(user).status(OrderStatus.CONFIRMED).build();
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        var auth = customerAuth(user);
+
+        assertThrows(RuntimeException.class, () -> orderService.cancelCustomerOrder(orderId, auth));
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(outboxEventRepository, never()).save(any(OutboxEvent.class));
+    }
+
+    @Test
+    void searchReturnsOrdersMatchingKeyword() {
+        UUID user = UUID.randomUUID(), orderId = UUID.randomUUID();
+        Order order = Order.builder().id(orderId).customerId(user).status(OrderStatus.PENDING_CONFIRMATION).build();
+        OrderResponse response = mock(OrderResponse.class);
+        Page<Order> page = new PageImpl<>(List.of(order));
+        when(orderRepository.searchByCustomerAndKeyword(eq(user), eq("test-keyword"), any(Pageable.class)))
+                .thenReturn(page);
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of());
+        when(orderMapper.toResponse(eq(order), anyList())).thenReturn(response);
+        var auth = customerAuth(user);
+
+        PageResponse<OrderResponse> result = orderService.searchCustomerOrders(auth, "test-keyword", 0, 20);
+        assertEquals(1, result.getContent().size());
+        assertSame(response, result.getContent().get(0));
+    }
+
+    @Test
+    void searchRejectsBlankKeyword() {
+        UUID user = UUID.randomUUID();
+        var auth = customerAuth(user);
+
+        assertThrows(RuntimeException.class, () -> orderService.searchCustomerOrders(auth, "  ", 0, 20));
+        verify(orderRepository, never()).searchByCustomerAndKeyword(any(), any(), any());
+    }
+
+    @Test
+    void getOrdersRejectsInvalidPagination() {
+        UUID user = UUID.randomUUID();
+        var auth = customerAuth(user);
+
+        assertThrows(RuntimeException.class, () -> orderService.getCustomerOrders(auth, null, -1, 20));
+        assertThrows(RuntimeException.class, () -> orderService.getCustomerOrders(auth, null, 0, 0));
+        assertThrows(RuntimeException.class, () -> orderService.getCustomerOrders(auth, null, 0, 101));
+        verify(orderRepository, never()).findByCustomerId(any(), any());
     }
 }

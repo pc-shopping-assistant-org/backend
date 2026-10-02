@@ -33,6 +33,16 @@ public class OrderController {
                 orderService.getCustomerOrders(authentication, status, page, size));
     }
 
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<OrderResponse>> searchMyOrders(
+            Authentication authentication,
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ApiResponse.success("Search orders successfully",
+                orderService.searchCustomerOrders(authentication, keyword, page, size));
+    }
+
     @GetMapping("/{orderId}")
     public ApiResponse<OrderResponse> getMyOrder(
             @PathVariable UUID orderId, Authentication authentication) {
