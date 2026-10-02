@@ -8,6 +8,7 @@ import com.ecm.order.dto.request.AddToCartRequest;
 import com.ecm.order.dto.request.UpdateCartItemRequest;
 import com.ecm.order.dto.response.CartItemResponse;
 import com.ecm.order.dto.response.CartResponse;
+import com.ecm.order.dto.response.CartVariantDetailsResponse;
 import com.ecm.order.dto.response.ProductVariantResponse;
 import com.ecm.order.entity.Cart;
 import com.ecm.order.entity.CartItem;
@@ -154,7 +155,8 @@ public class CartService {
             if (variant == null || !ACTIVE_STATUS.equalsIgnoreCase(variant.status())) {
                 throw new BusinessException(OrderErrorCode.VARIANT_NOT_AVAILABLE);
             }
-            return variant;
+            return new ProductVariantResponse(variant.id(), variant.productId(), variant.listPrice(), variant.quantity(),
+                    variant.sku(), variant.model(), variant.status(), null, null, variant.images());
         } catch (ResourceNotFoundException ex) {
             throw new ResourceNotFoundException("ProductVariant", variantId);
         } catch (BusinessException ex) {
@@ -163,6 +165,7 @@ public class CartService {
             throw new ExternalServiceException("catalog-service", ex);
         }
     }
+
 
     private void validateStock(ProductVariantResponse variant, int quantity) {
         if (variant.quantity() == null || quantity > variant.quantity()) {
@@ -180,11 +183,25 @@ public class CartService {
 
     private CartResponse toResponse(Cart cart) {
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        if (cartItems.isEmpty()) {
+            return emptyCart(cart.getId());
+        }
+        List<CartVariantDetailsResponse> details;
+        try {
+            details = catalogServiceClient.getCartVariantDetails(cartItems.stream().map(CartItem::getVariantId).distinct().toList()).getData();
+        } catch (RestClientException ex) {
+            throw new ExternalServiceException("catalog-service", ex);
+        }
+        java.util.Map<UUID, CartVariantDetailsResponse> byId = details == null ? java.util.Map.of() : details.stream()
+                .collect(java.util.stream.Collectors.toMap(CartVariantDetailsResponse::id, item -> item));
         List<CartItemResponse> items = new ArrayList<>();
         int totalItems = 0;
         long subtotal = 0L;
         for (CartItem item : cartItems) {
-            ProductVariantResponse variant = findSellableVariant(item.getVariantId());
+            CartVariantDetailsResponse variant = byId.get(item.getVariantId());
+            if (variant == null || !ACTIVE_STATUS.equalsIgnoreCase(variant.status())) {
+                throw new BusinessException(OrderErrorCode.VARIANT_NOT_AVAILABLE);
+            }
             long lineTotal;
             try {
                 lineTotal = Math.multiplyExact(variant.listPrice(), (long) item.getQuantity());

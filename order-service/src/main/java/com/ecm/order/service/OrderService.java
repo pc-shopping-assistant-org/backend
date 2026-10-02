@@ -72,10 +72,17 @@ public class OrderService {
         // 3. Re-price every line against the catalog's current price/stock — never trust a
         // client-supplied price — and reject the whole checkout if anything is unavailable.
         List<OrderItem> items = priceCartItems(cartItems);
-        long subtotal = items.stream().mapToLong(item -> item.getUnitPrice() * item.getQuantity()).sum();
+        long subtotal;
+        try {
+            subtotal = items.stream().mapToLong(item -> Math.multiplyExact(item.getUnitPrice(), (long) item.getQuantity()))
+                    .reduce(0L, Math::addExact);
+        } catch (ArithmeticException ex) {
+            throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
+        }
 
         // 4. Snapshot the shipping fee at order time.
         ShippingMethod shippingMethod = shippingMethodRepository.findById(request.shippingMethodId())
+                .filter(method -> method.getStatus() == ShippingMethodStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("ShippingMethod", request.shippingMethodId()));
 
         // 5. Persist order + items, convert the cart, and enqueue stock reservation commands
@@ -138,7 +145,7 @@ public class OrderService {
                 .subtotalAmount(subtotal)
                 .discountAmount(0L)
                 .shippingFee(shippingMethod.getFee())
-                .totalAmount(subtotal + shippingMethod.getFee())
+                .totalAmount(addExact(subtotal, shippingMethod.getFee()))
                 .orderTime(Instant.now())
                 .recipientName(request.recipientName())
                 .recipientPhone(request.recipientPhone())
@@ -171,6 +178,14 @@ public class OrderService {
 
         enqueueReservations(order, items);
         return order;
+    }
+
+    private long addExact(long left, long right) {
+        try {
+            return Math.addExact(left, right);
+        } catch (ArithmeticException ex) {
+            throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
+        }
     }
 
     @SneakyThrows

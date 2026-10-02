@@ -1,5 +1,6 @@
 package com.ecm.order.dto.response;
 
+import java.util.List;
 import java.util.UUID;
 
 public record ProductVariantResponse(
@@ -11,6 +12,7 @@ public record ProductVariantResponse(
         String model,
         String status,
         String productName,
-        String mainImageUrl
+        String mainImageUrl,
+        List<ProductImageResponse> images
 ) {
 }
