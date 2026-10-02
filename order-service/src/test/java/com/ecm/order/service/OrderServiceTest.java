@@ -70,6 +70,16 @@ class OrderServiceTest {
         verify(outboxEventRepository).save(any(OutboxEvent.class));
     }
 
+    @Test
+    void rejectsCheckoutWithoutAuthenticatedCustomer() {
+        UUID shippingId = UUID.randomUUID();
+        CreateOrderRequest request = new CreateOrderRequest("anonymous-key", shippingId, UUID.randomUUID(),
+                "Customer", "09123456789", "Address", null);
+
+        assertThrows(RuntimeException.class, () -> orderService.createOrder(request, null, "guest-session"));
+        verifyNoInteractions(orderRepository, cartRepository, cartItemRepository, catalogServiceClient);
+    }
+
     private JwtAuthenticationToken customerAuth(UUID user) {
         Jwt jwt = Jwt.withTokenValue("test-token").header("alg", "none")
                 .claim("accountId", user.toString()).build();

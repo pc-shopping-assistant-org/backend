@@ -49,6 +49,9 @@ public class OrderService {
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request, Authentication authentication, String sessionToken) {
         UUID accountId = CurrentUser.accountId(authentication);
+        if (accountId == null) {
+            throw new BusinessException(OrderErrorCode.CART_OWNER_REQUIRED);
+        }
 
         // 1. A duplicate checkout submission with the same key returns the original order.
         Optional<Order> existing = orderRepository.findByIdempotencyKey(request.idempotencyKey());
