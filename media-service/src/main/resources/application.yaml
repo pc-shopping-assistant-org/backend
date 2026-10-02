@@ -21,6 +21,11 @@ spring:
 server:
   port: 8087
 
+security:
+  jwt:
+    jwks-uri: ${JWT_JWKS_URI:http://localhost:8080/.well-known/jwks.json}
+    issuer: ${JWT_SECURITY_ISSUER:http://identity-service}
+
 management:
   tracing:
     sampling:

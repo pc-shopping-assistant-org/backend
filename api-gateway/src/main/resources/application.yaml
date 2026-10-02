@@ -6,6 +6,12 @@ spring:
       server:
         webmvc:
           routes:
+            - id: identity-jwks
+              uri: lb://identity-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /.well-known/jwks.json
             - id: identity-public-api
               uri: lb://identity-service
               predicates:
@@ -19,6 +25,12 @@ spring:
                   args:
                     pattern: /product-variants/**
             - id: order-public-api
+              uri: lb://order-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /cart/**
+            - id: order-checkout-api
               uri: lb://order-service
               predicates:
                 - name: Path
@@ -103,6 +115,11 @@ spring:
 
 server:
   port: 8080
+
+security:
+  jwt:
+    jwks-uri: ${JWT_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
+    issuer: ${JWT_SECURITY_ISSUER:http://identity-service}
 
 management:
   endpoints:
