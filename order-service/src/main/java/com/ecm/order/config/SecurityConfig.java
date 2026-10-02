@@ -21,7 +21,7 @@ public class SecurityConfig {
                         .requestMatchers("/trace-test/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.POST, "/orders").hasRole("CUSTOMER")
-                        .requestMatchers("/orders/**").authenticated()
+                        .requestMatchers("/orders/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))

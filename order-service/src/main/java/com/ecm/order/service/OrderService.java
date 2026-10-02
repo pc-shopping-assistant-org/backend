@@ -3,6 +3,7 @@ package com.ecm.order.service;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.ResourceNotFoundException;
+import com.ecm.common.response.PageResponse;
 import com.ecm.common.security.CurrentUser;
 import com.ecm.order.client.CatalogServiceClient;
 import com.ecm.order.dto.request.CreateOrderRequest;
@@ -13,11 +14,16 @@ import com.ecm.order.exception.OrderErrorCode;
 import com.ecm.order.mapper.OrderMapper;
 import com.ecm.order.messaging.rabbitmq.RabbitTopology;
 import com.ecm.order.messaging.rabbitmq.command.ReserveStockCommand;
+import com.ecm.order.messaging.rabbitmq.command.ReleaseStockCommand;
 import com.ecm.order.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +42,10 @@ public class OrderService {
     private static final String AGGREGATE_TYPE_ORDER = "ORDER";
     private static final String VARIANT_STATUS_ACTIVE = "ACTIVE";
 
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE_SIZE = 20;
+
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
@@ -46,23 +56,97 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final ObjectMapper objectMapper;
 
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getCustomerOrders(Authentication authentication, OrderStatus status, int page, int size) {
+        // 1. Verify customer identity before accessing any order data.
+        UUID accountId = requireCustomerAccountId(authentication);
+
+        // 2. Validate pagination and query only this customer's orders.
+        if (page < DEFAULT_PAGE || size < 1 || size > MAX_PAGE_SIZE) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderTime"));
+        Page<Order> orders = status == null
+                ? orderRepository.findByCustomerId(accountId, pageable)
+                : orderRepository.findByCustomerIdAndStatus(accountId, status, pageable);
+
+        // 3. Convert the result page to its API representation.
+        return PageResponse.of(orders.map(this::toResponse));
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getCustomerOrder(UUID orderId, Authentication authentication) {
+        // 1. Verify customer identity and retrieve only an order owned by that customer.
+        UUID accountId = requireCustomerAccountId(authentication);
+        Order order = orderRepository.findByIdAndCustomerId(orderId, accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+
+        // 2. Map the authorized order and its items to the API response.
+        return toResponse(order);
+    }
+
     @Transactional
-    public OrderResponse createOrder(CreateOrderRequest request, Authentication authentication, String sessionToken) {
+    @SneakyThrows
+    public OrderResponse cancelCustomerOrder(UUID orderId, Authentication authentication) {
+        // 1. Verify customer identity and find an owned order that is still cancellable.
+        UUID accountId = requireCustomerAccountId(authentication);
+        Order order = orderRepository.findByIdAndCustomerIdAndStatus(orderId, accountId, OrderStatus.PENDING_CONFIRMATION)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+
+        // 2. Cancel the order and its items in the current transaction.
+        List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+        order.setStatus(OrderStatus.CANCELLED);
+        items.forEach(item -> item.setStatus(OrderItemStatus.CANCELLED));
+        orderItemRepository.saveAll(items);
+        orderRepository.save(order);
+
+        // 3. Release reserved stock through the transactional outbox.
+        enqueueStockReleases(order, items);
+
+        // 4. Map the cancelled order to the API response.
+        return toResponse(order);
+    }
+
+    private UUID requireCustomerAccountId(Authentication authentication) {
         UUID accountId = CurrentUser.accountId(authentication);
         if (accountId == null) {
             throw new BusinessException(OrderErrorCode.CART_OWNER_REQUIRED);
         }
+        return accountId;
+    }
 
-        // 1. A duplicate checkout submission with the same key returns the original order.
+    @SneakyThrows
+    private void enqueueStockReleases(Order order, List<OrderItem> items) {
+        for (OrderItem item : items) {
+            ReleaseStockCommand command = new ReleaseStockCommand(
+                    UUID.randomUUID(), order.getId(), item.getProductVariantId(), item.getQuantity());
+            outboxEventRepository.save(OutboxEvent.builder()
+                    .aggregateType(AGGREGATE_TYPE_ORDER)
+                    .aggregateId(order.getId())
+                    .eventType("ReleaseStockCommand")
+                    .channel(OutboxChannel.RABBITMQ)
+                    .destination(RabbitTopology.ROUTING_KEY_RELEASE)
+                    .payload(objectMapper.writeValueAsString(command))
+                    .status(OutboxStatus.PENDING)
+                    .build());
+        }
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request, Authentication authentication, String sessionToken) {
+        // 1. Verify customer identity before looking up or creating orders.
+        UUID accountId = requireCustomerAccountId(authentication);
+
+        // 2. Return the original order for an idempotent retry by its owner.
         Optional<Order> existing = orderRepository.findByIdempotencyKey(request.idempotencyKey());
         if (existing.isPresent()) {
-            if (accountId == null || !Objects.equals(existing.get().getCustomerId(), accountId)) {
+            if (!Objects.equals(existing.get().getCustomerId(), accountId)) {
                 throw new BusinessException(OrderErrorCode.CART_OWNER_REQUIRED);
             }
             return toResponse(existing.get());
         }
 
-        // 2. Load and authorize the cart using the verified owner, never a client-selected cart id.
+        // 3. Load and authorize the customer's active cart, never a client-selected cart ID.
         Cart cart = findOwnedCart(accountId, normalizeSession(sessionToken));
         if (cart.getStatus() != CartStatus.ACTIVE) {
             throw new BusinessException(OrderErrorCode.CART_NOT_ACTIVE);
@@ -72,9 +156,9 @@ public class OrderService {
             throw new BusinessException(OrderErrorCode.CART_EMPTY);
         }
 
-        // 3. Re-price every line against the catalog's current price/stock — never trust a
-        // client-supplied price — and reject the whole checkout if anything is unavailable.
+        // 4. Re-price every line against current catalog data; never trust a client-supplied price.
         List<OrderItem> items = priceCartItems(cartItems);
+        // 5. Calculate the subtotal and reject arithmetic overflow.
         long subtotal;
         try {
             subtotal = items.stream().mapToLong(item -> Math.multiplyExact(item.getUnitPrice(), (long) item.getQuantity()))
@@ -83,16 +167,15 @@ public class OrderService {
             throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
         }
 
-        // 4. Snapshot the shipping fee at order time.
+        // 6. Snapshot the fee from an active shipping method.
         ShippingMethod shippingMethod = shippingMethodRepository.findById(request.shippingMethodId())
                 .filter(method -> method.getStatus() == ShippingMethodStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("ShippingMethod", request.shippingMethodId()));
 
-        // 5. Persist order + items, convert the cart, and enqueue stock reservation commands
-        // for the saga — all in the same transaction as the order/cart state change.
+        // 7. Persist order state and stock reservation commands in one transaction.
         Order order = persistOrder(request, cart, items, shippingMethod, subtotal);
 
-        // 6. Map to response.
+        // 8. Map the saved order and its items to the API response.
         return toResponse(order);
     }
 
@@ -118,6 +201,7 @@ public class OrderService {
     }
 
     private List<OrderItem> priceCartItems(List<CartItem> cartItems) {
+        // 1. Re-price each cart line and reject unavailable variants or insufficient stock.
         List<OrderItem> items = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
             ProductVariantResponse variant = catalogServiceClient.getVariant(cartItem.getVariantId()).getData();
@@ -154,16 +238,10 @@ public class OrderService {
                 .recipientPhone(request.recipientPhone())
                 .deliveryAddress(request.deliveryAddress())
                 .note(request.note())
-                // Online vs COD payment split (doc: online -> PENDING_PAYMENT, COD ->
-                // PENDING_CONFIRMATION) needs the chosen payment method's type, which isn't
-                // available cross-service yet — every order starts PENDING_CONFIRMATION until then.
+                // Payment-method type is not yet available across services, so checkout currently starts every order in PENDING_CONFIRMATION.
                 .status(OrderStatus.PENDING_CONFIRMATION)
                 .build();
-        // A concurrent retry with the same idempotency key can still race past the check in
-        // createOrder() — the unique index is the real guard. Postgres aborts the whole
-        // transaction after a constraint violation, so this can't recover by querying again
-        // in the same transaction; translate to a clean error and let the caller retry, which
-        // will then hit the fast path in createOrder() step 1.
+        // 1. Save the order; the unique index resolves concurrent idempotency-key retries.
         try {
             order = orderRepository.save(order);
         } catch (DataIntegrityViolationException ex) {
@@ -171,6 +249,7 @@ public class OrderService {
                     "This order was already submitted concurrently; please retry", ex);
         }
 
+        // 2. Save the order lines and convert the active cart.
         for (OrderItem item : items) {
             item.setOrderId(order.getId());
         }
@@ -179,6 +258,7 @@ public class OrderService {
         cart.setStatus(CartStatus.CONVERTED);
         cartRepository.save(cart);
 
+        // 3. Queue reservation commands so they commit atomically with the order and cart.
         enqueueReservations(order, items);
         return order;
     }
@@ -193,6 +273,7 @@ public class OrderService {
 
     @SneakyThrows
     private void enqueueReservations(Order order, List<OrderItem> items) {
+        // 1. Queue one stock reservation command per order line through the outbox.
         for (OrderItem item : items) {
             ReserveStockCommand command = new ReserveStockCommand(
                     UUID.randomUUID(), order.getId(), item.getProductVariantId(), item.getQuantity());

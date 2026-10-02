@@ -12,7 +12,8 @@ public enum OrderErrorCode implements ErrorCode {
     CART_SESSION_REQUIRED(HttpStatus.BAD_REQUEST, "Guest cart session is required"),
     CART_QUANTITY_TOO_LARGE(HttpStatus.BAD_REQUEST, "Cart quantity or amount is too large"),
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "One or more items do not have enough stock"),
-    VARIANT_NOT_AVAILABLE(HttpStatus.CONFLICT, "One or more items are no longer available");
+    VARIANT_NOT_AVAILABLE(HttpStatus.CONFLICT, "One or more items are no longer available"),
+    ORDER_CANNOT_BE_CANCELLED(HttpStatus.CONFLICT, "Order cannot be cancelled in its current status");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;
