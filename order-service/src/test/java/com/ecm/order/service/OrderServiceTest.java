@@ -38,12 +38,22 @@ class OrderServiceTest {
     @Mock ShippingMethodRepository shippingMethodRepository;
     @Mock OutboxEventRepository outboxEventRepository;
     @Mock CatalogServiceClient catalogServiceClient;
+    @Mock com.ecm.order.client.PromotionServiceClient promotionServiceClient;
     @Mock OrderMapper orderMapper;
     @Mock ObjectMapper objectMapper;
     @InjectMocks OrderService orderService;
 
     @Test
     void checkoutRepricesCartConvertsCartAndWritesOutbox() throws Exception {
+        checkoutWithDiscounts(false);
+    }
+
+    @Test
+    void checkoutPersistsVoucherAndItemDiscountSnapshots() throws Exception {
+        checkoutWithDiscounts(true);
+    }
+
+    private void checkoutWithDiscounts(boolean discounted) throws Exception {
         UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), variantId = UUID.randomUUID();
         UUID shippingId = UUID.randomUUID();
         Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
@@ -58,6 +68,13 @@ class OrderServiceTest {
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(line));
         when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok", variant));
         when(shippingMethodRepository.findById(shippingId)).thenReturn(Optional.of(shipping));
+        when(catalogServiceClient.getProduct(variant.productId())).thenReturn(ApiResponse.success("ok",
+                new com.ecm.order.dto.response.ProductDetailResponse(variant.productId(), "product", List.of(), UUID.randomUUID())));
+        UUID voucherId = UUID.randomUUID(), itemDiscountId = UUID.randomUUID();
+        when(promotionServiceClient.apply(any(), anyString())).thenReturn(ApiResponse.success("ok",
+                new com.ecm.order.dto.response.DiscountApplyResponse(discounted ? voucherId : null, discounted ? 150L : 0L,
+                        discounted ? voucherId : null, discounted ? 50L : 0L, discounted ? List.of(
+                        new com.ecm.order.dto.response.ItemDiscountApplyResponse(variantId, itemDiscountId, 100L)) : List.of())));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderItemRepository.saveAll(anyList())).thenAnswer(call -> call.getArgument(0));
         when(objectMapper.writeValueAsString(any())).thenReturn("{}");
@@ -67,10 +84,14 @@ class OrderServiceTest {
         var auth = customerAuth(user);
 
         assertSame(response, orderService.createOrder(new CreateOrderRequest("key-1", shippingId, UUID.randomUUID(),
-                "Customer", "09123456789", "Address", null), auth, null));
+                "Customer", "09123456789", "Address", null, null), auth, null));
         assertEquals(CartStatus.CONVERTED, cart.getStatus());
         verify(orderRepository).save(argThat(saved -> saved.getSubtotalAmount() == 500L
-                && saved.getShippingFee() == 500L && saved.getTotalAmount() == 1000L));
+                && saved.getShippingFee() == 500L && saved.getTotalAmount() == (discounted ? 850L : 1000L)
+                && saved.getDiscountAmount() == (discounted ? 150L : 0L)
+                && java.util.Objects.equals(saved.getOrderDiscountId(), discounted ? voucherId : null)));
+        verify(orderItemRepository).saveAll(argThat((java.util.List<com.ecm.order.entity.OrderItem> saved) -> saved.get(0).getItemDiscount() == (discounted ? 100L : 0L)
+                && java.util.Objects.equals(saved.getFirst().getItemDiscountId(), discounted ? itemDiscountId : null)));
         verify(outboxEventRepository).save(any(OutboxEvent.class));
     }
 
@@ -78,7 +99,7 @@ class OrderServiceTest {
     void rejectsCheckoutWithoutAuthenticatedCustomer() {
         UUID shippingId = UUID.randomUUID();
         CreateOrderRequest request = new CreateOrderRequest("anonymous-key", shippingId, UUID.randomUUID(),
-                "Customer", "09123456789", "Address", null);
+                "Customer", "09123456789", "Address", null, null);
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(request, null, "guest-session"));
         verifyNoInteractions(orderRepository, cartRepository, cartItemRepository, catalogServiceClient);
@@ -103,7 +124,7 @@ class OrderServiceTest {
         when(shippingMethodRepository.findById(shippingId)).thenReturn(Optional.empty());
         var auth = customerAuth(user);
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("key-2", shippingId,
-                UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+                UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
         verify(orderRepository, never()).save(any(Order.class));
     }
 
@@ -118,7 +139,7 @@ class OrderServiceTest {
         var auth = customerAuth(user);
 
         assertSame(response, orderService.createOrder(new CreateOrderRequest("duplicate-key", UUID.randomUUID(),
-                UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+                UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
         verify(cartRepository, never()).lockActiveByCustomerId(any(), any());
         verify(orderRepository, never()).save(any(Order.class));
     }
@@ -133,7 +154,7 @@ class OrderServiceTest {
         var auth = customerAuth(user);
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("empty-cart",
-                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
         verify(catalogServiceClient, never()).getVariant(any());
         verify(orderRepository, never()).save(any(Order.class));
     }
@@ -152,7 +173,7 @@ class OrderServiceTest {
         var auth = customerAuth(user);
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("low-stock",
-                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null), auth, null));
+                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
         verify(orderRepository, never()).save(any(Order.class));
     }
 

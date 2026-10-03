@@ -6,6 +6,6 @@ import java.util.UUID;
 public record ProductDetailResponse(
         UUID id,
         String name,
-        List<ProductVariantResponse> variants
+        List<ProductVariantResponse> variants, UUID categoryId
 ) {
 }

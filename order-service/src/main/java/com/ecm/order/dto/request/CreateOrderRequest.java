@@ -30,5 +30,8 @@ public record CreateOrderRequest(
         @Size(max = 500, message = "Delivery address cannot exceed 500 characters")
         String deliveryAddress,
 
+        @Size(max = 50, message = "Discount code cannot exceed 50 characters")
+        String discountCode,
+
         String note) {
 }

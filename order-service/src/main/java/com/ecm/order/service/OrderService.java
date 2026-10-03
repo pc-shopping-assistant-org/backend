@@ -6,8 +6,11 @@ import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.response.PageResponse;
 import com.ecm.common.security.CurrentUser;
 import com.ecm.order.client.CatalogServiceClient;
+import com.ecm.order.client.PromotionServiceClient;
+import com.ecm.order.dto.request.ApplyDiscountRequest;
 import com.ecm.order.dto.request.CreateOrderRequest;
 import com.ecm.order.dto.response.OrderResponse;
+import com.ecm.order.dto.response.DiscountApplyResponse;
 import com.ecm.order.dto.response.ProductVariantResponse;
 import com.ecm.order.entity.*;
 import com.ecm.order.exception.OrderErrorCode;
@@ -53,6 +56,7 @@ public class OrderService {
     private final ShippingMethodRepository shippingMethodRepository;
     private final OutboxEventRepository outboxEventRepository;
     private final CatalogServiceClient catalogServiceClient;
+    private final PromotionServiceClient promotionServiceClient;
     private final OrderMapper orderMapper;
     private final ObjectMapper objectMapper;
 
@@ -195,16 +199,83 @@ public class OrderService {
             throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
         }
 
-        // 6. Snapshot the fee from an active shipping method.
         ShippingMethod shippingMethod = shippingMethodRepository.findById(request.shippingMethodId())
                 .filter(method -> method.getStatus() == ShippingMethodStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("ShippingMethod", request.shippingMethodId()));
+        DiscountApplyResponse appliedDiscounts = evaluateDiscounts(request, authentication, items, subtotal);
+        items = applyItemDiscounts(items, appliedDiscounts);
+        // 9. Persist order state and stock reservation commands in one transaction.
+        Order order = persistOrder(request, cart, items, shippingMethod, subtotal, appliedDiscounts);
 
-        // 7. Persist order state and stock reservation commands in one transaction.
-        Order order = persistOrder(request, cart, items, shippingMethod, subtotal);
-
-        // 8. Map the saved order and its items to the API response.
+        // 10. Map the saved order and its items to the API response.
         return toResponse(order);
+    }
+
+    private DiscountApplyResponse evaluateDiscounts(CreateOrderRequest request, Authentication authentication,
+                                                     List<OrderItem> items, long subtotal) {
+        try {
+            List<ApplyDiscountRequest.DiscountCartItemRequest> lines = new ArrayList<>();
+            for (OrderItem item : items) {
+                ProductVariantResponse variant = catalogServiceClient.getVariant(item.getProductVariantId()).getData();
+                var product = catalogServiceClient.getProduct(variant.productId()).getData();
+                if (product == null || product.categoryId() == null) {
+                    throw new com.ecm.common.exception.ExternalServiceException("catalog-service", "Missing product category");
+                }
+                lines.add(new ApplyDiscountRequest.DiscountCartItemRequest(item.getProductVariantId(),
+                        item.getQuantity(), item.getUnitPrice(), product.categoryId()));
+            }
+            String bearer = "Bearer " + ((org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken)
+                    authentication).getToken().getTokenValue();
+            var response = promotionServiceClient.apply(new ApplyDiscountRequest(request.discountCode(), subtotal,
+                    lines, request.idempotencyKey()), bearer);
+            if (response == null || !response.isSuccess() || response.getData() == null) {
+                throw new com.ecm.common.exception.ExternalServiceException("promotion-service", "Invalid discount response");
+            }
+            DiscountApplyResponse result = response.getData();
+            if (result.discountAmount() == null || result.discountAmount() < 0 || result.discountAmount() > subtotal
+                    || result.orderDiscountAmount() == null || result.orderDiscountAmount() < 0 || result.itemDiscounts() == null) {
+                throw new com.ecm.common.exception.ExternalServiceException("promotion-service", "Invalid discount amounts");
+            }
+            long total = result.orderDiscountAmount();
+            java.util.Set<UUID> seen = new java.util.HashSet<>();
+            for (var line : result.itemDiscounts()) {
+                if (line.discountAmount() == null || line.discountAmount() < 0 || line.discountId() == null
+                        || !seen.add(line.productVariantId())) {
+                    throw new com.ecm.common.exception.ExternalServiceException("promotion-service", "Invalid item discounts");
+                }
+                total = addExact(total, line.discountAmount());
+            }
+            if (total != result.discountAmount()) {
+                throw new com.ecm.common.exception.ExternalServiceException("promotion-service", "Inconsistent discount total");
+            }
+            return result;
+        } catch (feign.FeignException ex) {
+            throw new com.ecm.common.exception.ExternalServiceException("promotion-service", ex);
+        }
+    }
+    private List<OrderItem> applyItemDiscounts(List<OrderItem> items, DiscountApplyResponse discounts) {
+        if (discounts.itemDiscounts() == null) {
+            return items;
+        }
+        for (var itemDiscount : discounts.itemDiscounts()) {
+            OrderItem item = items.stream().filter(candidate -> candidate.getProductVariantId().equals(itemDiscount.productVariantId()))
+                    .findFirst().orElseThrow(() -> new BusinessException(OrderErrorCode.VARIANT_NOT_AVAILABLE));
+            long lineAmount = multiplyExact(item.getUnitPrice(), item.getQuantity());
+            if (itemDiscount.discountAmount() < 0 || itemDiscount.discountAmount() > lineAmount) {
+                throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
+            }
+            item.setItemDiscountId(itemDiscount.discountId());
+            item.setItemDiscount(itemDiscount.discountAmount());
+        }
+        return items;
+    }
+
+    private long multiplyExact(long price, int quantity) {
+        try {
+            return Math.multiplyExact(price, quantity);
+        } catch (ArithmeticException ex) {
+            throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
+        }
     }
 
     private Cart findOwnedCart(UUID accountId, String sessionToken) {
@@ -251,16 +322,18 @@ public class OrderService {
     }
 
     private Order persistOrder(
-            CreateOrderRequest request, Cart cart, List<OrderItem> items, ShippingMethod shippingMethod, long subtotal) {
+            CreateOrderRequest request, Cart cart, List<OrderItem> items, ShippingMethod shippingMethod, long subtotal,
+            DiscountApplyResponse appliedDiscounts) {
         Order order = Order.builder()
                 .customerId(cart.getCustomerId())
                 .shippingMethodId(shippingMethod.getId())
                 .paymentMethodId(request.paymentMethodId())
                 .idempotencyKey(request.idempotencyKey())
                 .subtotalAmount(subtotal)
-                .discountAmount(0L)
+                .orderDiscountId(appliedDiscounts.orderDiscountId())
+                .discountAmount(appliedDiscounts.discountAmount())
                 .shippingFee(shippingMethod.getFee())
-                .totalAmount(addExact(subtotal, shippingMethod.getFee()))
+                .totalAmount(addExact(subtotal - appliedDiscounts.discountAmount(), shippingMethod.getFee()))
                 .orderTime(Instant.now())
                 .recipientName(request.recipientName())
                 .recipientPhone(request.recipientPhone())

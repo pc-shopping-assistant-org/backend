@@ -53,6 +53,9 @@ public class Discount {
     @Column(name = "end_at", nullable = false)
     private Instant endAt;
 
+    @Column(name = "usage_limit")
+    private Long usageLimit;
+
     @Column(name = "description")
     private String description;
 

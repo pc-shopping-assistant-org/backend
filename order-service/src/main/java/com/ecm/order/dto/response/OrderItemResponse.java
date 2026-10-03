@@ -6,5 +6,5 @@ public record OrderItemResponse(
         UUID id,
         UUID productVariantId,
         int quantity,
-        Long unitPrice) {
+        Long unitPrice, UUID itemDiscountId, Long itemDiscount) {
 }

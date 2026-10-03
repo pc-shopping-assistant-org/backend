@@ -13,5 +13,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface PromotionServiceClient {
 
     @PostMapping("/discounts/apply")
-    DiscountApplyResponse apply(@RequestBody ApplyDiscountRequest request);
+    com.ecm.common.response.ApiResponse<DiscountApplyResponse> apply(@RequestBody ApplyDiscountRequest request, @org.springframework.web.bind.annotation.RequestHeader("Authorization") String authorization);
 }
