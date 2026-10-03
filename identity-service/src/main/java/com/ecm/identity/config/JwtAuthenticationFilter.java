@@ -1,5 +1,6 @@
 package com.ecm.identity.config;
 
+import com.ecm.identity.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider tokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(
@@ -33,7 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt) && !tokenBlacklistService.isBlacklisted(jwt)
+                    && tokenProvider.validateToken(jwt)) {
                 UserPrincipal userPrincipal = tokenProvider.getUserPrincipal(jwt);
                 if (userPrincipal.isEnabled() && userPrincipal.isAccountNonLocked()) {
                     var authentication = new UsernamePasswordAuthenticationToken(

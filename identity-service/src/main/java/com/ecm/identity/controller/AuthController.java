@@ -1,18 +1,27 @@
 package com.ecm.identity.controller;
 
 import com.ecm.common.response.ApiResponse;
+import com.ecm.identity.config.JwtAuthenticationFilter;
+import com.ecm.identity.config.UserPrincipal;
+import com.ecm.identity.dto.request.ChangePasswordRequest;
+import com.ecm.identity.dto.request.ForgotPasswordRequest;
 import com.ecm.identity.dto.request.GoogleLoginRequest;
 import com.ecm.identity.dto.request.LoginRequest;
 import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.dto.request.ResendOtpRequest;
+import com.ecm.identity.dto.request.ResetPasswordRequest;
 import com.ecm.identity.dto.request.VerifyOtpRequest;
 import com.ecm.identity.dto.response.AuthResponse;
+import com.ecm.identity.dto.response.LogoutResponse;
+import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,5 +59,42 @@ public class AuthController {
     @PostMapping("/google")
     public ApiResponse<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
         return ApiResponse.success("Login successful", authService.loginWithGoogle(request));
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<LogoutResponse> logout(@RequestHeader(JwtAuthenticationFilter.AUTHORIZATION_HEADER) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith(JwtAuthenticationFilter.BEARER_PREFIX)) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
+        String token = authHeader.substring(JwtAuthenticationFilter.BEARER_PREFIX.length()).trim();
+        if (token.isEmpty()) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
+        boolean revoked = authService.logout(token);
+        LogoutResponse result = new LogoutResponse(revoked);
+        String message = revoked
+                ? "Logout successful; server token revoked"
+                : "Logout completed locally; server token revocation unconfirmed";
+        return ApiResponse.success(message, result);
+    }
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.email());
+        return ApiResponse.success("Password reset OTP sent to email", null);
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.email(), request.otp(), request.newPassword());
+        return ApiResponse.success("Password reset successful", null);
+    }
+
+    @PostMapping("/change-password")
+    public ApiResponse<Void> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        authService.changePassword(principal.getAccountId(), request.currentPassword(), request.newPassword());
+        return ApiResponse.success("Password changed successfully", null);
     }
 }

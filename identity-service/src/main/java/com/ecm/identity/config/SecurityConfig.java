@@ -27,7 +27,10 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/verify-otp",
+                                "/auth/resend-otp", "/auth/google", "/auth/forgot-password",
+                                "/auth/reset-password", "/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/auth/logout", "/auth/change-password", "/profile/**").authenticated()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

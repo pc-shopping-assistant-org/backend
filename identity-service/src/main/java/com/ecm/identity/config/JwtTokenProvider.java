@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -97,5 +96,13 @@ public class JwtTokenProvider {
 
     private Claims getClaims(String token) {
         return Jwts.parser().verifyWith(keyMaterial.publicKey()).build().parseSignedClaims(token).getPayload();
+    }
+
+    public long getExpirationSeconds(String token) {
+        Claims claims = getClaims(token);
+        Date expiration = claims.getExpiration();
+        Date now = new Date();
+        long remainingMs = expiration.getTime() - now.getTime();
+        return Math.max(remainingMs / 1000, 0);
     }
 }

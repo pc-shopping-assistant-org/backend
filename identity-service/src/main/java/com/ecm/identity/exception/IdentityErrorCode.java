@@ -17,7 +17,10 @@ public enum IdentityErrorCode implements ErrorCode {
     ROLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Default role is not configured"),
     ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "Account is locked"),
     ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "Account is not active"),
-    GOOGLE_ACCOUNT_NOT_LINKED(HttpStatus.UNAUTHORIZED, "Google account is not linked to any local account");
+    GOOGLE_ACCOUNT_NOT_LINKED(HttpStatus.UNAUTHORIZED, "Google account is not linked to any local account"),
+    PHONE_ALREADY_IN_USE(HttpStatus.CONFLICT, "Phone number is already in use by another account"),
+    CUSTOMER_PROFILE_REQUIRED(HttpStatus.BAD_REQUEST, "Only customer profiles can be updated"),
+    INCORRECT_PASSWORD(HttpStatus.BAD_REQUEST, "Current password is incorrect");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;

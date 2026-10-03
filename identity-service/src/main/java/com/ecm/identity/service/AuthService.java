@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ public class AuthService {
 
     private static final String ROLE_CUSTOMER = "ROLE_CUSTOMER";
     private static final String OTP_PURPOSE_REGISTRATION = "REGISTRATION";
+    private static final String OTP_PURPOSE_PASSWORD_RESET = "PASSWORD_RESET";
     private static final int MILLIS_IN_SECOND = 1000;
 
     private final AccountRepository accountRepository;
@@ -57,6 +59,7 @@ public class AuthService {
     private final GoogleIdentityVerifier googleIdentityVerifier;
     private final CustomerMapper customerMapper;
     private final EmployeeMapper employeeMapper;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public void register(RegisterRequest request) {
         // 1. Normalize identity fields so later lookups/comparisons are case/whitespace-stable
@@ -241,5 +244,61 @@ public class AuthService {
                 request.gender(),
                 request.birthday(),
                 request.address().trim());
+    }
+
+    public boolean logout(String accessToken) {
+        // 1. Reject malformed, expired, or refresh tokens
+        if (!tokenProvider.validateToken(accessToken) || tokenProvider.isRefreshToken(accessToken)) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
+
+        // 2. Extract remaining validity period from the access token
+        long expirationSeconds = tokenProvider.getExpirationSeconds(accessToken);
+
+        // 3. Attempt server-side revocation without blocking client-side logout on Redis outage
+        return tokenBlacklistService.tryBlacklistToken(accessToken, expirationSeconds);
+    }
+
+    public void forgotPassword(String email) {
+        String normalized = email.trim().toLowerCase(Locale.ROOT);
+
+        // 1. Generate a uniform response path and only send when a usable account exists
+        accountRepository.findByEmailIgnoreCase(normalized)
+                .filter(account -> account.getStatus() == AccountStatus.ACTIVE)
+                .ifPresent(account -> otpService.generateAndSendOtp(normalized, OTP_PURPOSE_PASSWORD_RESET));
+    }
+
+    @Transactional
+    public void resetPassword(String email, String otp, String newPassword) {
+        String normalized = email.trim().toLowerCase(Locale.ROOT);
+
+        // 1. Confirm that the OTP matches an active account before consuming it
+        Account account = accountRepository.findByEmailIgnoreCase(normalized)
+                .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.INVALID_OTP));
+        if (!otpService.verifyAndConsumeOtp(normalized, OTP_PURPOSE_PASSWORD_RESET, otp)) {
+            throw new BusinessException(IdentityErrorCode.INVALID_OTP);
+        }
+
+        // 2. Update the password
+        account.setPasswordHash(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
+
+    @Transactional
+    public void changePassword(UUID accountId, String currentPassword, String newPassword) {
+        // 1. Retrieve an active account
+        Account account = accountRepository.findById(accountId)
+                .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
+
+        // 2. Verify the current password
+        if (!passwordEncoder.matches(currentPassword, account.getPasswordHash())) {
+            throw new BusinessException(IdentityErrorCode.INCORRECT_PASSWORD);
+        }
+
+        // 3. Update to the new password
+        account.setPasswordHash(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
     }
 }
