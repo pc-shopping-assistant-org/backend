@@ -16,6 +16,8 @@ spring:
     bootstrap-servers: localhost:29092
     consumer:
       group-id: catalog-service
+    listener:
+      observation-enabled: true
   rabbitmq:
     host: localhost
     port: 5672

@@ -3,6 +3,7 @@ package com.ecm.payment.messaging;
 import com.ecm.payment.entity.OutboxEvent;
 import com.ecm.payment.entity.OutboxStatus;
 import com.ecm.payment.repository.OutboxEventRepository;
+import com.ecm.common.tracing.TraceSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -31,7 +32,9 @@ public class OutboxRelay {
         var pending = outboxEventRepository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING);
         for (OutboxEvent event : pending) {
             try {
-                kafkaTemplate.send(event.getDestination(), event.getAggregateId().toString(), event.getPayload());
+                try (TraceSupport.TraceScope ignored = TraceSupport.restore(event.getTraceContext())) {
+                    kafkaTemplate.send(event.getDestination(), event.getAggregateId().toString(), event.getPayload());
+                }
                 event.setStatus(OutboxStatus.PUBLISHED);
                 event.setPublishedAt(Instant.now());
                 outboxEventRepository.save(event);

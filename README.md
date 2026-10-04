@@ -79,7 +79,7 @@ Business services register with Eureka. External clients should normally call th
 - Java `25`
 - Maven `3.9+`
 - Docker Desktop with Docker Compose support
-- The following ports must be available: `5432`, `5672`, `6379`, `8761`, `8080-8087`, `15672`, `29092`, `3000`, `4317-4318`
+- The following ports must be available: `5432`, `5672`, `6379`, `8761`, `8080-8087`, `15672`, `29092`, `3300`, `4317-4318`
 
 Check Java and Maven in PowerShell:
 
@@ -107,7 +107,7 @@ The following containers are started:
 | RabbitMQ Management     | http://localhost:15672             | Management UI, `guest/guest`  |
 | Redis                   | `localhost:6379`                   | Cache and identity data       |
 | Kafka                   | `localhost:29092`                  | Event streaming               |
-| Grafana (LGTM)          | http://localhost:3000              | Traces, metrics, and logs UI  |
+| Grafana (LGTM)          | http://localhost:3300              | Traces, metrics, and logs UI  |
 | OTLP receiver           | `localhost:4317` (gRPC), `localhost:4318` (HTTP) | Receives telemetry from services |
 
 Check container status:
@@ -278,7 +278,7 @@ Logs reach Loki through the Logback `OTEL` appender defined in `common-lib/src/m
    curl.exe -X POST http://localhost:8080/auth/login -H "Content-Type: application/json" -d "{}"
    ```
 
-4. Open Grafana at http://localhost:3000 (`admin` / `admin` is the image default for local use only) and check:
+4. Open Grafana at http://localhost:3300 (change the host port with `GRAFANA_PORT`, e.g. in `.env`; `admin` / `admin123` is for local use only; the password comes from `GRAFANA_ADMIN_PASSWORD` and only applies when the Grafana data volume is first created — on an existing volume run `docker exec pcshop-lgtm /otel-lgtm/grafana/bin/grafana cli --homepath /otel-lgtm/grafana admin reset-admin-password <new>`) and check:
 
    | Where | What to look for |
    | ----- | ---------------- |
@@ -293,6 +293,8 @@ Logs reach Loki through the Logback `OTEL` appender defined in `common-lib/src/m
 ### Following one failing request
 
 Error responses include a `traceId`. Paste it into **Explore → Tempo** (query type *TraceQL*, or search by trace ID) to see where it failed. Server errors (5xx) are marked as errors on the span with the exception recorded. In **Explore → Loki**, filter `{service_name=~".+"} | trace_id="<traceId>"` to read the matching logs from every service.
+
+Traces also follow asynchronous messaging. An order placed through the gateway produces a single trace that continues through the outbox relay, RabbitMQ (`stock.reserve send` → `catalog.stock-commands receive`) and Kafka (`stock.reserved send` → `stock.reserved process`), so the logs and spans of every consumer share the request's `trace_id`. This works because each `outbox_events` row stores the W3C `traceparent` of the request that wrote it (`trace_context` column) and the relay restores it before publishing; Kafka and RabbitMQ observation is enabled on producers and listeners. Any new outbox-style publisher should do the same via `TraceSupport.currentTraceparent()` / `TraceSupport.restore(...)` in `common-lib`.
 
 Dashboards live in `docker/grafana/dashboards/` and are loaded read-only through `docker/grafana/provisioning/`. Edit the JSON there (or export from Grafana) and run `docker compose up -d lgtm` to apply changes. Telemetry is stored in the `pcshop-lgtm-data` volume and is removed by `docker compose down -v`.
 
@@ -339,7 +341,7 @@ Verify that `MAIL_USERNAME` and `MAIL_PASSWORD` were loaded into the same PowerS
 
 ### No data in Grafana
 
-- Check `docker compose ps lgtm` shows the container as healthy and that ports `3000`, `4317`, and `4318` are free.
+- Check `docker compose ps lgtm` shows the container as healthy and that ports `3300`, `4317`, and `4318` are free.
 - Metrics are pushed every 15 seconds, so wait about 30 seconds after starting a service. Confirm the service started after `lgtm` and sees `OTEL_EXPORTER_OTLP_ENDPOINT` if you override it.
 - Check the data sources under **Connections → Data sources**: `Prometheus`, `Loki`, and `Tempo` should all pass **Save & test**.
 - If only logs are missing, make sure the service uses the rebuilt `common-lib` (it provides `logback-spring.xml`).
