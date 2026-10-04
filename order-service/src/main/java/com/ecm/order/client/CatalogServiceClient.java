@@ -22,5 +22,6 @@ public interface CatalogServiceClient {
     @GetMapping("/cart-variant-details")
     ApiResponse<java.util.List<CartVariantDetailsResponse>> getCartVariantDetails(@org.springframework.web.bind.annotation.RequestParam("ids") java.util.List<UUID> ids);
 
+    @GetMapping("/trace-test/ping")
     ApiResponse<String> ping();
 }

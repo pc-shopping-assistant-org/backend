@@ -13,5 +13,7 @@ public interface BrandMapper {
     @Mapping(target = "imageUrl", ignore = true)
     BrandResponse toResponse(Brand brand);
 
+    Brand toEntity(com.ecm.catalog.dto.request.CreateBrandRequest request);
+
     List<BrandResponse> toResponseList(List<Brand> brands);
 }

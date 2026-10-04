@@ -21,4 +21,8 @@ public interface BrandRepository extends JpaRepository<Brand, UUID> {
     Optional<Brand> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
 
     boolean existsBySeoName(String seoName);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByIdAndStatus(UUID id, CatalogStatus status);
 }

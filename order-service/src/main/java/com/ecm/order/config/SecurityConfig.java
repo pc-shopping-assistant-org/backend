@@ -20,6 +20,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/trace-test/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/order-items/variants/*/exists").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/order-items/**").authenticated()
+                        .requestMatchers("/orders/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/orders").hasRole("CUSTOMER")
                         .requestMatchers("/orders/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())

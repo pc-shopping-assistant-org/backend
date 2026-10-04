@@ -9,6 +9,7 @@ import java.util.UUID;
 public record OrderResponse(
         UUID id,
         OrderStatus status,
+        String invoiceNumber,
         Long subtotalAmount,
         Long discountAmount,
         Long shippingFee,

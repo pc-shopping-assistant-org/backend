@@ -1,6 +1,11 @@
 package com.ecm.catalog.service;
 
 import com.ecm.catalog.client.MediaServiceClient;
+import com.ecm.catalog.client.OrderServiceClient;
+import com.ecm.catalog.dto.request.CreateProductRequest;
+import com.ecm.catalog.dto.request.CreateVariantRequest;
+import com.ecm.catalog.dto.request.UpdateProductRequest;
+import com.ecm.catalog.dto.request.UpdateVariantRequest;
 import com.ecm.catalog.dto.request.ProductFilterRequest;
 import com.ecm.catalog.dto.response.*;
 import com.ecm.catalog.entity.*;
@@ -41,6 +46,214 @@ public class ProductService {
     private final ProductImageMapper productImageMapper;
     private final OptionMapper optionMapper;
     private final MediaServiceClient mediaServiceClient;
+    private final ProductSupplierRepository productSupplierRepository;
+    private final SupplierRepository supplierRepository;
+    private final OrderServiceClient orderServiceClient;
+
+    @Transactional
+    public ProductDetailResponse createProduct(CreateProductRequest request, UUID employeeId) {
+        validateProductReferences(request.categoryId(), request.brandId(), request.supplierIds());
+        String seoName = normalizeSeo(request.seoName(), request.name());
+        if (productRepository.existsBySeoName(seoName)) {
+            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "SEO name already exists");
+        }
+        Product product = productMapper.toEntity(request);
+        product.setName(request.name().trim());
+        product.setSeoName(seoName);
+        product.setStatus(CatalogStatus.ACTIVE);
+        product.setCreatedBy(employeeId);
+        product = productRepository.save(product);
+        saveSuppliers(product.getId(), request.supplierIds());
+        for (CreateProductRequest.VariantRequest variant : request.variants()) {
+            createVariantEntity(product, variant, employeeId);
+        }
+        return buildProductDetail(product);
+    }
+
+    @Transactional
+    public ProductDetailResponse updateProduct(UUID id, UpdateProductRequest request, UUID employeeId) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        validateProductReferences(request.categoryId(), request.brandId(), request.supplierIds());
+        if (product.getStatus() == CatalogStatus.DELETED) {
+            throw new BusinessException(CatalogErrorCode.INVALID_PRODUCT_STATUS);
+        }
+        String seoName = normalizeSeo(request.seoName(), request.name());
+        if (!product.getSeoName().equals(seoName) && productRepository.existsBySeoNameAndIdNot(seoName, id)) {
+            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "SEO name already exists");
+        }
+        if (product.getStatus() == CatalogStatus.DELETED) {
+            throw new BusinessException(CatalogErrorCode.INVALID_PRODUCT_STATUS);
+        }
+        product.setName(request.name().trim());
+        product.setSeoName(seoName);
+        product.setBrandId(request.brandId());
+        product.setCategoryId(request.categoryId());
+        product.setSpecifications(request.specifications());
+        product.setDescription(request.description());
+        product.setStatus(request.status());
+        product.setUpdatedBy(employeeId);
+        productRepository.save(product);
+        productSupplierRepository.deleteByProductId(id);
+        saveSuppliers(id, request.supplierIds());
+        return buildProductDetail(product);
+    }
+
+    @Transactional
+    public void deleteProduct(UUID id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        if (product.getStatus() == CatalogStatus.DELETED) return;
+        List<UUID> variantIds = productVariantRepository.findByProductIdAndStatusNot(id, CatalogStatus.DELETED)
+                .stream().map(ProductVariant::getId).toList();
+        for (UUID variantId : variantIds) {
+            if (Boolean.TRUE.equals(orderServiceClient.hasOrderHistory(variantId).getData())) {
+                throw new BusinessException(CatalogErrorCode.PRODUCT_IN_USE);
+            }
+        }
+        product.setStatus(CatalogStatus.DELETED);
+        productRepository.save(product);
+        productVariantRepository.findByProductIdAndStatusNot(id, CatalogStatus.DELETED)
+                .forEach(variant -> { variant.setStatus(CatalogStatus.DELETED); variant.setUpdatedBy(null); });
+    }
+
+    @Transactional
+    public ProductDetailResponse updateProductStatus(UUID id, CatalogStatus status, UUID employeeId) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        if (product.getStatus() == CatalogStatus.DELETED || status == CatalogStatus.DELETED) {
+            throw new BusinessException(CatalogErrorCode.INVALID_PRODUCT_STATUS);
+        }
+        product.setStatus(status);
+        product.setUpdatedBy(employeeId);
+        productRepository.save(product);
+        return buildProductDetail(product);
+    }
+
+    @Transactional
+    public ProductVariantResponse createVariant(UUID productId, CreateVariantRequest request, UUID employeeId) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", productId));
+        if (product.getStatus() != CatalogStatus.ACTIVE) throw new BusinessException(CatalogErrorCode.INVALID_PRODUCT_STATUS);
+        ProductVariant variant = ProductVariant.builder().productId(product.getId()).listPrice(request.listPrice())
+                .quantity(request.quantity()).sku(request.sku().trim()).model(request.model()).description(request.description())
+                .warrantyMonths(request.warrantyMonths()).barcode(request.barcode()).releaseAt(request.releaseAt())
+                .status(CatalogStatus.ACTIVE).createdBy(employeeId).build();
+        return enrichVariant(persistVariant(variant, request.images(), request.optionIds()));
+    }
+
+    @Transactional
+    public ProductVariantResponse updateVariant(UUID productId, UUID variantId, UpdateVariantRequest request, UUID employeeId) {
+        ProductVariant variant = productVariantRepository.findByIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .filter(existing -> existing.getProductId().equals(productId))
+                .orElseThrow(() -> new ResourceNotFoundException("ProductVariant", variantId));
+        if (productVariantRepository.existsBySkuAndIdNot(request.sku().trim(), variantId)
+                || request.barcode() != null && productVariantRepository.existsByBarcodeAndIdNot(request.barcode(), variantId)) {
+            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Variant SKU or barcode already exists");
+        }
+        validateVariantAssociations(request.images(), request.optionIds());
+        variant.setListPrice(request.listPrice());
+        variant.setQuantity(request.quantity());
+        variant.setSku(request.sku().trim());
+        variant.setModel(request.model());
+        variant.setDescription(request.description());
+        variant.setWarrantyMonths(request.warrantyMonths());
+        variant.setBarcode(request.barcode());
+        variant.setReleaseAt(request.releaseAt());
+        variant.setUpdatedBy(employeeId);
+        productVariantRepository.save(variant);
+        replaceVariantAssociations(variantId, request.images(), request.optionIds());
+        return enrichVariant(variant);
+    }
+
+    @Transactional
+    public ProductVariantResponse updateVariantStatus(UUID productId, UUID variantId, CatalogStatus status, UUID employeeId) {
+        ProductVariant variant = productVariantRepository.findByIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .filter(existing -> existing.getProductId().equals(productId))
+                .orElseThrow(() -> new ResourceNotFoundException("ProductVariant", variantId));
+        if (status == CatalogStatus.DELETED) throw new BusinessException(CatalogErrorCode.INVALID_PRODUCT_STATUS);
+        variant.setStatus(status);
+        variant.setUpdatedBy(employeeId);
+        return enrichVariant(productVariantRepository.save(variant));
+    }
+
+    @Transactional
+    public void deleteVariant(UUID productId, UUID variantId) {
+        ProductVariant variant = productVariantRepository.findByIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .filter(existing -> existing.getProductId().equals(productId))
+                .orElseThrow(() -> new ResourceNotFoundException("ProductVariant", variantId));
+        if (Boolean.TRUE.equals(orderServiceClient.hasOrderHistory(variantId).getData())) throw new BusinessException(CatalogErrorCode.PRODUCT_IN_USE);
+        variant.setStatus(CatalogStatus.DELETED);
+        productVariantRepository.save(variant);
+        productImageRepository.findByProductVariantIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .forEach(image -> image.setStatus(CatalogStatus.DELETED));
+        variantOptionRepository.findByProductVariantIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .forEach(option -> option.setStatus(CatalogStatus.DELETED));
+    }
+
+    private ProductVariant persistVariant(ProductVariant variant, List<CreateProductRequest.ImageRequest> images, List<UUID> optionIds) {
+        validateVariantAssociations(images, optionIds);
+        if (productVariantRepository.existsBySku(variant.getSku())
+                || variant.getBarcode() != null && productVariantRepository.existsByBarcode(variant.getBarcode())) {
+            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Variant SKU or barcode already exists");
+        }
+        ProductVariant saved = productVariantRepository.save(variant);
+        replaceVariantAssociations(saved.getId(), images, optionIds);
+        return saved;
+    }
+
+    private void validateVariantAssociations(List<CreateProductRequest.ImageRequest> images, List<UUID> optionIds) {
+        if (images != null && images.stream().filter(CreateProductRequest.ImageRequest::main).count() > 1) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "A variant can have only one main image");
+        }
+        if (optionIds != null && !optionIds.isEmpty()
+                && optionRepository.findByIdInAndStatus(optionIds.stream().distinct().toList(), CatalogStatus.ACTIVE).size() != optionIds.stream().distinct().count()) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE);
+        }
+    }
+
+    private void replaceVariantAssociations(UUID variantId, List<CreateProductRequest.ImageRequest> images, List<UUID> optionIds) {
+        productImageRepository.findByProductVariantIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .forEach(image -> image.setStatus(CatalogStatus.DELETED));
+        variantOptionRepository.findByProductVariantIdAndStatus(variantId, CatalogStatus.ACTIVE)
+                .forEach(option -> option.setStatus(CatalogStatus.DELETED));
+        if (images != null) productImageRepository.saveAll(images.stream().map(image -> ProductImage.builder()
+                .productVariantId(variantId).fileId(image.fileId()).isMain(image.main()).status(CatalogStatus.ACTIVE).build()).toList());
+        if (optionIds != null) variantOptionRepository.saveAll(optionIds.stream().distinct().map(optionId -> VariantOption.builder()
+                .productVariantId(variantId).optionId(optionId).status(CatalogStatus.ACTIVE).build()).toList());
+    }
+
+    private ProductVariant createVariantEntity(Product product, CreateProductRequest.VariantRequest request, UUID employeeId) {
+        ProductVariant variant = ProductVariant.builder().productId(product.getId()).listPrice(request.listPrice())
+                .quantity(request.quantity()).sku(request.sku().trim()).model(request.model()).description(request.description())
+                .warrantyMonths(request.warrantyMonths()).barcode(request.barcode()).releaseAt(request.releaseAt())
+                .status(CatalogStatus.ACTIVE).createdBy(employeeId).build();
+        return persistVariant(variant, request.images(), request.optionIds());
+    }
+
+
+    private void validateProductReferences(UUID categoryId, UUID brandId, List<UUID> supplierIds) {
+        if (!categoryRepository.existsByIdAndStatus(categoryId, CatalogStatus.ACTIVE)) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Category must exist and be ACTIVE");
+        }
+        if (brandId != null && !brandRepository.existsByIdAndStatus(brandId, CatalogStatus.ACTIVE)) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Brand must exist and be ACTIVE");
+        }
+        if (supplierIds != null && !supplierIds.isEmpty()
+                && supplierRepository.findAllById(supplierIds.stream().distinct().toList()).stream()
+                .filter(supplier -> supplier.getStatus() == CatalogStatus.ACTIVE).count() != supplierIds.stream().distinct().count()) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Suppliers must exist and be ACTIVE");
+        }
+    }
+
+    private void saveSuppliers(UUID productId, List<UUID> supplierIds) {
+        if (supplierIds == null) return;
+        productSupplierRepository.saveAll(supplierIds.stream().distinct().map(supplierId -> ProductSupplier.builder()
+                .productId(productId).supplierId(supplierId).build()).toList());
+    }
+
+    private String normalizeSeo(String seoName, String name) {
+        String value = (seoName == null || seoName.isBlank() ? name : seoName).trim().toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        if (value.isBlank()) throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "SEO name is invalid");
+        return value;
+    }
 
     @Transactional(readOnly = true)
     public CursorPageResponse<ProductSummaryResponse> getProducts(ProductFilterRequest filter) {

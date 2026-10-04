@@ -2,6 +2,9 @@ package com.ecm.catalog.controller;
 
 import com.ecm.catalog.client.MediaServiceClient;
 import com.ecm.catalog.dto.response.BrandResponse;
+import com.ecm.catalog.dto.request.CreateBrandRequest;
+import com.ecm.catalog.dto.request.UpdateBrandRequest;
+import com.ecm.catalog.dto.request.UpdateStatusRequest;
 import com.ecm.catalog.dto.response.MediaFileResponse;
 import com.ecm.catalog.service.BrandService;
 import com.ecm.common.response.ApiResponse;
@@ -18,6 +21,27 @@ public class BrandController {
 
     private final BrandService brandService;
     private final MediaServiceClient mediaServiceClient;
+
+    @PostMapping
+    public ApiResponse<BrandResponse> create(@jakarta.validation.Valid @RequestBody CreateBrandRequest request) {
+        return ApiResponse.success("Brand created", brandService.create(request));
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<BrandResponse> update(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody UpdateBrandRequest request) {
+        return ApiResponse.success("Brand updated", brandService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ApiResponse<BrandResponse> updateStatus(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody UpdateStatusRequest request) {
+        return ApiResponse.success("Brand status updated", brandService.updateStatus(id, request.status()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable UUID id) {
+        brandService.delete(id);
+        return ApiResponse.success("Brand deleted", null);
+    }
 
     @GetMapping
     public ApiResponse<List<BrandResponse>> getAllBrands() {

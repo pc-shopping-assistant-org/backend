@@ -17,6 +17,21 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Optional<Order> findByIdempotencyKey(String idempotencyKey);
 
+    Page<Order> findAllByStatus(OrderStatus status, Pageable pageable);
+
+    @Query("SELECT o FROM Order o WHERE (:status IS NULL OR o.status = :status) " +
+            "AND (:customerId IS NULL OR o.customerId = :customerId) " +
+            "AND (:createdFrom IS NULL OR o.orderTime >= :createdFrom) " +
+            "AND (:createdTo IS NULL OR o.orderTime < :createdTo) " +
+            "AND (:keyword IS NULL OR LOWER(CAST(o.id AS string)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(COALESCE(o.invoiceNumber, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Order> searchAdminOrders(@Param("status") OrderStatus status,
+                                  @Param("customerId") UUID customerId,
+                                  @Param("createdFrom") java.time.Instant createdFrom,
+                                  @Param("createdTo") java.time.Instant createdTo,
+                                  @Param("keyword") String keyword,
+                                  Pageable pageable);
+
     Page<Order> findByCustomerId(UUID customerId, Pageable pageable);
 
     Page<Order> findByCustomerIdAndStatus(UUID customerId, OrderStatus status, Pageable pageable);

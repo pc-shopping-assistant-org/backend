@@ -23,5 +23,11 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Query("SELECT c FROM Category c WHERE c.id = :id AND c.status = :status")
     Optional<Category> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
 
+    boolean existsByIdAndStatus(UUID id, CatalogStatus status);
+
     boolean existsBySeoName(String seoName);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByParentId(UUID parentId);
 }

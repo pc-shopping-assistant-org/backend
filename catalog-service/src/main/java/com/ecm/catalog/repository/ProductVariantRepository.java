@@ -22,8 +22,18 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<ProductVariant> findByProductIdAndStatus(@Param("productId") UUID productId,
                                                    @Param("status") CatalogStatus status);
 
+    List<ProductVariant> findByProductIdAndStatusNot(UUID productId, CatalogStatus status);
+
     @Query("SELECT v FROM ProductVariant v WHERE v.id = :id AND v.status = :status")
     Optional<ProductVariant> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
 
     boolean existsBySku(String sku);
+
+    boolean existsByBarcode(String barcode);
+
+    boolean existsBySkuAndIdNot(String sku, UUID id);
+
+    boolean existsByBarcodeAndIdNot(String barcode, UUID id);
+
+    boolean existsByProductIdAndStatusNot(UUID productId, CatalogStatus status);
 }

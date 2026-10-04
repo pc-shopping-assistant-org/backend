@@ -23,5 +23,7 @@ public interface ProductMapper {
     @Mapping(target = "variants", ignore = true)
     ProductDetailResponse toDetailResponse(Product product);
 
+    Product toEntity(com.ecm.catalog.dto.request.CreateProductRequest request);
+
     List<ProductSummaryResponse> toSummaryResponseList(List<Product> products);
 }

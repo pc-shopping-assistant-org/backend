@@ -54,6 +54,9 @@ public class Order {
     @Column(name = "idempotency_key")
     private String idempotencyKey;
 
+    @Column(name = "invoice_number", length = 50)
+    private String invoiceNumber;
+
     @Column(name = "subtotal_amount", nullable = false)
     private Long subtotalAmount;
 

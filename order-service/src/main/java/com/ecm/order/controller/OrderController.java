@@ -3,6 +3,8 @@ package com.ecm.order.controller;
 import com.ecm.common.response.ApiResponse;
 import com.ecm.common.response.PageResponse;
 import com.ecm.order.dto.request.CreateOrderRequest;
+import com.ecm.order.dto.request.AdminOrderSearchRequest;
+import com.ecm.order.dto.request.UpdateOrderStatusRequest;
 import com.ecm.order.dto.response.OrderResponse;
 import com.ecm.order.entity.OrderStatus;
 import com.ecm.order.service.OrderService;
@@ -22,6 +24,25 @@ public class OrderController {
     private static final String CART_SESSION_HEADER = "X-Cart-Session";
 
     private final OrderService orderService;
+
+    @GetMapping("/admin")
+    public ApiResponse<PageResponse<OrderResponse>> getAllOrders(
+            @Valid @ModelAttribute AdminOrderSearchRequest filter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return ApiResponse.success("Get orders successfully", orderService.getAdminOrders(filter, page, size));
+    }
+
+    @PatchMapping("/admin/{orderId}/status")
+    public ApiResponse<OrderResponse> updateOrderStatus(@PathVariable UUID orderId,
+                                                         @Valid @RequestBody UpdateOrderStatusRequest request,
+                                                         Authentication authentication) {
+        UUID employeeId = null;
+        if (authentication instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwt) {
+            try { employeeId = UUID.fromString(jwt.getToken().getSubject()); } catch (IllegalArgumentException ignored) { }
+        }
+        return ApiResponse.success("Order status updated", orderService.updateAdminOrderStatus(orderId, request.status(), employeeId));
+    }
 
     @GetMapping
     public ApiResponse<PageResponse<OrderResponse>> getMyOrders(

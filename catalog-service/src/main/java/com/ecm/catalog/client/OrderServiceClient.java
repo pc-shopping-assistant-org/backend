@@ -15,4 +15,7 @@ public interface OrderServiceClient {
 
     @GetMapping("/order-items/{id}")
     OrderItemResponse getOrderItem(@PathVariable("id") UUID id);
+
+    @GetMapping("/order-items/variants/{variantId}/exists")
+    com.ecm.common.response.ApiResponse<Boolean> hasOrderHistory(@PathVariable("variantId") UUID variantId);
 }

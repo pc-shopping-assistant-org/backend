@@ -9,6 +9,7 @@ import com.ecm.order.client.CatalogServiceClient;
 import com.ecm.order.client.PromotionServiceClient;
 import com.ecm.order.dto.request.ApplyDiscountRequest;
 import com.ecm.order.dto.request.CreateOrderRequest;
+import com.ecm.order.dto.request.AdminOrderSearchRequest;
 import com.ecm.order.dto.response.OrderResponse;
 import com.ecm.order.dto.response.DiscountApplyResponse;
 import com.ecm.order.dto.response.ProductVariantResponse;
@@ -59,6 +60,43 @@ public class OrderService {
     private final PromotionServiceClient promotionServiceClient;
     private final OrderMapper orderMapper;
     private final ObjectMapper objectMapper;
+
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getAdminOrders(AdminOrderSearchRequest filter, int page, int size) {
+        if (page < DEFAULT_PAGE || size < 1 || size > MAX_PAGE_SIZE
+                || filter.createdFrom() != null && filter.createdTo() != null && !filter.createdFrom().isBefore(filter.createdTo())) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+        String keyword = filter.keyword() == null || filter.keyword().isBlank() ? null : filter.keyword().trim();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderTime"));
+        Page<Order> orders = orderRepository.searchAdminOrders(filter.status(), filter.customerId(),
+                filter.createdFrom(), filter.createdTo(), keyword, pageable);
+        return PageResponse.of(orders.map(this::toResponse));
+    }
+
+    @Transactional
+    public OrderResponse updateAdminOrderStatus(UUID orderId, OrderStatus status, UUID employeeId) {
+        Order order = orderRepository.findByIdForUpdate(orderId).orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+        if (!isValidAdminTransition(order.getStatus(), status)) throw new BusinessException(OrderErrorCode.INVALID_ORDER_STATUS_TRANSITION);
+        order.setStatus(status);
+        order.setUpdatedBy(employeeId);
+        if (status == OrderStatus.COMPLETED) order.setDeliveredAt(Instant.now());
+        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        items.forEach(item -> item.setStatus(status == OrderStatus.CANCELLED ? OrderItemStatus.CANCELLED : OrderItemStatus.ACTIVE));
+        orderItemRepository.saveAll(items);
+        Order saved = orderRepository.save(order);
+        if (status == OrderStatus.CANCELLED) enqueueStockReleases(saved, items);
+        return toResponse(saved);
+    }
+
+    private boolean isValidAdminTransition(OrderStatus current, OrderStatus next) {
+        return switch (current) {
+            case PENDING_CONFIRMATION -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
+            case SHIPPING -> next == OrderStatus.COMPLETED;
+            default -> false;
+        };
+    }
 
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getCustomerOrders(Authentication authentication, OrderStatus status, int page, int size) {

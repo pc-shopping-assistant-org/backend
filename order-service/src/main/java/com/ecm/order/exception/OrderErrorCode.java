@@ -13,7 +13,8 @@ public enum OrderErrorCode implements ErrorCode {
     CART_QUANTITY_TOO_LARGE(HttpStatus.BAD_REQUEST, "Cart quantity or amount is too large"),
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "One or more items do not have enough stock"),
     VARIANT_NOT_AVAILABLE(HttpStatus.CONFLICT, "One or more items are no longer available"),
-    ORDER_NOT_CANCELLABLE(HttpStatus.CONFLICT, "Order cannot be cancelled in its current status");
+    ORDER_NOT_CANCELLABLE(HttpStatus.CONFLICT, "Order cannot be cancelled in its current status"),
+    INVALID_ORDER_STATUS_TRANSITION(HttpStatus.CONFLICT, "Order status transition is invalid");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;

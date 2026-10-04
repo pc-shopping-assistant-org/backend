@@ -19,6 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByIdAndStatus(UUID id, CatalogStatus status);
 
+    boolean existsBySeoNameAndIdNot(String seoName, UUID id);
+
     Optional<Product> findBySeoNameAndStatus(String seoName, CatalogStatus status);
 
     @Query("SELECT p FROM Product p WHERE p.id = :id AND p.status = :status")
@@ -87,4 +89,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     long countByCategoryId(UUID categoryId);
 
     long countByBrandId(UUID brandId);
+
+    boolean existsByCategoryId(UUID categoryId);
+
+    boolean existsByCategoryIdAndStatusNot(UUID categoryId, CatalogStatus status);
+
+    boolean existsByBrandId(UUID brandId);
 }
