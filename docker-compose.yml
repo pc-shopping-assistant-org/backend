@@ -78,31 +78,25 @@ services:
     volumes:
       - pcshop-kafka-data:/var/lib/kafka/data
 
-  zipkin:
-    image: openzipkin/zipkin:3.6.0
-    container_name: pcshop-zipkin
+  # Grafana LGTM (Loki + Grafana + Tempo + Mimir/Prometheus) with a built-in OpenTelemetry
+  # Collector. Services run on the HOST and push traces, metrics and logs over OTLP to
+  # localhost:4318 (HTTP) / localhost:4317 (gRPC); everything is explored in Grafana.
+  lgtm:
+    image: grafana/otel-lgtm:0.35.0
+    container_name: pcshop-lgtm
     restart: unless-stopped
     ports:
-      - "9411:9411" # UI + query API (http://localhost:9411)
-
-  # Services run on the HOST (not containerized), so the collector's OTLP
-  # receiver is exposed on host-reachable ports; it then forwards spans to
-  # zipkin over the internal compose network.
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.153.0
-    container_name: pcshop-otel-collector
-    restart: unless-stopped
-    command: [ "--config=/etc/otel-collector-config.yaml" ]
-    volumes:
-      - ./docker/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
-    ports:
+      - "3000:3000" # Grafana UI (http://localhost:3000, admin/admin)
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP HTTP receiver
-    depends_on:
-      - zipkin
+    volumes:
+      - pcshop-lgtm-data:/data
+      - ./docker/grafana/provisioning/pcshop-dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/pcshop-dashboards.yaml:ro
+      - ./docker/grafana/dashboards:/var/lib/pcshop-dashboards:ro
 
 volumes:
   pcshop-postgres-data:
   pcshop-rabbitmq-data:
   pcshop-redis-data:
   pcshop-kafka-data:
+  pcshop-lgtm-data:

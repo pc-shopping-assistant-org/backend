@@ -24,6 +24,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
         ErrorCode errorCode = ex.getErrorCode();
+        if (errorCode.getHttpStatus().is5xxServerError()) {
+            log.error("Business exception with server error status {}", errorCode.getCode(), ex);
+            TraceSupport.recordError(ex);
+        }
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ApiResponse.error(errorCode.getCode(), ex.getMessage()));
     }
