@@ -15,6 +15,11 @@ instead of re-deriving your own convention.
 
 ## Quick facts
 
+- `ai-service/` is Python/FastAPI/PydanticAI and is outside the Maven reactor.
+  Run `uv sync --frozen`, `uv run pytest -q`, `uv run ruff check src tests`, and
+  `uv run mypy src` in that directory. Gateway routes `/api/v1/assistant/**`
+  to its `/api/v1/**` API using `AI_SERVICE_URL`.
+
 - Root `pom.xml` is the Maven reactor parent — it manages shared versions
   (`java.version`, `spring-cloud.version`, `mapstruct.version`,
   `lombok-mapstruct-binding.version`) for every module. Don't give a service module its

@@ -6,6 +6,19 @@ spring:
       server:
         webmvc:
           routes:
+            - id: ai-assistant-api
+              uri: ${AI_SERVICE_URL:http://localhost:8000}
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /api/v1/assistant/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "3"
+                - name: PrefixPath
+                  args:
+                    prefix: /api/v1
             - id: identity-jwks
               uri: lb://identity-service
               predicates:

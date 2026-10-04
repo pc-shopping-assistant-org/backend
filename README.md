@@ -36,6 +36,50 @@ See [Running the Services](#running-the-services) for the exact commands.
 
 ## Architecture
 
+### Python AI service
+
+`ai-service/` contains the existing FastAPI/PydanticAI assistant and graph
+implementation. It builds independently of the Java Maven reactor. Catalog
+retrieval reads the catalog-service public API; it does not access service databases.
+
+Run on the host:
+
+```bash
+cd ai-service
+uv sync --frozen
+uv run uvicorn ai_service.main:app --host 127.0.0.1 --port 8000
+```
+
+Alternatively, from this backend directory:
+
+```bash
+docker compose --profile ai up -d --build ai-service
+```
+
+Start catalog-service on port 8082 and the gateway on port 8080. Gateway routes
+`/api/v1/assistant/chat` and `/api/v1/assistant/chat/stream` to the AI service's
+`/api/v1/chat` and `/api/v1/chat/stream`. Existing gateway JWT authentication
+applies to these routes. Set `AI_SERVICE_URL` on the gateway if the AI host changes.
+Swagger is available locally at `http://localhost:8000/docs`.
+
+```bash
+curl -N http://localhost:8080/api/v1/assistant/chat/stream \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"Tìm laptop chơi game"}'
+```
+
+The default `AI_PROVIDER=fallback` produces deterministic catalog-grounded answers.
+Configure `AI_PROVIDER=openai` or `gemini` and the corresponding API key to enable
+model generation; use `ai-service/.env.example` for host execution. AI responses
+retain `{data, message, errors}` with static message keys, including SSE frames.
+
+Current integration limits: conversation storage is process-local and has no
+per-account ownership binding; keep this local integration until ownership is
+implemented before exposing persistent conversations to multiple users. The AI
+service currently has no OTLP exporter, and Gateway SSE forwarding still requires
+an end-to-end runtime check. Search-service indexing remains outside this integration.
+
 ```text
                          +----------------+
                          |  API Gateway   |
