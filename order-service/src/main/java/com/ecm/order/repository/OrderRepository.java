@@ -21,15 +21,15 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT o FROM Order o WHERE (:status IS NULL OR o.status = :status) " +
             "AND (:customerId IS NULL OR o.customerId = :customerId) " +
-            "AND (:createdFrom IS NULL OR o.orderTime >= :createdFrom) " +
-            "AND (:createdTo IS NULL OR o.orderTime < :createdTo) " +
-            "AND (:keyword IS NULL OR LOWER(CAST(o.id AS string)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "AND o.orderTime >= :createdFrom " +
+            "AND o.orderTime < :createdTo " +
+            "AND (LOWER(CAST(o.id AS string)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(COALESCE(o.invoiceNumber, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Order> searchAdminOrders(@Param("status") OrderStatus status,
                                   @Param("customerId") UUID customerId,
-                                  @Param("createdFrom") java.time.Instant createdFrom,
+                                  @Param("createdFrom") java.time.Instant createdFrom, // never null: an untyped null breaks "IS NULL" on PostgreSQL
                                   @Param("createdTo") java.time.Instant createdTo,
-                                  @Param("keyword") String keyword,
+                                  @Param("keyword") String keyword, // never null: an untyped null breaks LOWER() on PostgreSQL; "" matches everything
                                   Pageable pageable);
 
     Page<Order> findByCustomerId(UUID customerId, Pageable pageable);

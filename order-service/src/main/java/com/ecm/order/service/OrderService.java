@@ -44,6 +44,7 @@ import java.util.UUID;
 public class OrderService {
 
     private static final String AGGREGATE_TYPE_ORDER = "ORDER";
+    private static final String NO_UPPER_BOUND = "9999-12-31T00:00:00Z";
     private static final String VARIANT_STATUS_ACTIVE = "ACTIVE";
 
     private static final int MAX_PAGE_SIZE = 100;
@@ -67,10 +68,12 @@ public class OrderService {
                 || filter.createdFrom() != null && filter.createdTo() != null && !filter.createdFrom().isBefore(filter.createdTo())) {
             throw new BusinessException(CommonErrorCode.BAD_REQUEST);
         }
-        String keyword = filter.keyword() == null || filter.keyword().isBlank() ? null : filter.keyword().trim();
+        String keyword = filter.keyword() == null ? "" : filter.keyword().trim();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderTime"));
+        Instant createdFrom = filter.createdFrom() == null ? Instant.EPOCH : filter.createdFrom();
+        Instant createdTo = filter.createdTo() == null ? Instant.parse(NO_UPPER_BOUND) : filter.createdTo();
         Page<Order> orders = orderRepository.searchAdminOrders(filter.status(), filter.customerId(),
-                filter.createdFrom(), filter.createdTo(), keyword, pageable);
+                createdFrom, createdTo, keyword, pageable);
         return PageResponse.of(orders.map(this::toResponse));
     }
 
