@@ -1,6 +1,7 @@
 package com.ecm.common.exception;
 
 import com.ecm.common.response.ApiResponse;
+import com.ecm.common.tracing.TraceSupport;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unhandled exception", ex);
+        TraceSupport.recordError(ex);
         return ResponseEntity.status(CommonErrorCode.INTERNAL_ERROR.getHttpStatus())
                 .body(ApiResponse.error(CommonErrorCode.INTERNAL_ERROR.getCode(), CommonErrorCode.INTERNAL_ERROR.getDefaultMessage()));
     }

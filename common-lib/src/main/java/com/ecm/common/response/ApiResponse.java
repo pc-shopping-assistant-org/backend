@@ -1,5 +1,6 @@
 package com.ecm.common.response;
 
+import com.ecm.common.tracing.TraceSupport;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,9 +15,10 @@ public class ApiResponse<T> {
     private final String message;
     private final T data;
     private final Instant timestamp;
+    private final String traceId;
 
     private ApiResponse(boolean success, String code, String message, T data) {
-        this(success, code, message, data, Instant.now());
+        this(success, code, message, data, Instant.now(), success ? null : TraceSupport.currentTraceId());
     }
 
     // Every controller response is wrapped in this envelope, so a Feign client decoding
@@ -28,12 +30,14 @@ public class ApiResponse<T> {
             @JsonProperty("code") String code,
             @JsonProperty("message") String message,
             @JsonProperty("data") T data,
-            @JsonProperty("timestamp") Instant timestamp) {
+            @JsonProperty("timestamp") Instant timestamp,
+            @JsonProperty("traceId") String traceId) {
         this.success = success;
         this.code = code;
         this.message = message;
         this.data = data;
         this.timestamp = timestamp;
+        this.traceId = traceId;
     }
 
     public static <T> ApiResponse<T> success(T data) {
@@ -70,5 +74,9 @@ public class ApiResponse<T> {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    public String getTraceId() {
+        return traceId;
     }
 }

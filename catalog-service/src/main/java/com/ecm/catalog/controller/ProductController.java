@@ -79,7 +79,8 @@ public class ProductController {
 
     private UUID employeeId(org.springframework.security.core.Authentication authentication) {
         if (authentication instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwt) {
-            try { return UUID.fromString(jwt.getToken().getSubject()); } catch (IllegalArgumentException ignored) { return null; }
+            try { return UUID.fromString(jwt.getToken().getClaimAsString("accountId")); }
+            catch (IllegalArgumentException | NullPointerException ignored) { return null; }
         }
         return null;
     }
