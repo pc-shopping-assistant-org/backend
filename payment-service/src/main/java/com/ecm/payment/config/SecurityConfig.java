@@ -1,5 +1,6 @@
 package com.ecm.payment.config;
 
+import com.ecm.common.security.ApiResponseSecurityHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,7 +23,13 @@ public class SecurityConfig {
                         // Internal saga call from order-service (Feign sends no token); the gateway still requires auth.
                         .requestMatchers(HttpMethod.POST, "/payments").permitAll()
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE)
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
         return http.build();
     }
 }

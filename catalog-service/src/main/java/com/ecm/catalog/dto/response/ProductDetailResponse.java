@@ -35,5 +35,8 @@ public class ProductDetailResponse {
     private Instant updatedAt;
     
     @Builder.Default
+    private List<ProductImageResponse> images = new ArrayList<>();
+
+    @Builder.Default
     private List<ProductVariantResponse> variants = new ArrayList<>();
 }

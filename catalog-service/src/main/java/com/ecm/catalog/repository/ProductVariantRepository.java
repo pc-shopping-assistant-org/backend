@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,26 +15,24 @@ import java.util.UUID;
 @Repository
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
 
-    @Query("SELECT v FROM ProductVariant v WHERE v.productId IN :productIds AND v.status = :status ORDER BY v.productId, v.listPrice")
-    List<ProductVariant> findByProductIdInAndStatus(@Param("productIds") List<UUID> productIds,
-                                                     @Param("status") CatalogStatus status);
+    @Query("SELECT v FROM ProductVariant v WHERE v.productId IN :productIds AND v.status IN :statuses ORDER BY v.productId, v.price")
+    List<ProductVariant> findByProductIdInAndStatusIn(@Param("productIds") Collection<UUID> productIds,
+                                                      @Param("statuses") Collection<CatalogStatus> statuses);
 
-    @Query("SELECT v FROM ProductVariant v WHERE v.productId = :productId AND v.status = :status")
-    List<ProductVariant> findByProductIdAndStatus(@Param("productId") UUID productId,
-                                                   @Param("status") CatalogStatus status);
+    @Query("SELECT v FROM ProductVariant v WHERE v.productId = :productId AND v.status IN :statuses ORDER BY v.price, v.id")
+    List<ProductVariant> findByProductIdAndStatusIn(@Param("productId") UUID productId,
+                                                    @Param("statuses") Collection<CatalogStatus> statuses);
 
     List<ProductVariant> findByProductIdAndStatusNot(UUID productId, CatalogStatus status);
 
     @Query("SELECT v FROM ProductVariant v WHERE v.id = :id AND v.status = :status")
     Optional<ProductVariant> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
 
-    boolean existsBySku(String sku);
+    boolean existsBySkuAndStatusNot(String sku, CatalogStatus status);
 
-    boolean existsByBarcode(String barcode);
+    boolean existsByBarcodeAndStatusNot(String barcode, CatalogStatus status);
 
-    boolean existsBySkuAndIdNot(String sku, UUID id);
+    boolean existsBySkuAndIdNotAndStatusNot(String sku, UUID id, CatalogStatus status);
 
-    boolean existsByBarcodeAndIdNot(String barcode, UUID id);
-
-    boolean existsByProductIdAndStatusNot(UUID productId, CatalogStatus status);
+    boolean existsByBarcodeAndIdNotAndStatusNot(String barcode, UUID id, CatalogStatus status);
 }

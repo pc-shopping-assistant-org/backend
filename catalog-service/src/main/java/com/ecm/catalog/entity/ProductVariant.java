@@ -28,17 +28,23 @@ public class ProductVariant {
     @Column(name = "product_id", nullable = false)
     private UUID productId;
 
-    @Column(name = "list_price", nullable = false)
-    private Long listPrice;
+    @Column(name = "price", nullable = false)
+    private Long price;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "sku", nullable = false, unique = true, length = 100)
+    @Column(name = "sku", nullable = false, length = 100)
     private String sku;
 
     @Column(name = "model", length = 100)
     private String model;
+
+    /**
+     * ref -> Media Service (files.id), no cross-DB FK. Optional variant-specific image.
+     */
+    @Column(name = "image_file_id")
+    private UUID imageFileId;
 
     @Column(name = "description")
     private String description;
@@ -46,7 +52,7 @@ public class ProductVariant {
     @Column(name = "warranty_months", nullable = false)
     private int warrantyMonths;
 
-    @Column(name = "barcode", unique = true, length = 100)
+    @Column(name = "barcode", length = 100)
     private String barcode;
 
     @Column(name = "release_at")

@@ -16,23 +16,25 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductVariantResponse {
-    
+
     private UUID id;
     private UUID productId;
-    private Long listPrice;
+    private Long price;
     private Integer quantity;
     private String sku;
     private String model;
     private String description;
     private Integer warrantyMonths;
+    private String barcode;
     private LocalDate releaseAt;
+
+    /** The own image of the variant; null when it shows the main image of the product instead. */
+    private UUID imageFileId;
+    private String imageUrl;
     private String status;
-    
-    @Builder.Default
-    private List<ProductImageResponse> images = new ArrayList<>();
-    
+
     @Builder.Default
     private List<OptionResponse> options = new ArrayList<>();
-    
+
     private Instant createdAt;
 }

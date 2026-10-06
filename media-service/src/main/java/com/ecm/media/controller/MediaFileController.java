@@ -29,16 +29,16 @@ public class MediaFileController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<MediaFileResponse> uploadImage(@RequestPart("file") MultipartFile file) {
-        return ApiResponse.success("Upload image successfully", mediaFileService.uploadImage(file));
+        return ApiResponse.success(mediaFileService.uploadImage(file));
     }
 
     @GetMapping
     public ApiResponse<List<MediaFileResponse>> getFiles(@RequestParam @NotEmpty List<UUID> ids) {
-        return ApiResponse.success("Get files successfully", mediaFileService.getActiveFiles(ids));
+        return ApiResponse.success(mediaFileService.getActiveFiles(ids));
     }
 
     @GetMapping("/{id}")
     public ApiResponse<MediaFileResponse> getFile(@PathVariable UUID id) {
-        return ApiResponse.success("Get file successfully", mediaFileService.getActiveFile(id));
+        return ApiResponse.success(mediaFileService.getActiveFile(id));
     }
 }

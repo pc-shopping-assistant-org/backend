@@ -35,7 +35,7 @@ public class CartController {
     public ApiResponse<CartResponse> getCart(
             Authentication authentication,
             @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success("Get cart successfully", cartService.getCart(accountId(authentication), sessionToken));
+        return ApiResponse.success(cartService.getCart(accountId(authentication), sessionToken));
     }
 
     @PostMapping("/items")
@@ -43,8 +43,7 @@ public class CartController {
             @Valid @RequestBody AddToCartRequest body,
             Authentication authentication,
             @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success("Cart item added successfully",
-                cartService.addItem(accountId(authentication), sessionToken, body));
+        return ApiResponse.success(cartService.addItem(accountId(authentication), sessionToken, body));
     }
 
     @PutMapping("/items/{variantId}")
@@ -53,8 +52,7 @@ public class CartController {
             @Valid @RequestBody UpdateCartItemRequest body,
             Authentication authentication,
             @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success("Cart item updated successfully",
-                cartService.updateItem(accountId(authentication), sessionToken, variantId, body));
+        return ApiResponse.success(cartService.updateItem(accountId(authentication), sessionToken, variantId, body));
     }
 
     @DeleteMapping("/items/{variantId}")
@@ -62,24 +60,21 @@ public class CartController {
             @PathVariable UUID variantId,
             Authentication authentication,
             @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success("Cart item removed successfully",
-                cartService.removeItem(accountId(authentication), sessionToken, variantId));
+        return ApiResponse.success(cartService.removeItem(accountId(authentication), sessionToken, variantId));
     }
 
     @DeleteMapping
     public ApiResponse<CartResponse> clearCart(
             Authentication authentication,
             @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success("Cart cleared successfully",
-                cartService.clearCart(accountId(authentication), sessionToken));
+        return ApiResponse.success(cartService.clearCart(accountId(authentication), sessionToken));
     }
 
     @PostMapping("/merge")
     public ApiResponse<CartResponse> mergeGuestCart(
             Authentication authentication,
             @RequestHeader(CART_SESSION_HEADER) String sessionToken) {
-        return ApiResponse.success("Guest cart merged successfully",
-                cartService.mergeGuestCart(accountId(authentication), sessionToken));
+        return ApiResponse.success(cartService.mergeGuestCart(accountId(authentication), sessionToken));
     }
 
     private UUID accountId(Authentication authentication) {

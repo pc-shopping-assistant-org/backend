@@ -16,6 +16,10 @@ public class ProductFilterRequest {
     private String keyword;
     private UUID categoryId;
     private UUID brandId;
+
+    /** Only honored by the admin listing; the public listing always shows ACTIVE products. */
+    private com.ecm.catalog.entity.CatalogStatus status;
+
     private Long minPrice;
     private Long maxPrice;
     

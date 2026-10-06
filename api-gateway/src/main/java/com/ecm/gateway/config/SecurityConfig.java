@@ -1,5 +1,6 @@
 package com.ecm.gateway.config;
 
+import com.ecm.common.security.ApiResponseSecurityHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,7 +18,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/auth/**", "/.well-known/jwks.json",
+                                "/identity-service/auth/**", "/identity-service/.well-known/jwks.json").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**",
                                 "/catalog-service/products/**", "/catalog-service/categories/**", "/catalog-service/brands/**",
                                 "/catalog-service/product-variants/**").permitAll()
@@ -25,7 +27,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/orders", "/order-service/orders").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))
                 .oauth2ResourceServer(resourceServer -> resourceServer
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE)
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
         return http.build();
     }

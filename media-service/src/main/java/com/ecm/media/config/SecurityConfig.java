@@ -1,5 +1,6 @@
 package com.ecm.media.config;
 
+import com.ecm.common.security.ApiResponseSecurityHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,8 +19,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/files/**", "/actuator/health", "/actuator/info").permitAll()
-                        .anyRequest().hasRole("ADMIN"))
-                .oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
+                        .anyRequest().hasRole("EMPLOYEE"))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE)
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
         return http.build();
     }
 }

@@ -422,8 +422,8 @@ class AssistantService:
         """Read a canonical price from either a summary or detail payload.
 
         Product summaries expose ``minPrice`` while product details expose
-        prices on their variants.  The AI contract keeps one ``list_price``
-        field, so detail mapping uses the lowest available variant list price
+        prices on their variants (``price``).  The AI contract keeps one ``list_price``
+        field, so detail mapping uses the lowest available variant price
         without trusting any sale-price field.
         """
         for key in ("listPrice", "list_price", "minPrice", "min_price"):
@@ -438,7 +438,7 @@ class AssistantService:
             int(value)
             for variant in variants
             if isinstance(variant, dict)
-            for value in (variant.get("listPrice", variant.get("list_price")),)
+            for value in (variant.get("price", variant.get("listPrice", variant.get("list_price"))),)
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         ]
         return min(variant_prices) if variant_prices else None

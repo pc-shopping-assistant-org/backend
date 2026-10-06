@@ -9,9 +9,11 @@ import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
+import com.ecm.identity.mapper.AdminMapper;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.mapper.EmployeeMapper;
 import com.ecm.identity.repository.AccountRepository;
+import com.ecm.identity.repository.AdminRepository;
 import com.ecm.identity.repository.CustomerRepository;
 import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.repository.RoleRepository;
@@ -28,9 +30,11 @@ public class ProfileService {
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
     private final EmployeeRepository employeeRepository;
+    private final AdminRepository adminRepository;
     private final RoleRepository roleRepository;
     private final CustomerMapper customerMapper;
     private final EmployeeMapper employeeMapper;
+    private final AdminMapper adminMapper;
 
     @Transactional(readOnly = true)
     public UserSummaryResponse getProfile(UUID accountId) {
@@ -39,11 +43,13 @@ public class ProfileService {
         ensureActive(account);
         Role role = findRole(account);
 
-        // 2. Map the existing customer or employee profile
+        // 2. Map the existing customer, employee or admin profile
         return customerRepository.findById(accountId)
                 .map(customer -> customerMapper.toSummary(account, role, customer))
                 .or(() -> employeeRepository.findById(accountId)
                         .map(employee -> employeeMapper.toSummary(account, role, employee)))
+                .or(() -> adminRepository.findById(accountId)
+                        .map(admin -> adminMapper.toSummary(account, role, admin)))
                 .orElseThrow(() -> new ResourceNotFoundException("UserProfile", accountId));
     }
 

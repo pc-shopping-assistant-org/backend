@@ -19,7 +19,6 @@ public enum PromotionErrorCode implements ErrorCode {
         this.defaultMessage = defaultMessage;
     }
 
-    @Override public String getCode() { return name(); }
     @Override public String getDefaultMessage() { return defaultMessage; }
     @Override public HttpStatus getHttpStatus() { return httpStatus; }
 }

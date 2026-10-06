@@ -10,7 +10,8 @@ import java.util.UUID;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductSupplierId implements Serializable {
-    private UUID productId;
-    private UUID supplierId;
+public class VariantOptionId implements Serializable {
+
+    private UUID productVariantId;
+    private UUID optionId;
 }

@@ -31,54 +31,119 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CreateCategoryRequest request) {
-        String seoName = normalizeSeo(request.seoName(), request.name());
-        if (categoryRepository.existsByNameIgnoreCase(request.name().trim()) || categoryRepository.existsBySeoName(seoName)) {
-            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT);
-        }
+        // 1. Reject a name or SEO name already held by a non-deleted category
+        String name = request.name().trim();
+        String seoName = normalizeSeo(request.seoName(), name);
+        ensureNameAvailable(name, seoName);
+
+        // 2. The parent, when given, must be an ACTIVE category
         validateParent(request.parentId(), null);
-        Category category = Category.builder().name(request.name().trim()).seoName(seoName)
+
+        // 3. Persist the new category
+        Category category = Category.builder().name(name).seoName(seoName).description(normalizeDescription(request.description()))
                 .parentId(request.parentId()).status(CatalogStatus.ACTIVE).build();
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
     public CategoryResponse update(UUID id, UpdateCategoryDetailsRequest request) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", id));
-        if (category.getStatus() == CatalogStatus.DELETED) throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE);
-        String seoName = normalizeSeo(request.seoName(), request.name());
-        if ((!category.getName().equalsIgnoreCase(request.name().trim()) && categoryRepository.existsByNameIgnoreCase(request.name().trim()))
-                || (!category.getSeoName().equals(seoName) && categoryRepository.existsBySeoName(seoName))) {
-            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT);
-        }
-        validateParent(request.parentId(), id);
-        category.setName(request.name().trim()); category.setSeoName(seoName); category.setParentId(request.parentId());
-        category.setUpdatedAt(java.time.Instant.now());
+        Category category = applyDetails(id, request.name(), request.seoName(), request.description(), request.parentId());
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
     public CategoryResponse update(UUID id, UpdateCategoryRequest request) {
-        update(id, new UpdateCategoryDetailsRequest(request.name(), request.seoName(), request.parentId()));
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", id));
-        category.setStatus(request.status()); category.setUpdatedAt(java.time.Instant.now());
+        // 1. Soft delete has its own endpoint, which enforces the "no products / no children" rule
+        if (request.status() == CatalogStatus.DELETED) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Use DELETE to remove a category");
+        }
+
+        // 2. Apply the details and the requested status together
+        Category category = applyDetails(id, request.name(), request.seoName(), request.description(), request.parentId());
+        category.setStatus(request.status());
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
     public void delete(UUID id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", id));
-        if (categoryRepository.existsByParentId(id) || productRepository.existsByCategoryIdAndStatusNot(id, CatalogStatus.DELETED)) {
+        // 1. A category with live children or products cannot be removed
+        Category category = findLiveCategory(id);
+        if (categoryRepository.existsByParentIdAndStatusNot(id, CatalogStatus.DELETED)
+                || productRepository.existsByCategoryIdAndStatusNot(id, CatalogStatus.DELETED)) {
             throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Category has children or products");
         }
-        category.setStatus(CatalogStatus.DELETED); category.setUpdatedAt(java.time.Instant.now());
+
+        // 2. Soft delete so its name can be reused
+        category.setStatus(CatalogStatus.DELETED);
         categoryRepository.save(category);
     }
 
+    private Category applyDetails(UUID id, String rawName, String rawSeoName, String description, UUID parentId) {
+        // 1. Load the category being edited
+        Category category = findLiveCategory(id);
+
+        // 2. Name and SEO name may only collide with themselves
+        String name = rawName.trim();
+        String seoName = normalizeSeo(rawSeoName, name);
+        boolean nameChanged = !category.getName().equalsIgnoreCase(name);
+        boolean seoNameChanged = !category.getSeoName().equals(seoName);
+        if ((nameChanged && categoryRepository.existsByNameIgnoreCaseAndStatusNot(name, CatalogStatus.DELETED))
+                || (seoNameChanged && categoryRepository.existsBySeoNameAndStatusNot(seoName, CatalogStatus.DELETED))) {
+            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT);
+        }
+
+        // 3. Moving under a new parent must not create a cycle
+        validateParent(parentId, id);
+
+        category.setName(name);
+        category.setSeoName(seoName);
+        category.setDescription(normalizeDescription(description));
+        category.setParentId(parentId);
+        return category;
+    }
+
+    private Category findLiveCategory(UUID id) {
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", id));
+        if (category.getStatus() == CatalogStatus.DELETED) {
+            throw new ResourceNotFoundException("Category", id);
+        }
+        return category;
+    }
+
+    private void ensureNameAvailable(String name, String seoName) {
+        if (categoryRepository.existsByNameIgnoreCaseAndStatusNot(name, CatalogStatus.DELETED)
+                || categoryRepository.existsBySeoNameAndStatusNot(seoName, CatalogStatus.DELETED)) {
+            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT);
+        }
+    }
+
     private void validateParent(UUID parentId, UUID selfId) {
-        if (parentId == null) return;
+        if (parentId == null) {
+            return;
+        }
         if (parentId.equals(selfId) || categoryRepository.findByIdAndStatus(parentId, CatalogStatus.ACTIVE).isEmpty()) {
             throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Parent category must be ACTIVE and cannot be itself");
         }
+        if (selfId != null && isDescendant(parentId, selfId)) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Parent category cannot be a descendant of the category");
+        }
+    }
+
+    // Walks up from candidateId; true when selfId is one of its ancestors.
+    private boolean isDescendant(UUID candidateId, UUID selfId) {
+        Set<UUID> visited = new HashSet<>();
+        UUID current = candidateId;
+        while (current != null && visited.add(current)) {
+            if (current.equals(selfId)) {
+                return true;
+            }
+            current = categoryRepository.findById(current).map(Category::getParentId).orElse(null);
+        }
+        return false;
+    }
+
+    private String normalizeDescription(String description) {
+        return description == null || description.isBlank() ? null : description.trim();
     }
 
     private String normalizeSeo(String seoName, String name) {
@@ -111,6 +176,12 @@ public class CategoryService {
 
         // 4. Return root categories with nested children
         return roots;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategoriesForAdmin() {
+        // 1. Admin listing includes INACTIVE categories, never DELETED ones
+        return categoryMapper.toResponseList(categoryRepository.findByStatusNot(CatalogStatus.DELETED));
     }
 
     @Transactional(readOnly = true)

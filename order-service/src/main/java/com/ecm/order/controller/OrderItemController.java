@@ -21,15 +21,12 @@ public class OrderItemController {
 
     @GetMapping("/{id}")
     public ApiResponse<OrderItemDetailResponse> getOrderItem(@PathVariable UUID id, Authentication authentication) {
-        return ApiResponse.success("Get order item successfully", orderItemService.getOwnedOrderItem(id, authentication));
+        return ApiResponse.success(orderItemService.getOwnedOrderItem(id, authentication));
     }
 
+    // Restricted to ROLE_EMPLOYEE by SecurityConfig.
     @GetMapping("/variants/{variantId}/exists")
-    public ApiResponse<Boolean> hasOrderHistory(@PathVariable UUID variantId,
-            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
-        if (jwt == null || !jwt.getClaims().containsKey("roles") || !jwt.getClaimAsStringList("roles").contains("ROLE_ADMIN")) {
-            throw new org.springframework.security.access.AccessDeniedException("Admin role required");
-        }
-        return ApiResponse.success("Order history checked", orderItemRepository.existsByProductVariantId(variantId));
+    public ApiResponse<Boolean> hasOrderHistory(@PathVariable UUID variantId) {
+        return ApiResponse.success(orderItemRepository.existsByProductVariantId(variantId));
     }
 }

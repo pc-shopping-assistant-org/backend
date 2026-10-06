@@ -1,82 +1,60 @@
 package com.ecm.common.response;
 
-import com.ecm.common.tracing.TraceSupport;
+import com.ecm.common.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.Instant;
+import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+/**
+ * Top-level response envelope shared by every service. {@code message} is always a static,
+ * machine-readable key (never request-specific text); details belong in {@code errors}.
+ */
 public class ApiResponse<T> {
 
-    private final boolean success;
-    private final String code;
-    private final String message;
-    private final T data;
-    private final Instant timestamp;
-    private final String traceId;
+    public static final String SUCCESS_MESSAGE = "SUCCESS";
 
-    private ApiResponse(boolean success, String code, String message, T data) {
-        this(success, code, message, data, Instant.now(), success ? null : TraceSupport.currentTraceId());
-    }
+    private final T data;
+    private final String message;
+    private final List<ErrorDetail> errors;
 
     // Every controller response is wrapped in this envelope, so a Feign client decoding
     // another service's response needs Jackson to be able to reconstruct it — without this
     // creator, deserialization fails with "no Creators, like default constructor, exist".
     @JsonCreator
     private ApiResponse(
-            @JsonProperty("success") boolean success,
-            @JsonProperty("code") String code,
-            @JsonProperty("message") String message,
             @JsonProperty("data") T data,
-            @JsonProperty("timestamp") Instant timestamp,
-            @JsonProperty("traceId") String traceId) {
-        this.success = success;
-        this.code = code;
-        this.message = message;
+            @JsonProperty("message") String message,
+            @JsonProperty("errors") List<ErrorDetail> errors) {
         this.data = data;
-        this.timestamp = timestamp;
-        this.traceId = traceId;
+        this.message = message;
+        this.errors = errors == null ? List.of() : List.copyOf(errors);
     }
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(true, "SUCCESS", "Success", data);
+        return new ApiResponse<>(data, SUCCESS_MESSAGE, List.of());
     }
 
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(true, "SUCCESS", message, data);
+    public static <T> ApiResponse<T> error(ErrorCode errorCode, List<ErrorDetail> errors) {
+        return new ApiResponse<>(null, errorCode.name(), errors);
     }
 
-    public static <T> ApiResponse<T> error(String code, String message) {
-        return new ApiResponse<>(false, code, message, null);
-    }
-
-    public static <T> ApiResponse<T> error(String code, String message, T data) {
-        return new ApiResponse<>(false, code, message, data);
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
+    public static <T> ApiResponse<T> error(ErrorCode errorCode, String detail) {
+        return error(errorCode, List.of(new ErrorDetail(null, detail)));
     }
 
     public T getData() {
         return data;
     }
 
-    public Instant getTimestamp() {
-        return timestamp;
+    public String getMessage() {
+        return message;
     }
 
-    public String getTraceId() {
-        return traceId;
+    public List<ErrorDetail> getErrors() {
+        return errors;
+    }
+
+    public record ErrorDetail(String field, String message) {
     }
 }

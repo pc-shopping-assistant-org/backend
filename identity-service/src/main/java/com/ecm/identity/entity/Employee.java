@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -52,20 +51,10 @@ public class Employee {
     @Column(name = "gender", nullable = false, length = 10)
     private Gender gender;
 
-    @Column(name = "salary", nullable = false)
-    private Long salary;
-
     @Column(name = "birthday")
     private LocalDate birthday;
-
-    @Column(name = "joined_at", nullable = false)
-    private LocalDate joinedAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }

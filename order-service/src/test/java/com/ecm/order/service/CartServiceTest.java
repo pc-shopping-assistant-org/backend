@@ -42,9 +42,8 @@ class CartServiceTest {
                 "SKU-1", "Model", "ACTIVE", null, null, List.of());
         when(cartRepository.lockActiveBySessionToken("guest-session", CartStatus.ACTIVE)).thenReturn(Optional.empty());
         when(cartRepository.saveAndFlush(any(Cart.class))).thenReturn(cart);
-        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok", variant));
-        when(catalogServiceClient.getCartVariantDetails(List.of(variantId))).thenReturn(ApiResponse.success("ok",
-                List.of(new CartVariantDetailsResponse(variantId, productId, "RAM", "SKU-1", "Model", 125L, 8, "ACTIVE", "/image.jpg"))));
+        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(variant));
+        when(catalogServiceClient.getCartVariantDetails(List.of(variantId))).thenReturn(ApiResponse.success(List.of(new CartVariantDetailsResponse(variantId, productId, "RAM", "SKU-1", "Model", 125L, 8, "ACTIVE", "/image.jpg"))));
         when(cartItemRepository.findByCartIdAndVariantId(cartId, variantId)).thenReturn(Optional.empty());
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(CartItem.builder()

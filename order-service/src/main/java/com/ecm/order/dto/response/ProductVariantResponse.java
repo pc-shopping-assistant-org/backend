@@ -6,7 +6,7 @@ import java.util.UUID;
 public record ProductVariantResponse(
         UUID id,
         UUID productId,
-        Long listPrice,
+        Long price,
         Integer quantity,
         String sku,
         String model,

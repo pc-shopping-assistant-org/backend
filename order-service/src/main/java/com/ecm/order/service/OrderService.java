@@ -269,7 +269,7 @@ public class OrderService {
                     authentication).getToken().getTokenValue();
             var response = promotionServiceClient.apply(new ApplyDiscountRequest(request.discountCode(), subtotal,
                     lines, request.idempotencyKey()), bearer);
-            if (response == null || !response.isSuccess() || response.getData() == null) {
+            if (response == null || response.getData() == null) {
                 throw new com.ecm.common.exception.ExternalServiceException("promotion-service", "Invalid discount response");
             }
             DiscountApplyResponse result = response.getData();
@@ -354,7 +354,7 @@ public class OrderService {
             items.add(OrderItem.builder()
                     .productVariantId(cartItem.getVariantId())
                     .quantity(cartItem.getQuantity())
-                    .unitPrice(variant.listPrice())
+                    .unitPrice(variant.price())
                     .itemDiscount(0L)
                     .status(OrderItemStatus.ACTIVE)
                     .build());

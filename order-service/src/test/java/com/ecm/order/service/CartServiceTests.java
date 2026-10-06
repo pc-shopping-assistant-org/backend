@@ -49,7 +49,7 @@ class CartServiceTests {
                 5, "sku-1", "model-1", "ACTIVE", null, null, java.util.List.of());
         when(cartRepository.lockActiveBySessionToken("guest-session", CartStatus.ACTIVE)).thenReturn(Optional.empty());
         when(cartRepository.saveAndFlush(any(Cart.class))).thenReturn(cart);
-        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok", variant));
+        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(variant));
 
         when(cartItemRepository.findByCartIdAndVariantId(cartId, variantId)).thenReturn(Optional.empty());
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(invocation -> invocation.getArgument(0));

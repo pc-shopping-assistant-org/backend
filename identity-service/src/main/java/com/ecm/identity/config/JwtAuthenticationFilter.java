@@ -1,6 +1,6 @@
 package com.ecm.identity.config;
 
-import com.ecm.identity.service.TokenBlacklistService;
+import com.ecm.identity.service.TokenRevocationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -26,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider tokenProvider;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final TokenRevocationService tokenRevocationService;
 
     @Override
     protected void doFilterInternal(
@@ -35,8 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            if (StringUtils.hasText(jwt) && !tokenBlacklistService.isBlacklisted(jwt)
-                    && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)
+                    && !isRevoked(jwt)) {
                 UserPrincipal userPrincipal = tokenProvider.getUserPrincipal(jwt);
                 if (userPrincipal.isEnabled() && userPrincipal.isAccountNonLocked()) {
                     var authentication = new UsernamePasswordAuthenticationToken(
@@ -50,6 +52,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isRevoked(String jwt) {
+        UUID accountId = tokenProvider.getAccountId(jwt);
+        Instant issuedAt = tokenProvider.getIssuedAt(jwt);
+        if (accountId == null || issuedAt == null) {
+            return false;
+        }
+        return tokenRevocationService.isRevoked(accountId, issuedAt);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

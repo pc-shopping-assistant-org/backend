@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.PublicKey;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -82,6 +83,16 @@ public class JwtTokenProvider {
                 .username(claims.getSubject()).role(role).status(status).authorities(authorities).build();
     }
 
+    public UUID getAccountId(String token) {
+        String accountIdStr = getClaims(token).get(CLAIM_ACCOUNT_ID, String.class);
+        return accountIdStr != null ? UUID.fromString(accountIdStr) : null;
+    }
+
+    public Instant getIssuedAt(String token) {
+        Date issuedAt = getClaims(token).getIssuedAt();
+        return issuedAt != null ? issuedAt.toInstant() : null;
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(keyMaterial.publicKey()).build().parseSignedClaims(token);
@@ -96,13 +107,5 @@ public class JwtTokenProvider {
 
     private Claims getClaims(String token) {
         return Jwts.parser().verifyWith(keyMaterial.publicKey()).build().parseSignedClaims(token).getPayload();
-    }
-
-    public long getExpirationSeconds(String token) {
-        Claims claims = getClaims(token);
-        Date expiration = claims.getExpiration();
-        Date now = new Date();
-        long remainingMs = expiration.getTime() - now.getTime();
-        return Math.max(remainingMs / 1000, 0);
     }
 }

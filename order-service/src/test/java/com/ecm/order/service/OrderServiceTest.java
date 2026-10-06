@@ -66,13 +66,11 @@ class OrderServiceTest {
         when(orderRepository.findByIdempotencyKey("key-1")).thenReturn(Optional.empty());
         when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(line));
-        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok", variant));
+        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(variant));
         when(shippingMethodRepository.findById(shippingId)).thenReturn(Optional.of(shipping));
-        when(catalogServiceClient.getProduct(variant.productId())).thenReturn(ApiResponse.success("ok",
-                new com.ecm.order.dto.response.ProductDetailResponse(variant.productId(), "product", List.of(), UUID.randomUUID())));
+        when(catalogServiceClient.getProduct(variant.productId())).thenReturn(ApiResponse.success(new com.ecm.order.dto.response.ProductDetailResponse(variant.productId(), "product", List.of(), UUID.randomUUID())));
         UUID voucherId = UUID.randomUUID(), itemDiscountId = UUID.randomUUID();
-        when(promotionServiceClient.apply(any(), anyString())).thenReturn(ApiResponse.success("ok",
-                new com.ecm.order.dto.response.DiscountApplyResponse(discounted ? voucherId : null, discounted ? 150L : 0L,
+        when(promotionServiceClient.apply(any(), anyString())).thenReturn(ApiResponse.success(new com.ecm.order.dto.response.DiscountApplyResponse(discounted ? voucherId : null, discounted ? 150L : 0L,
                         discounted ? voucherId : null, discounted ? 50L : 0L, discounted ? List.of(
                         new com.ecm.order.dto.response.ItemDiscountApplyResponse(variantId, itemDiscountId, 100L)) : List.of())));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
@@ -119,8 +117,7 @@ class OrderServiceTest {
         when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(CartItem.builder()
                 .cartId(cartId).variantId(variantId).quantity(1).build()));
-        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok",
-                new ProductVariantResponse(variantId, UUID.randomUUID(), 1L, 5, "sku", "model", "ACTIVE", null, null, List.of())));
+        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(new ProductVariantResponse(variantId, UUID.randomUUID(), 1L, 5, "sku", "model", "ACTIVE", null, null, List.of())));
         when(shippingMethodRepository.findById(shippingId)).thenReturn(Optional.empty());
         var auth = customerAuth(user);
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("key-2", shippingId,
@@ -169,7 +166,7 @@ class OrderServiceTest {
         when(orderRepository.findByIdempotencyKey("low-stock")).thenReturn(Optional.empty());
         when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(line));
-        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success("ok", variant));
+        when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(variant));
         var auth = customerAuth(user);
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("low-stock",

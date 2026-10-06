@@ -15,10 +15,6 @@ public enum MediaErrorCode implements ErrorCode {
         this.defaultMessage = defaultMessage;
     }
 
-    @Override
-    public String getCode() {
-        return name();
-    }
 
     @Override
     public String getDefaultMessage() {
