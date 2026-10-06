@@ -67,7 +67,8 @@ class EmployeeServiceTest {
         JwtProperties jwtProperties = new JwtProperties();
         jwtProperties.setRefreshTokenExpirationMs(REFRESH_TTL_MS);
         service = new EmployeeService(accountRepository, employeeRepository, roleRepository, passwordEncoder,
-                new EmployeeMapperImpl(), avatarResolver, tokenRevocationService, jwtProperties);
+                new EmployeeMapperImpl(), avatarResolver,
+                new AccountLocker(accountRepository, tokenRevocationService, jwtProperties));
         account = Account.builder().id(ACCOUNT_ID).email("old@shop.vn").phone("0911111111").roleId(ROLE_ID)
                 .status(AccountStatus.ACTIVE).build();
         employee = Employee.builder().accountId(ACCOUNT_ID).firstName("An").lastName("Nguyen").gender(Gender.MALE).build();

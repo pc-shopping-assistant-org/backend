@@ -3,10 +3,8 @@ package com.ecm.identity.service;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.DuplicateResourceException;
-import com.ecm.common.exception.InvalidStateException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.response.PageResponse;
-import com.ecm.identity.config.JwtProperties;
 import com.ecm.identity.dto.request.CreateEmployeeRequest;
 import com.ecm.identity.dto.request.UpdateEmployeeRequest;
 import com.ecm.identity.dto.response.EmployeeResponse;
@@ -28,8 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -52,8 +48,7 @@ public class EmployeeService {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeMapper employeeMapper;
     private final AvatarResolver avatarResolver;
-    private final TokenRevocationService tokenRevocationService;
-    private final JwtProperties jwtProperties;
+    private final AccountLocker accountLocker;
 
     @Transactional
     public EmployeeResponse create(CreateEmployeeRequest request) {
@@ -158,15 +153,9 @@ public class EmployeeService {
         }
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId));
-        if (account.getStatus() == AccountStatus.LOCKED) {
-            throw new InvalidStateException(RESOURCE_EMPLOYEE, accountId, account.getStatus().name(), "lock");
-        }
 
-        // 2. Lock it, then cut off tokens already issued; a Redis failure rolls the lock back
-        account.setStatus(AccountStatus.LOCKED);
-        accountRepository.save(account);
-        tokenRevocationService.revokeBefore(accountId, Instant.now().plusSeconds(1),
-                Duration.ofMillis(jwtProperties.getRefreshTokenExpirationMs()));
+        // 2. Lock it and cut off the tokens already issued
+        accountLocker.lock(account, RESOURCE_EMPLOYEE);
 
         // 3. Answer with the stored row
         return detail(accountId);
