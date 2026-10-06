@@ -97,6 +97,20 @@ services:
       - ./docker/grafana/provisioning/pcshop-dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/pcshop-dashboards.yaml:ro
       - ./docker/grafana/dashboards:/var/lib/pcshop-dashboards:ro
 
+  ai-service:
+    profiles: [ai]
+    build: ./ai-service
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      AI_BACKEND_API_URL: ${AI_BACKEND_API_URL:-http://host.docker.internal:8082}
+      AI_PROVIDER: ${AI_PROVIDER:-fallback}
+      AI_OPENAI_API_KEY: ${AI_OPENAI_API_KEY:-}
+      AI_GEMINI_API_KEY: ${AI_GEMINI_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 volumes:
   pcshop-postgres-data:
   pcshop-rabbitmq-data:
