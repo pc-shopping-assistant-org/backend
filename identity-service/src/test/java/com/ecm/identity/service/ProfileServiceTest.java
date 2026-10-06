@@ -51,7 +51,7 @@ class ProfileServiceTest {
         account = Account.builder().id(ACCOUNT_ID).email("u@example.com").phone("0912345678")
                 .roleId(ROLE_ID).status(AccountStatus.ACTIVE).build();
         customer = Customer.builder().accountId(ACCOUNT_ID).firstName("An").lastName("Test").build();
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
+        org.mockito.Mockito.lenient().when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
     }
 
     @Test
@@ -103,5 +103,25 @@ class ProfileServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> profileService.getProfile(ACCOUNT_ID));
 
         assertEquals(IdentityErrorCode.ACCOUNT_INACTIVE, ex.getErrorCode());
+    }
+
+    @Test
+    void customersAreFoundByATrimmedNameAndTheListIsBounded() {
+        java.util.UUID found = java.util.UUID.randomUUID();
+        when(customerRepository.findAccountIdsByName(org.mockito.ArgumentMatchers.eq("an"), any())).thenReturn(java.util.List.of(found));
+
+        assertEquals(java.util.List.of(found), profileService.findCustomerIdsByName("  an "));
+
+        org.mockito.ArgumentCaptor<org.springframework.data.domain.Pageable> pageable = org.mockito.ArgumentCaptor.forClass(org.springframework.data.domain.Pageable.class);
+        verify(customerRepository).findAccountIdsByName(org.mockito.ArgumentMatchers.eq("an"), pageable.capture());
+        assertEquals(200, pageable.getValue().getPageSize());
+    }
+
+    @Test
+    void aBlankNameFindsNobodyWithoutAQuery() {
+        assertEquals(java.util.List.of(), profileService.findCustomerIdsByName("   "));
+        assertEquals(java.util.List.of(), profileService.findCustomerIdsByName(null));
+
+        verify(customerRepository, never()).findAccountIdsByName(any(), any());
     }
 }

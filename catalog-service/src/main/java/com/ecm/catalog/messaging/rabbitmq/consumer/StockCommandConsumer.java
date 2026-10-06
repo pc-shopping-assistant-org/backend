@@ -1,6 +1,7 @@
 package com.ecm.catalog.messaging.rabbitmq.consumer;
 
 import com.ecm.catalog.messaging.InboxGuard;
+import com.ecm.catalog.messaging.event.StockReleasedEvent;
 import com.ecm.catalog.messaging.event.StockReserveFailedEvent;
 import com.ecm.catalog.messaging.event.StockReservedEvent;
 import com.ecm.catalog.messaging.kafka.producer.StockEventProducer;
@@ -55,6 +56,8 @@ public class StockCommandConsumer {
         if (inboxGuard.alreadyProcessed(command.commandId(), CONSUMER_NAME)) {
             return;
         }
-        stockReservationService.release(command);
+        if (stockReservationService.release(command)) {
+            stockEventProducer.publishStockReleased(new StockReleasedEvent(UUID.randomUUID(), command.orderId()));
+        }
     }
 }

@@ -35,6 +35,7 @@ class SagaConsumersTest {
 
     private static final UUID ORDER_ID = UUID.randomUUID();
     private static final UUID EVENT_ID = UUID.randomUUID();
+    private static final UUID CUSTOMER = UUID.randomUUID();
     private static final UUID PAYMENT_METHOD = UUID.randomUUID();
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -60,7 +61,7 @@ class SagaConsumersTest {
     }
 
     private Order order(OrderStatus status) {
-        Order order = Order.builder().id(ORDER_ID).status(status).paymentMethodId(PAYMENT_METHOD).totalAmount(777L).build();
+        Order order = Order.builder().id(ORDER_ID).customerId(CUSTOMER).status(status).paymentMethodId(PAYMENT_METHOD).totalAmount(777L).build();
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
         when(orderRepository.findByIdForUpdate(ORDER_ID)).thenReturn(Optional.of(order));
         when(statusService.transition(any(), any(), any(), any())).thenReturn(order);
@@ -80,7 +81,7 @@ class SagaConsumersTest {
 
         stockConsumer.onStockReserved(json(new StockReservedEvent(EVENT_ID, ORDER_ID)));
 
-        verify(paymentClient).create(new CreatePaymentRequest(ORDER_ID, PAYMENT_METHOD, 777L, ORDER_ID.toString()));
+        verify(paymentClient).create(new CreatePaymentRequest(ORDER_ID, CUSTOMER, PAYMENT_METHOD, 777L, ORDER_ID.toString()));
     }
 
     @Test

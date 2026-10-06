@@ -41,7 +41,9 @@ public class StockEventConsumer {
         if (inboxGuard.alreadyProcessed(event.eventId(), CONSUMER_NAME)) {
             return;
         }
-        Order order = orderRepository.findById(event.orderId())
+        // The order stays locked until this transaction ends, so a cancel waits until the payment below exists. Its
+        // order.cancelled event then finds that payment and cancels it, instead of missing a payment created too late.
+        Order order = orderRepository.findByIdForUpdate(event.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order", event.orderId()));
 
         // 1. An order cancelled meanwhile already queued the release of this stock, and needs no payment
@@ -51,7 +53,7 @@ public class StockEventConsumer {
 
         // 2. Start the payment of the order. The key is the order, so a redelivery cannot create a second payment.
         paymentServiceClient.create(new CreatePaymentRequest(
-                order.getId(), order.getPaymentMethodId(), order.getTotalAmount(), order.getId().toString()));
+                order.getId(), order.getCustomerId(), order.getPaymentMethodId(), order.getTotalAmount(), order.getId().toString()));
     }
 
     @KafkaListener(topics = KafkaTopics.STOCK_RESERVE_FAILED)

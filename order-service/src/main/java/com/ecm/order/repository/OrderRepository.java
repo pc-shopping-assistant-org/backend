@@ -52,6 +52,16 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             Pageable pageable
     );
 
+    /** The invoices: completed orders whose invoice number or recipient name contains the keyword, delivered within the period. */
+    @Query("SELECT o FROM Order o WHERE o.status = com.ecm.order.entity.OrderStatus.COMPLETED " +
+            "AND o.deliveredAt >= :deliveredFrom AND o.deliveredAt < :deliveredTo " +
+            "AND (LOWER(o.invoiceNumber) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(o.recipientName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Order> searchInvoices(@Param("keyword") String keyword, // never null: an untyped null breaks LOWER() on PostgreSQL; "" matches everything
+                               @Param("deliveredFrom") Instant deliveredFrom,
+                               @Param("deliveredTo") Instant deliveredTo,
+                               Pageable pageable);
+
     @Query("SELECT o FROM Order o WHERE (:status IS NULL OR o.status = :status) " +
             "AND (:customerId IS NULL OR o.customerId = :customerId) " +
             "AND o.createdAt >= :createdFrom " +

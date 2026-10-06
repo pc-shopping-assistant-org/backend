@@ -1,4 +1,4 @@
-package com.ecm.catalog.entity;
+package com.ecm.payment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,22 +14,24 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Marks that the stock of an order is reserved, until the order releases it. */
+/** Dedup record for at-least-once Kafka delivery. */
 @Entity
-@Table(name = "stock_reservations")
+@Table(name = "inbox_events")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StockReservation {
+public class InboxEvent {
 
-    /** ref -> Order Service (orders.id), no cross-DB FK. */
     @Id
-    @Column(name = "order_id", nullable = false)
-    private UUID orderId;
+    @Column(name = "event_id", nullable = false)
+    private UUID eventId;
+
+    @Column(name = "consumer_name", nullable = false, length = 100)
+    private String consumerName;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    @Column(name = "processed_at", nullable = false, updatable = false)
+    private Instant processedAt;
 }

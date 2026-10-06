@@ -1,6 +1,7 @@
 package com.ecm.payment.controller;
 
 import com.ecm.common.response.ApiResponse;
+import com.ecm.payment.dto.response.AdminPaymentMethodResponse;
 import com.ecm.payment.dto.response.PaymentMethodResponse;
 import com.ecm.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,11 @@ public class PaymentMethodController {
     @GetMapping
     public ApiResponse<List<PaymentMethodResponse>> getActiveMethods() {
         return ApiResponse.success(paymentService.getActivePaymentMethods());
+    }
+
+    /** Every method the shop has set up, with its status; employees only (see SecurityConfig). */
+    @GetMapping("/admin")
+    public ApiResponse<List<AdminPaymentMethodResponse>> getAllMethods() {
+        return ApiResponse.success(paymentService.getAllPaymentMethods());
     }
 }

@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, UUID> {
 
     List<PaymentMethod> findByStatusOrderByNameAsc(PaymentMethodStatus status);
+
+    List<PaymentMethod> findAllByOrderByNameAsc();
 }

@@ -35,6 +35,10 @@ public class Payment {
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 
+    /** ref -> Identity Service (customers.account_id), no cross-DB FK; copied from the order so payments can be read and searched by customer. */
+    @Column(name = "customer_id", nullable = false, updatable = false)
+    private UUID customerId;
+
     @Column(name = "payment_method_id", nullable = false)
     private UUID paymentMethodId;
 

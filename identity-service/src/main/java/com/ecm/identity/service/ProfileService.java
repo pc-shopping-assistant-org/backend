@@ -18,14 +18,19 @@ import com.ecm.identity.repository.CustomerRepository;
 import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
+
+    /** Enough for another service to filter by, without ever returning an unbounded list. */
+    private static final int MAX_CUSTOMER_IDS = 200;
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
@@ -99,5 +104,14 @@ public class ProfileService {
     private Role findRole(Account account) {
         return roleRepository.findById(account.getRoleId())
                 .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
+    }
+
+    /** The accounts of the customers whose name contains the text, for a service that holds only account ids and has to search by name. */
+    @Transactional(readOnly = true)
+    public List<UUID> findCustomerIdsByName(String name) {
+        if (name == null || name.isBlank()) {
+            return List.of();
+        }
+        return customerRepository.findAccountIdsByName(name.trim(), PageRequest.of(0, MAX_CUSTOMER_IDS));
     }
 }

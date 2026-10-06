@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/profile")
@@ -24,6 +28,12 @@ public class ProfileController {
     @GetMapping
     public ApiResponse<UserSummaryResponse> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success(profileService.getProfile(principal.getAccountId()));
+    }
+
+    /** For the other services, on behalf of an employee searching by customer name. */
+    @GetMapping("/admin/customer-ids")
+    public ApiResponse<List<UUID>> findCustomerIds(@RequestParam String name) {
+        return ApiResponse.success(profileService.findCustomerIdsByName(name));
     }
 
     @PutMapping

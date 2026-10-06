@@ -2,6 +2,8 @@ package com.ecm.order.mapper;
 
 import com.ecm.order.dto.response.AdminOrderDetailResponse;
 import com.ecm.order.dto.response.AdminOrderSummaryResponse;
+import com.ecm.order.dto.response.InvoiceDetailResponse;
+import com.ecm.order.dto.response.InvoiceSummaryResponse;
 import com.ecm.order.dto.response.OrderDetailResponse;
 import com.ecm.order.dto.response.OrderItemResponse;
 import com.ecm.order.dto.response.OrderStatusResponse;
@@ -26,6 +28,13 @@ public interface OrderMapper {
     OrderSummaryResponse toSummary(Order order, int itemCount, String firstProductName);
 
     AdminOrderSummaryResponse toAdminSummary(Order order, int itemCount, String firstProductName);
+
+    @Mapping(target = "invoiceDate", source = "deliveredAt")
+    InvoiceSummaryResponse toInvoiceSummary(Order order);
+
+    @Mapping(target = "id", source = "order.id")
+    @Mapping(target = "invoiceDate", source = "order.deliveredAt")
+    InvoiceDetailResponse toInvoiceDetail(Order order, List<OrderItem> items);
 
     OrderStatusResponse toStatusResponse(Order order, String cancellationReason);
 

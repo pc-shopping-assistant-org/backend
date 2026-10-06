@@ -4,10 +4,13 @@ import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.response.PageResponse;
+import com.ecm.order.dto.request.AdminInvoiceSearchRequest;
 import com.ecm.order.dto.request.AdminOrderSearchRequest;
 import com.ecm.order.dto.response.AdminOrderDetailResponse;
 import com.ecm.order.dto.response.AdminOrderSummaryResponse;
 import com.ecm.order.dto.response.CursorPageResponse;
+import com.ecm.order.dto.response.InvoiceDetailResponse;
+import com.ecm.order.dto.response.InvoiceSummaryResponse;
 import com.ecm.order.dto.response.OrderDetailResponse;
 import com.ecm.order.dto.response.OrderStatusResponse;
 import com.ecm.order.dto.response.OrderSummaryResponse;
@@ -144,6 +147,28 @@ public class OrderQueryService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
         return orderMapper.toAdminDetail(order, orderItemRepository.findByOrderId(orderId),
                 paymentLookup.forOrder(orderId, bearerToken), historyRepository.findByOrderIdOrderByCreatedAtAsc(orderId));
+    }
+
+    /** The invoices of the shop, the latest first (UC-ADM-INV-001, 002): completed orders, found by invoice number or customer name and filtered by invoice date. */
+    @Transactional(readOnly = true)
+    public PageResponse<InvoiceSummaryResponse> searchInvoices(AdminInvoiceSearchRequest filter, int page, int size) {
+        if (page < 0 || size < 1 || size > MAX_PAGE_SIZE
+                || filter.invoiceFrom() != null && filter.invoiceTo() != null && !filter.invoiceFrom().isBefore(filter.invoiceTo())) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+        String keyword = filter.keyword() == null ? "" : filter.keyword().trim();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "deliveredAt", "id"));
+        return PageResponse.of(orderRepository.searchInvoices(keyword,
+                filter.invoiceFrom() == null ? Instant.EPOCH : filter.invoiceFrom(),
+                filter.invoiceTo() == null ? NO_UPPER_BOUND : filter.invoiceTo(), pageable).map(orderMapper::toInvoiceSummary));
+    }
+
+    /** An invoice exists only for a completed order, so any other order is not found here. */
+    @Transactional(readOnly = true)
+    public InvoiceDetailResponse getInvoice(UUID orderId) {
+        Order order = orderRepository.findById(orderId).filter(candidate -> candidate.getStatus() == OrderStatus.COMPLETED)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice", orderId));
+        return orderMapper.toInvoiceDetail(order, orderItemRepository.findByOrderId(orderId));
     }
 
     private Order findOwnedOrder(UUID orderId, UUID customerId) {

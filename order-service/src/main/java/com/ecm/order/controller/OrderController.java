@@ -29,10 +29,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ecm.common.response.PageResponse;
 import com.ecm.order.dto.request.AdminCancelOrderRequest;
+import com.ecm.order.dto.request.AdminInvoiceSearchRequest;
 import com.ecm.order.dto.request.AdminOrderSearchRequest;
 import com.ecm.order.dto.request.UpdateOrderStatusRequest;
 import com.ecm.order.dto.response.AdminOrderDetailResponse;
 import com.ecm.order.dto.response.AdminOrderSummaryResponse;
+import com.ecm.order.dto.response.InvoiceDetailResponse;
+import com.ecm.order.dto.response.InvoiceSummaryResponse;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import java.util.UUID;
@@ -88,6 +91,18 @@ public class OrderController {
                                                                          @RequestParam(defaultValue = "0") int page,
                                                                          @RequestParam(defaultValue = "50") int size) {
         return ApiResponse.success(orderQueryService.searchOrders(filter, page, size));
+    }
+
+    @GetMapping("/admin/invoices")
+    public ApiResponse<PageResponse<InvoiceSummaryResponse>> getInvoices(@Valid @ModelAttribute AdminInvoiceSearchRequest filter,
+                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "50") int size) {
+        return ApiResponse.success(orderQueryService.searchInvoices(filter, page, size));
+    }
+
+    @GetMapping("/admin/invoices/{orderId}")
+    public ApiResponse<InvoiceDetailResponse> getInvoice(@PathVariable UUID orderId) {
+        return ApiResponse.success(orderQueryService.getInvoice(orderId));
     }
 
     @GetMapping("/admin/{orderId}")

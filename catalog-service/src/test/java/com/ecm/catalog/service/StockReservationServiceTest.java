@@ -5,7 +5,7 @@ import com.ecm.catalog.messaging.rabbitmq.command.ReleaseStockCommand;
 import com.ecm.catalog.messaging.rabbitmq.command.ReserveStockCommand;
 import com.ecm.catalog.messaging.rabbitmq.command.StockItem;
 import com.ecm.catalog.repository.ProductVariantRepository;
-import com.ecm.catalog.repository.StockReservationRepository;
+import com.ecm.catalog.repository.OutboxEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -29,7 +30,7 @@ class StockReservationServiceTest {
     private static final UUID VARIANT_B = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
 
     private ProductVariantRepository variantRepository;
-    private StockReservationRepository reservationRepository;
+    private OutboxEventRepository outboxRepository;
     private StockReservationService service;
     private ProductVariant a;
     private ProductVariant b;
@@ -37,8 +38,8 @@ class StockReservationServiceTest {
     @BeforeEach
     void setUp() {
         variantRepository = mock(ProductVariantRepository.class);
-        reservationRepository = mock(StockReservationRepository.class);
-        service = new StockReservationService(variantRepository, reservationRepository);
+        outboxRepository = mock(OutboxEventRepository.class);
+        service = new StockReservationService(variantRepository, outboxRepository);
         a = ProductVariant.builder().id(VARIANT_A).quantity(5).build();
         b = ProductVariant.builder().id(VARIANT_B).quantity(2).build();
         when(variantRepository.findAllByIdForUpdate(anyCollection())).thenReturn(List.of(a, b));
@@ -53,13 +54,13 @@ class StockReservationServiceTest {
     }
 
     @Test
-    void reservesEveryLineAndRecordsTheReservation() {
+    void reservesEveryLine() {
         Optional<String> failure = service.reserve(reserve(new StockItem(VARIANT_A, 3), new StockItem(VARIANT_B, 2)));
 
         assertTrue(failure.isEmpty());
         assertEquals(2, a.getQuantity());
         assertEquals(0, b.getQuantity());
-        verify(reservationRepository).save(any());
+        verify(variantRepository).saveAll(any());
     }
 
     @Test
@@ -69,7 +70,7 @@ class StockReservationServiceTest {
         assertTrue(failure.isPresent());
         assertEquals(5, a.getQuantity());
         assertEquals(2, b.getQuantity());
-        verify(reservationRepository, never()).save(any());
+        verify(variantRepository, never()).saveAll(any());
     }
 
     @Test
@@ -88,19 +89,19 @@ class StockReservationServiceTest {
 
     @Test
     void anOrderThatAlreadyHoldsAReservationIsNotReservedTwice() {
-        when(reservationRepository.existsById(ORDER_ID)).thenReturn(true);
+        when(outboxRepository.existsByAggregateIdAndEventType(ORDER_ID, "StockReservedEvent")).thenReturn(true);
 
         assertTrue(service.reserve(reserve(new StockItem(VARIANT_A, 3))).isEmpty());
 
         assertEquals(5, a.getQuantity());
-        verify(reservationRepository, never()).save(any());
+        verify(variantRepository, never()).findAllByIdForUpdate(anyCollection());
     }
 
     @Test
     void releaseGivesTheReservedStockBack() {
-        when(reservationRepository.deleteByOrderIdReturningCount(ORDER_ID)).thenReturn(1);
+        when(outboxRepository.existsByAggregateIdAndEventType(ORDER_ID, "StockReservedEvent")).thenReturn(true);
 
-        service.release(release(new StockItem(VARIANT_A, 3), new StockItem(VARIANT_B, 1)));
+        assertTrue(service.release(release(new StockItem(VARIANT_A, 3), new StockItem(VARIANT_B, 1))));
 
         assertEquals(8, a.getQuantity());
         assertEquals(3, b.getQuantity());
@@ -108,11 +109,19 @@ class StockReservationServiceTest {
 
     @Test
     void releaseForAnOrderThatReservedNothingChangesNothing() {
-        when(reservationRepository.deleteByOrderIdReturningCount(ORDER_ID)).thenReturn(0);
-
-        service.release(release(new StockItem(VARIANT_A, 3)));
+        assertFalse(service.release(release(new StockItem(VARIANT_A, 3))));
 
         assertEquals(5, a.getQuantity());
         verify(variantRepository, never()).findAllByIdForUpdate(anyCollection());
+    }
+
+    @Test
+    void anOrderIsNotReleasedTwice() {
+        when(outboxRepository.existsByAggregateIdAndEventType(ORDER_ID, "StockReservedEvent")).thenReturn(true);
+        when(outboxRepository.existsByAggregateIdAndEventType(ORDER_ID, "StockReleasedEvent")).thenReturn(true);
+
+        assertFalse(service.release(release(new StockItem(VARIANT_A, 3))));
+
+        assertEquals(5, a.getQuantity());
     }
 }

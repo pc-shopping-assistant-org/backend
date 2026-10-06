@@ -12,6 +12,10 @@ public final class CurrentUser {
     private CurrentUser() {
     }
 
+    public static boolean hasRole(Authentication authentication, String role) {
+        return authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_" + role));
+    }
+
     /** The token of the caller as an {@code Authorization} header value, to relay to a service called on their behalf. */
     public static String bearerToken(Authentication authentication) {
         return BEARER_PREFIX + ((JwtAuthenticationToken) authentication).getToken().getTokenValue();
