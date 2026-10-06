@@ -22,6 +22,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**", "/cart-variant-details").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.POST, "/products/*/reviews").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.PATCH, "/products/*/reviews/*").hasRole("CUSTOMER")
                         .anyRequest().hasRole("EMPLOYEE"))
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)

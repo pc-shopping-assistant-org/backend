@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -34,6 +35,12 @@ public class ProfileController {
     @GetMapping("/admin/customer-ids")
     public ApiResponse<List<UUID>> findCustomerIds(@RequestParam String name) {
         return ApiResponse.success(profileService.findCustomerIdsByName(name));
+    }
+
+    /** For catalog-service, to show reviewer names on the public review list; exposes names only. */
+    @GetMapping("/customer-names")
+    public ApiResponse<Map<UUID, String>> getCustomerNames(@RequestParam List<UUID> ids) {
+        return ApiResponse.success(profileService.getCustomerNames(ids));
     }
 
     @PutMapping

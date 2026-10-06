@@ -1,6 +1,7 @@
 package com.ecm.catalog.controller;
 
 import com.ecm.catalog.dto.request.CreateReviewRequest;
+import com.ecm.catalog.dto.request.UpdateReviewRequest;
 import com.ecm.catalog.dto.response.ReviewResponse;
 import com.ecm.catalog.service.ProductReviewService;
 import com.ecm.common.response.ApiResponse;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +36,14 @@ public class ProductReviewController {
                                               @Valid @RequestBody CreateReviewRequest request,
                                               Authentication authentication) {
         return ApiResponse.success(reviewService.createReview(productId, request, CurrentUser.accountId(authentication)));
+    }
+
+    @PatchMapping("/{reviewId}")
+    public ApiResponse<ReviewResponse> update(@PathVariable UUID productId, @PathVariable UUID reviewId,
+                                              @Valid @RequestBody UpdateReviewRequest request,
+                                              Authentication authentication) {
+        return ApiResponse.success(
+                reviewService.updateReview(productId, reviewId, request, CurrentUser.accountId(authentication)));
     }
 
     @GetMapping

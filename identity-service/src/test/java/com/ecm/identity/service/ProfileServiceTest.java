@@ -124,4 +124,19 @@ class ProfileServiceTest {
 
         verify(customerRepository, never()).findAccountIdsByName(any(), any());
     }
+
+    @Test
+    void returnsOnlyTheNamesOfTheRequestedCustomers() {
+        when(customerRepository.findAllById(java.util.List.of(ACCOUNT_ID))).thenReturn(java.util.List.of(customer));
+
+        assertEquals(java.util.Map.of(ACCOUNT_ID, "An Test"), profileService.getCustomerNames(java.util.List.of(ACCOUNT_ID)));
+    }
+
+    @Test
+    void refusesANameLookupLargerThanOnePage() {
+        java.util.List<UUID> tooMany = java.util.stream.Stream.generate(UUID::randomUUID).limit(51).toList();
+
+        assertThrows(BusinessException.class, () -> profileService.getCustomerNames(tooMany));
+        verify(customerRepository, never()).findAllById(any());
+    }
 }
