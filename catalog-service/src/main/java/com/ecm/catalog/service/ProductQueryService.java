@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
 import com.ecm.common.exception.BusinessException;
@@ -36,6 +37,7 @@ public class ProductQueryService {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final CategoryRepository categoryRepository;
     private final ProductAssembler assembler;
 
     @Transactional(readOnly = true)
@@ -90,15 +92,19 @@ public class ProductQueryService {
                 ? "%" + filter.getKeyword().trim().toLowerCase(Locale.ROOT) + "%"
                 : null;
 
-        // 2. Read one extra row to learn whether another page follows
+        // 2. A category filter also matches the products of its sub-categories
+        boolean anyCategory = filter.getCategoryId() == null;
+        List<UUID> categoryIds = anyCategory ? List.of() : categoryRepository.findSelfAndDescendantIds(filter.getCategoryId());
+
+        // 3. Read one extra row to learn whether another page follows
         List<Product> products = productRepository.search(productStatuses, variantStatuses, filter.getCursor(),
-                filter.getCategoryId(), filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
+                anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
                 PageRequest.of(0, pageSize + 1));
         boolean hasNext = products.size() > pageSize;
         List<Product> results = hasNext ? products.subList(0, pageSize) : products;
         String nextCursor = hasNext ? results.get(results.size() - 1).getId().toString() : null;
 
-        // 3. Assemble the summaries
+        // 4. Assemble the summaries
         List<ProductSummaryResponse> items = assembler.summaries(results, variantStatuses, onlyWithVariants);
         return CursorPageResponse.<ProductSummaryResponse>builder()
                 .items(items).nextCursor(nextCursor).hasNext(hasNext).size(items.size()).build();
