@@ -25,9 +25,6 @@ public enum OrderErrorCode implements ErrorCode {
     }
 
     @Override
-    public String getCode() { return name(); }
-
-    @Override
     public String getDefaultMessage() { return defaultMessage; }
 
     @Override

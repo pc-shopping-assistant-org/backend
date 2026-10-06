@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 public interface ErrorCode {
 
     /**
-     * Stable machine-readable code, e.g. "USER_ALREADY_EXISTS". Defaults to the enum constant
-     * name, which is sufficient for enum-based implementations.
+     * Stable machine-readable key, e.g. "USER_ALREADY_EXISTS"; the enum constant name is
+     * serialized as the response envelope's {@code message}.
      */
-    String getCode();
+    String name();
 
     String getDefaultMessage();
 

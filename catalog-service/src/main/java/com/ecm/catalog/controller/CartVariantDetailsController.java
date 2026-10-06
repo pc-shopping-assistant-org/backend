@@ -20,6 +20,6 @@ public class CartVariantDetailsController {
 
     @GetMapping
     public ApiResponse<List<CartVariantDetailsResponse>> getDetails(@RequestParam List<UUID> ids) {
-        return ApiResponse.success("Get cart variant details successfully", service.getDetails(ids));
+        return ApiResponse.success(service.getDetails(ids));
     }
 }

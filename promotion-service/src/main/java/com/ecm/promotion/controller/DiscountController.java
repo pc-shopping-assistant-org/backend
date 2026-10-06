@@ -27,30 +27,30 @@ public class DiscountController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<DiscountResponse> create(@Valid @RequestBody CreateDiscountRequest request, @AuthenticationPrincipal Jwt jwt) {
-        return ApiResponse.success("Discount created successfully", discountService.create(request, actorId(jwt)));
+        return ApiResponse.success(discountService.create(request, actorId(jwt)));
     }
 
     @GetMapping
     public ApiResponse<PageResponse<DiscountResponse>> list(
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success("Get discounts successfully", discountService.list(page, size));
+        return ApiResponse.success(discountService.list(page, size));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<DiscountResponse> update(@PathVariable UUID id, @Valid @RequestBody CreateDiscountRequest request,
                                                 @AuthenticationPrincipal Jwt jwt) {
-        return ApiResponse.success("Discount updated successfully", discountService.update(id, request, actorId(jwt)));
+        return ApiResponse.success(discountService.update(id, request, actorId(jwt)));
     }
 
     @GetMapping("/{id}")
     public ApiResponse<DiscountResponse> get(@PathVariable UUID id) {
-        return ApiResponse.success("Get discount successfully", discountService.get(id));
+        return ApiResponse.success(discountService.get(id));
     }
 
     @PatchMapping("/{id}/status")
     public ApiResponse<DiscountResponse> setStatus(
             @PathVariable UUID id, @RequestParam DiscountStatus status, @AuthenticationPrincipal Jwt jwt) {
-        return ApiResponse.success("Discount status updated successfully", discountService.setStatus(id, status, actorId(jwt)));
+        return ApiResponse.success(discountService.setStatus(id, status, actorId(jwt)));
     }
 
     @DeleteMapping("/{id}")
@@ -61,7 +61,7 @@ public class DiscountController {
 
     @PostMapping("/apply")
     public ApiResponse<ApplyDiscountResponse> apply(@Valid @RequestBody ApplyDiscountRequest request) {
-        return ApiResponse.success("Discounts evaluated successfully", discountService.apply(request));
+        return ApiResponse.success(discountService.apply(request));
     }
 
     private UUID actorId(Jwt jwt) {

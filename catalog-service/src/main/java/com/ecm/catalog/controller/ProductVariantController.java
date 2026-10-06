@@ -20,6 +20,6 @@ public class ProductVariantController {
 
     @GetMapping("/{id}")
     public ApiResponse<ProductVariantResponse> getById(@PathVariable UUID id) {
-        return ApiResponse.success("Get product variant successfully", productVariantService.getById(id));
+        return ApiResponse.success(productVariantService.getById(id));
     }
 }

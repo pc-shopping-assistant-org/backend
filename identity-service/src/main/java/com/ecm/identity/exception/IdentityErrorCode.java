@@ -30,10 +30,6 @@ public enum IdentityErrorCode implements ErrorCode {
         this.defaultMessage = defaultMessage;
     }
 
-    @Override
-    public String getCode() {
-        return name();
-    }
 
     @Override
     public String getDefaultMessage() {

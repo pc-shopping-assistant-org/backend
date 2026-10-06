@@ -8,13 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,28 +23,34 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
         ErrorCode errorCode = ex.getErrorCode();
         if (errorCode.getHttpStatus().is5xxServerError()) {
-            log.error("Business exception with server error status {}", errorCode.getCode(), ex);
+            log.error("Business exception with server error status {}", errorCode.name(), ex);
             TraceSupport.recordError(ex);
         }
         return ResponseEntity.status(errorCode.getHttpStatus())
-                .body(ApiResponse.error(errorCode.getCode(), ex.getMessage()));
+                .body(ApiResponse.error(errorCode, ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, String> fieldErrors = new LinkedHashMap<>();
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        }
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+        List<ApiResponse.ErrorDetail> details = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> new ApiResponse.ErrorDetail(fieldError.getField(), fieldError.getDefaultMessage()))
+                .toList();
         return ResponseEntity.status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())
-                .body(ApiResponse.error(CommonErrorCode.VALIDATION_ERROR.getCode(),
-                        CommonErrorCode.VALIDATION_ERROR.getDefaultMessage(), fieldErrors));
+                .body(ApiResponse.error(CommonErrorCode.VALIDATION_ERROR, details));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(ConstraintViolationException ex) {
+        List<ApiResponse.ErrorDetail> details = ex.getConstraintViolations().stream()
+                .map(violation -> new ApiResponse.ErrorDetail(
+                        lastPathNode(violation.getPropertyPath().toString()), violation.getMessage()))
+                .toList();
         return ResponseEntity.status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())
-                .body(ApiResponse.error(CommonErrorCode.VALIDATION_ERROR.getCode(), ex.getMessage()));
+                .body(ApiResponse.error(CommonErrorCode.VALIDATION_ERROR, details));
+    }
+
+    private static String lastPathNode(String path) {
+        return path.substring(path.lastIndexOf('.') + 1);
     }
 
     /*
@@ -59,13 +63,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity.status(CommonErrorCode.FORBIDDEN.getHttpStatus())
-                .body(ApiResponse.error(CommonErrorCode.FORBIDDEN.getCode(), CommonErrorCode.FORBIDDEN.getDefaultMessage()));
+                .body(ApiResponse.error(CommonErrorCode.FORBIDDEN, CommonErrorCode.FORBIDDEN.getDefaultMessage()));
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
         return ResponseEntity.status(CommonErrorCode.UNAUTHORIZED.getHttpStatus())
-                .body(ApiResponse.error(CommonErrorCode.UNAUTHORIZED.getCode(), CommonErrorCode.UNAUTHORIZED.getDefaultMessage()));
+                .body(ApiResponse.error(CommonErrorCode.UNAUTHORIZED, CommonErrorCode.UNAUTHORIZED.getDefaultMessage()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -73,6 +77,6 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception", ex);
         TraceSupport.recordError(ex);
         return ResponseEntity.status(CommonErrorCode.INTERNAL_ERROR.getHttpStatus())
-                .body(ApiResponse.error(CommonErrorCode.INTERNAL_ERROR.getCode(), CommonErrorCode.INTERNAL_ERROR.getDefaultMessage()));
+                .body(ApiResponse.error(CommonErrorCode.INTERNAL_ERROR, CommonErrorCode.INTERNAL_ERROR.getDefaultMessage()));
     }
 }

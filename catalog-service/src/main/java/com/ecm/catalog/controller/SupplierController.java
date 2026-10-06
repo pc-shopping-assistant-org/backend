@@ -19,22 +19,22 @@ public class SupplierController {
 
     @GetMapping
     public ApiResponse<List<SupplierResponse>> getAll() {
-        return ApiResponse.success("Get suppliers successfully", supplierService.getActiveSuppliers());
+        return ApiResponse.success(supplierService.getActiveSuppliers());
     }
 
     @PostMapping
     public ApiResponse<SupplierResponse> create(@Valid @RequestBody SupplierRequest request) {
-        return ApiResponse.success("Supplier created", supplierService.create(request));
+        return ApiResponse.success(supplierService.create(request));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<SupplierResponse> update(@PathVariable UUID id, @Valid @RequestBody UpdateSupplierRequest request) {
-        return ApiResponse.success("Supplier updated", supplierService.update(id, request));
+        return ApiResponse.success(supplierService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         supplierService.delete(id);
-        return ApiResponse.success("Supplier deleted", null);
+        return ApiResponse.success(null);
     }
 }

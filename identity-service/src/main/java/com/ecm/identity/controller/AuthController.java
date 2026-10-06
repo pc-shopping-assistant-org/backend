@@ -36,30 +36,30 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ApiResponse.success("Login successful", authService.login(request));
+        return ApiResponse.success(authService.login(request));
     }
 
     @PostMapping("/register")
     public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
-        return ApiResponse.success("OTP code sent to email", null);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/resend-otp")
     public ApiResponse<Void> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
         authService.resendOtp(request);
-        return ApiResponse.success("OTP code resent to email", null);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/verify-otp")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        return ApiResponse.success("Account created successfully", authService.verifyRegistrationOtp(request));
+        return ApiResponse.success(authService.verifyRegistrationOtp(request));
     }
 
     @PostMapping("/google")
     public ApiResponse<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
-        return ApiResponse.success("Login successful", authService.loginWithGoogle(request));
+        return ApiResponse.success(authService.loginWithGoogle(request));
     }
 
     @PostMapping("/logout")
@@ -72,23 +72,19 @@ public class AuthController {
             throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
         }
         boolean revoked = authService.logout(token);
-        LogoutResponse result = new LogoutResponse(revoked);
-        String message = revoked
-                ? "Logout successful; server token revoked"
-                : "Logout completed locally; server token revocation unconfirmed";
-        return ApiResponse.success(message, result);
+        return ApiResponse.success(new LogoutResponse(revoked));
     }
 
     @PostMapping("/forgot-password")
     public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request.email());
-        return ApiResponse.success("Password reset OTP sent to email", null);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/reset-password")
     public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request.email(), request.otp(), request.newPassword());
-        return ApiResponse.success("Password reset successful", null);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/change-password")
@@ -96,6 +92,6 @@ public class AuthController {
             @Valid @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
         authService.changePassword(principal.getAccountId(), request.currentPassword(), request.newPassword());
-        return ApiResponse.success("Password changed successfully", null);
+        return ApiResponse.success(null);
     }
 }

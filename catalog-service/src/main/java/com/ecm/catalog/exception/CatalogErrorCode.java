@@ -23,11 +23,6 @@ public enum CatalogErrorCode implements ErrorCode {
     }
 
     @Override
-    public String getCode() {
-        return this.name();
-    }
-
-    @Override
     public String getDefaultMessage() {
         return this.defaultMessage;
     }

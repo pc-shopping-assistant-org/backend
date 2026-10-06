@@ -23,14 +23,13 @@ public class ProfileController {
 
     @GetMapping
     public ApiResponse<UserSummaryResponse> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
-        return ApiResponse.success("Get profile successfully", profileService.getProfile(principal.getAccountId()));
+        return ApiResponse.success(profileService.getProfile(principal.getAccountId()));
     }
 
     @PutMapping
     public ApiResponse<UserSummaryResponse> updateProfile(
             @Valid @RequestBody UpdateProfileRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return ApiResponse.success("Profile updated successfully",
-                profileService.updateProfile(principal.getAccountId(), request));
+        return ApiResponse.success(profileService.updateProfile(principal.getAccountId(), request));
     }
 }

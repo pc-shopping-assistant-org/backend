@@ -21,7 +21,7 @@ public class OrderItemController {
 
     @GetMapping("/{id}")
     public ApiResponse<OrderItemDetailResponse> getOrderItem(@PathVariable UUID id, Authentication authentication) {
-        return ApiResponse.success("Get order item successfully", orderItemService.getOwnedOrderItem(id, authentication));
+        return ApiResponse.success(orderItemService.getOwnedOrderItem(id, authentication));
     }
 
     @GetMapping("/variants/{variantId}/exists")
@@ -30,6 +30,6 @@ public class OrderItemController {
         if (jwt == null || !jwt.getClaims().containsKey("roles") || !jwt.getClaimAsStringList("roles").contains("ROLE_ADMIN")) {
             throw new org.springframework.security.access.AccessDeniedException("Admin role required");
         }
-        return ApiResponse.success("Order history checked", orderItemRepository.existsByProductVariantId(variantId));
+        return ApiResponse.success(orderItemRepository.existsByProductVariantId(variantId));
     }
 }

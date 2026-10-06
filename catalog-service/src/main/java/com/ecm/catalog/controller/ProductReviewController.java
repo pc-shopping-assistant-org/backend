@@ -33,14 +33,13 @@ public class ProductReviewController {
     public ApiResponse<ReviewResponse> create(@PathVariable UUID productId,
                                               @Valid @RequestBody CreateReviewRequest request,
                                               Authentication authentication) {
-        return ApiResponse.success("Review created successfully",
-                reviewService.createReview(productId, request, CurrentUser.accountId(authentication)));
+        return ApiResponse.success(reviewService.createReview(productId, request, CurrentUser.accountId(authentication)));
     }
 
     @GetMapping
     public ApiResponse<PageResponse<ReviewResponse>> list(@PathVariable UUID productId,
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success("Get product reviews successfully", reviewService.getProductReviews(productId, page, size));
+        return ApiResponse.success(reviewService.getProductReviews(productId, page, size));
     }
 }

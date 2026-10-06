@@ -30,7 +30,7 @@ public class OrderController {
             @Valid @ModelAttribute AdminOrderSearchRequest filter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        return ApiResponse.success("Get orders successfully", orderService.getAdminOrders(filter, page, size));
+        return ApiResponse.success(orderService.getAdminOrders(filter, page, size));
     }
 
     @PatchMapping("/admin/{orderId}/status")
@@ -41,7 +41,7 @@ public class OrderController {
         if (authentication instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwt) {
             try { employeeId = UUID.fromString(jwt.getToken().getSubject()); } catch (IllegalArgumentException ignored) { }
         }
-        return ApiResponse.success("Order status updated", orderService.updateAdminOrderStatus(orderId, request.status(), employeeId));
+        return ApiResponse.success(orderService.updateAdminOrderStatus(orderId, request.status(), employeeId));
     }
 
     @GetMapping
@@ -50,8 +50,7 @@ public class OrderController {
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success("Get orders successfully",
-                orderService.getCustomerOrders(authentication, status, page, size));
+        return ApiResponse.success(orderService.getCustomerOrders(authentication, status, page, size));
     }
 
     @GetMapping("/search")
@@ -60,20 +59,19 @@ public class OrderController {
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success("Search orders successfully",
-                orderService.searchCustomerOrders(authentication, keyword, page, size));
+        return ApiResponse.success(orderService.searchCustomerOrders(authentication, keyword, page, size));
     }
 
     @GetMapping("/{orderId}")
     public ApiResponse<OrderResponse> getMyOrder(
             @PathVariable UUID orderId, Authentication authentication) {
-        return ApiResponse.success("Get order successfully", orderService.getCustomerOrder(orderId, authentication));
+        return ApiResponse.success(orderService.getCustomerOrder(orderId, authentication));
     }
 
     @PostMapping("/{orderId}/cancel")
     public ApiResponse<OrderResponse> cancelMyOrder(
             @PathVariable UUID orderId, Authentication authentication) {
-        return ApiResponse.success("Order cancelled successfully", orderService.cancelCustomerOrder(orderId, authentication));
+        return ApiResponse.success(orderService.cancelCustomerOrder(orderId, authentication));
     }
 
     @PostMapping
@@ -82,7 +80,6 @@ public class OrderController {
             @Valid @RequestBody CreateOrderRequest request,
             Authentication authentication,
             @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success("Order created successfully",
-                orderService.createOrder(request, authentication, sessionToken));
+        return ApiResponse.success(orderService.createOrder(request, authentication, sessionToken));
     }
 }

@@ -25,7 +25,7 @@ public class PaymentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PaymentResponse> create(@Valid @RequestBody CreatePaymentRequest request) {
-        return ApiResponse.success("Payment created successfully", paymentService.create(request));
+        return ApiResponse.success(paymentService.create(request));
     }
 
     /**
@@ -33,6 +33,6 @@ public class PaymentController {
      */
     @PostMapping("/{id}/webhook")
     public ApiResponse<PaymentResponse> webhook(@PathVariable UUID id, @Valid @RequestBody PaymentWebhookRequest request) {
-        return ApiResponse.success("Payment webhook processed successfully", paymentService.handleWebhook(id, request));
+        return ApiResponse.success(paymentService.handleWebhook(id, request));
     }
 }
