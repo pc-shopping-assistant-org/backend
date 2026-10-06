@@ -17,6 +17,10 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     @Query("SELECT a FROM Account a WHERE LOWER(a.email) = LOWER(:identifier) OR a.phone = :identifier")
     Optional<Account> findByLoginIdentifier(@Param("identifier") String identifier);
 
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, UUID id);
+
+    boolean existsByPhoneAndIdNot(String phone, UUID id);
+
     Optional<Account> findByEmailIgnoreCase(String email);
 
     Optional<Account> findByGoogleSubject(String googleSubject);

@@ -21,6 +21,7 @@ public enum IdentityErrorCode implements ErrorCode {
     PHONE_ALREADY_IN_USE(HttpStatus.CONFLICT, "Phone number is already in use by another account"),
     CUSTOMER_PROFILE_REQUIRED(HttpStatus.BAD_REQUEST, "Only customer profiles can be updated"),
     ADDRESS_NOT_OWNED(HttpStatus.NOT_FOUND, "Address does not belong to the customer"),
+    INVALID_AVATAR_FILE(HttpStatus.BAD_REQUEST, "Avatar file does not exist"),
     INCORRECT_PASSWORD(HttpStatus.BAD_REQUEST, "Current password is incorrect");
 
     private final HttpStatus httpStatus;
