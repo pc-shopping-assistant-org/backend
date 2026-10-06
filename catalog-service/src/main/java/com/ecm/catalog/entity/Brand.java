@@ -23,10 +23,10 @@ public class Brand {
     @Column(name = "id", insertable = false, updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "seo_name", nullable = false, unique = true)
+    @Column(name = "seo_name", nullable = false)
     private String seoName;
 
     @Column(name = "description")
@@ -42,7 +42,4 @@ public class Brand {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }

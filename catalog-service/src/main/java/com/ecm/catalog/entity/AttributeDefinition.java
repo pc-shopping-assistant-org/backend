@@ -53,10 +53,6 @@ public class AttributeDefinition {
     @Column(name = "comparable", nullable = false)
     private boolean comparable;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private CatalogStatus status;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

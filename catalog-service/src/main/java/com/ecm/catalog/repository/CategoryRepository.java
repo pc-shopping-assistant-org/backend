@@ -25,9 +25,12 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     boolean existsByIdAndStatus(UUID id, CatalogStatus status);
 
-    boolean existsBySeoName(String seoName);
+    @Query("SELECT c FROM Category c WHERE c.status <> :status ORDER BY c.name ASC")
+    List<Category> findByStatusNot(@Param("status") CatalogStatus status);
 
-    boolean existsByNameIgnoreCase(String name);
+    boolean existsBySeoNameAndStatusNot(String seoName, CatalogStatus status);
 
-    boolean existsByParentId(UUID parentId);
+    boolean existsByNameIgnoreCaseAndStatusNot(String name, CatalogStatus status);
+
+    boolean existsByParentIdAndStatusNot(UUID parentId, CatalogStatus status);
 }

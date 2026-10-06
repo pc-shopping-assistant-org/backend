@@ -49,6 +49,7 @@ public class ProductService {
     private final ProductSupplierRepository productSupplierRepository;
     private final SupplierRepository supplierRepository;
     private final OrderServiceClient orderServiceClient;
+    private final ProductSpecificationValidator specificationValidator;
 
     @Transactional
     public ProductDetailResponse createProduct(CreateProductRequest request, UUID employeeId) {
@@ -60,6 +61,7 @@ public class ProductService {
         Product product = productMapper.toEntity(request);
         product.setName(request.name().trim());
         product.setSeoName(seoName);
+        product.setSpecifications(specificationValidator.validate(request.categoryId(), request.specifications()));
         product.setStatus(CatalogStatus.ACTIVE);
         product.setCreatedBy(employeeId);
         product = productRepository.save(product);
@@ -88,7 +90,7 @@ public class ProductService {
         product.setSeoName(seoName);
         product.setBrandId(request.brandId());
         product.setCategoryId(request.categoryId());
-        product.setSpecifications(request.specifications());
+        product.setSpecifications(specificationValidator.validate(request.categoryId(), request.specifications()));
         product.setDescription(request.description());
         product.setStatus(request.status());
         product.setUpdatedBy(employeeId);

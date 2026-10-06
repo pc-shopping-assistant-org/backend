@@ -43,9 +43,17 @@ public class BrandController {
         return ApiResponse.success(null);
     }
 
+    @GetMapping("/admin")
+    public ApiResponse<List<BrandResponse>> getAllBrandsForAdmin() {
+        return ApiResponse.success(withImageUrls(brandService.getAllBrandsForAdmin()));
+    }
+
     @GetMapping
     public ApiResponse<List<BrandResponse>> getAllBrands() {
-        List<BrandResponse> response = brandService.getAllBrands();
+        return ApiResponse.success(withImageUrls(brandService.getAllBrands()));
+    }
+
+    private List<BrandResponse> withImageUrls(List<BrandResponse> response) {
         List<UUID> imageFileIds = response.stream().map(BrandResponse::getImageFileId)
                 .filter(id -> id != null).distinct().toList();
         if (!imageFileIds.isEmpty()) {
@@ -54,7 +62,7 @@ public class BrandController {
                     .collect(java.util.stream.Collectors.toMap(MediaFileResponse::id, MediaFileResponse::url));
             response.forEach(brand -> brand.setImageUrl(imageUrls.get(brand.getImageFileId())));
         }
-        return ApiResponse.success(response);
+        return response;
     }
 
     @GetMapping("/{id}")

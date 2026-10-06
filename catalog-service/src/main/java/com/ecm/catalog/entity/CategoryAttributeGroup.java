@@ -32,10 +32,6 @@ public class CategoryAttributeGroup {
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private CatalogStatus status;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

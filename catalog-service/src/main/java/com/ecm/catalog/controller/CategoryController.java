@@ -40,6 +40,11 @@ public class CategoryController {
         return ApiResponse.success(null);
     }
 
+    @GetMapping("/admin")
+    public ApiResponse<List<CategoryResponse>> getAllCategoriesForAdmin() {
+        return ApiResponse.success(categoryService.getAllCategoriesForAdmin());
+    }
+
     @GetMapping("/tree")
     public ApiResponse<List<CategoryResponse>> getCategoryTree() {
         List<CategoryResponse> response = categoryService.getCategoryTree();
