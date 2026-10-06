@@ -12,6 +12,7 @@ import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.dto.request.ResendOtpRequest;
 import com.ecm.identity.dto.request.ResetPasswordRequest;
 import com.ecm.identity.dto.request.VerifyOtpRequest;
+import com.ecm.identity.dto.request.VerifyPasswordChangeRequest;
 import com.ecm.identity.dto.response.AuthResponse;
 import com.ecm.identity.dto.response.LogoutResponse;
 import com.ecm.identity.exception.IdentityErrorCode;
@@ -92,6 +93,14 @@ public class AuthController {
             @Valid @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
         authService.changePassword(principal.getAccountId(), request.currentPassword(), request.newPassword());
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/verify-password-change")
+    public ApiResponse<Void> verifyPasswordChange(
+            @Valid @RequestBody VerifyPasswordChangeRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        authService.verifyPasswordChangeOtp(principal.getAccountId(), request.otp());
         return ApiResponse.success(null);
     }
 }

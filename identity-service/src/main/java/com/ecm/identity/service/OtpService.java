@@ -9,6 +9,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,8 +19,10 @@ public class OtpService {
     private static final int OTP_BOUND = 900_000;
     private static final Duration OTP_TTL = Duration.ofMinutes(5);
     private static final Duration REGISTRATION_DATA_TTL = Duration.ofMinutes(10);
+    private static final Duration PASSWORD_CHANGE_TTL = Duration.ofMinutes(10);
     private static final String OTP_KEY_PREFIX = "otp:";
     private static final String REG_DATA_KEY_PREFIX = "reg_data:";
+    private static final String PWD_CHANGE_KEY_PREFIX = "pwd_change:";
     private static final String OTP_CONSUME_SCRIPT =
             "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
 
@@ -66,11 +69,27 @@ public class OtpService {
         redisTemplate.delete(buildRegDataKey(email));
     }
 
+    public void savePendingPasswordChange(UUID accountId, String newPassword) {
+        redisTemplate.opsForValue().set(buildPwdChangeKey(accountId), newPassword, PASSWORD_CHANGE_TTL);
+    }
+
+    public String getPendingPasswordChange(UUID accountId) {
+        return redisTemplate.opsForValue().get(buildPwdChangeKey(accountId));
+    }
+
+    public void deletePendingPasswordChange(UUID accountId) {
+        redisTemplate.delete(buildPwdChangeKey(accountId));
+    }
+
     private String buildOtpKey(String email, String purpose) {
         return OTP_KEY_PREFIX + purpose.toUpperCase() + ":" + email.toLowerCase();
     }
 
     private String buildRegDataKey(String email) {
         return REG_DATA_KEY_PREFIX + email.toLowerCase();
+    }
+
+    private String buildPwdChangeKey(UUID accountId) {
+        return PWD_CHANGE_KEY_PREFIX + accountId;
     }
 }

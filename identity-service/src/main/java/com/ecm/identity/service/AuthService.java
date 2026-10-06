@@ -19,9 +19,11 @@ import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.CustomerAddress;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
+import com.ecm.identity.mapper.AdminMapper;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.mapper.EmployeeMapper;
 import com.ecm.identity.repository.AccountRepository;
+import com.ecm.identity.repository.AdminRepository;
 import com.ecm.identity.repository.CustomerAddressRepository;
 import com.ecm.identity.repository.CustomerRepository;
 import com.ecm.identity.repository.EmployeeRepository;
@@ -35,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -45,12 +49,14 @@ public class AuthService {
     private static final String ROLE_CUSTOMER = "ROLE_CUSTOMER";
     private static final String OTP_PURPOSE_REGISTRATION = "REGISTRATION";
     private static final String OTP_PURPOSE_PASSWORD_RESET = "PASSWORD_RESET";
+    private static final String OTP_PURPOSE_PASSWORD_CHANGE = "PASSWORD_CHANGE";
     private static final int MILLIS_IN_SECOND = 1000;
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
     private final CustomerAddressRepository customerAddressRepository;
     private final EmployeeRepository employeeRepository;
+    private final AdminRepository adminRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
@@ -59,7 +65,8 @@ public class AuthService {
     private final GoogleIdentityVerifier googleIdentityVerifier;
     private final CustomerMapper customerMapper;
     private final EmployeeMapper employeeMapper;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final AdminMapper adminMapper;
+    private final TokenRevocationService tokenRevocationService;
 
     public void register(RegisterRequest request) {
         // 1. Normalize identity fields so later lookups/comparisons are case/whitespace-stable
@@ -151,6 +158,8 @@ public class AuthService {
                 .map(customer -> customerMapper.toSummary(account, role, customer))
                 .or(() -> employeeRepository.findById(account.getId())
                         .map(employee -> employeeMapper.toSummary(account, role, employee)))
+                .or(() -> adminRepository.findById(account.getId())
+                        .map(admin -> adminMapper.toSummary(account, role, admin)))
                 .orElseThrow(() -> new ResourceNotFoundException("UserProfile", account.getId()));
     }
 
@@ -252,11 +261,18 @@ public class AuthService {
             throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
         }
 
-        // 2. Extract remaining validity period from the access token
-        long expirationSeconds = tokenProvider.getExpirationSeconds(accessToken);
+        // 2. Determine the account to revoke tokens for
+        UUID accountId = tokenProvider.getAccountId(accessToken);
+        if (accountId == null) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
 
-        // 3. Attempt server-side revocation without blocking client-side logout on Redis outage
-        return tokenBlacklistService.tryBlacklistToken(accessToken, expirationSeconds);
+        // 3. Revoke every token issued before this logout instant, for the refresh lifetime.
+        // The +1s margin covers the token being revoked itself, whose iat is truncated to the
+        // current second and would otherwise compare equal to the cutoff instead of before it.
+        tokenRevocationService.revokeBefore(accountId, Instant.now().plusSeconds(1),
+                Duration.ofMillis(jwtProperties.getRefreshTokenExpirationMs()));
+        return true;
     }
 
     public void forgotPassword(String email) {
@@ -285,20 +301,41 @@ public class AuthService {
         accountRepository.save(account);
     }
 
-    @Transactional
     public void changePassword(UUID accountId, String currentPassword, String newPassword) {
         // 1. Retrieve an active account
         Account account = accountRepository.findById(accountId)
                 .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
 
-        // 2. Verify the current password
+        // 2. Verify the current password before sending the confirmation OTP
         if (!passwordEncoder.matches(currentPassword, account.getPasswordHash())) {
             throw new BusinessException(IdentityErrorCode.INCORRECT_PASSWORD);
         }
 
-        // 3. Update to the new password
+        // 3. Cache the new password pending OTP verification, then email the OTP
+        otpService.savePendingPasswordChange(accountId, newPassword);
+        otpService.generateAndSendOtp(account.getEmail(), OTP_PURPOSE_PASSWORD_CHANGE);
+    }
+
+    @Transactional
+    public void verifyPasswordChangeOtp(UUID accountId, String otp) {
+        // 1. Confirm the OTP before consuming it and reading the pending password
+        Account account = accountRepository.findById(accountId)
+                .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
+        if (!otpService.verifyAndConsumeOtp(account.getEmail(), OTP_PURPOSE_PASSWORD_CHANGE, otp)) {
+            throw new BusinessException(IdentityErrorCode.INVALID_OTP);
+        }
+
+        // 2. Retrieve the pending password cached at step 3 of changePassword()
+        String newPassword = otpService.getPendingPasswordChange(accountId);
+        if (newPassword == null) {
+            throw new ExpiredException("Password change session", accountId);
+        }
+
+        // 3. Apply the new password and clear the consumed cache entry
         account.setPasswordHash(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
+        otpService.deletePendingPasswordChange(accountId);
     }
 }

@@ -23,13 +23,13 @@ import java.util.UUID;
  * DB-generated here.
  */
 @Entity
-@Table(name = "employees")
+@Table(name = "admins")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Employee {
+public class Admin {
 
     @Id
     @Column(name = "account_id", nullable = false)

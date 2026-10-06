@@ -31,7 +31,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/auth/register", "/auth/verify-otp",
                                 "/auth/resend-otp", "/auth/google", "/auth/forgot-password",
                                 "/auth/reset-password", "/.well-known/jwks.json").permitAll()
-                        .requestMatchers("/auth/logout", "/auth/change-password", "/profile/**").authenticated()
+                        .requestMatchers("/auth/logout", "/auth/change-password",
+                                "/auth/verify-password-change", "/profile/**").authenticated()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
