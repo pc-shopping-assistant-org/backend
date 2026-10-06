@@ -8,7 +8,7 @@ public record CartVariantDetailsResponse(
         String productName,
         String sku,
         String model,
-        Long listPrice,
+        Long price,
         Integer quantity,
         String status,
         String mainImageUrl

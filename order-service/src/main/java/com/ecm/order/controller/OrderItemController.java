@@ -24,12 +24,9 @@ public class OrderItemController {
         return ApiResponse.success(orderItemService.getOwnedOrderItem(id, authentication));
     }
 
+    // Restricted to ROLE_EMPLOYEE by SecurityConfig.
     @GetMapping("/variants/{variantId}/exists")
-    public ApiResponse<Boolean> hasOrderHistory(@PathVariable UUID variantId,
-            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
-        if (jwt == null || !jwt.getClaims().containsKey("roles") || !jwt.getClaimAsStringList("roles").contains("ROLE_ADMIN")) {
-            throw new org.springframework.security.access.AccessDeniedException("Admin role required");
-        }
+    public ApiResponse<Boolean> hasOrderHistory(@PathVariable UUID variantId) {
         return ApiResponse.success(orderItemRepository.existsByProductVariantId(variantId));
     }
 }

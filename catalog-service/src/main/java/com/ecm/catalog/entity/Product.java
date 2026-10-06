@@ -30,7 +30,7 @@ public class Product {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "seo_name", nullable = false, unique = true)
+    @Column(name = "seo_name", nullable = false)
     private String seoName;
 
     @Column(name = "brand_id")
@@ -57,7 +57,7 @@ public class Product {
     /**
      * ref -> Identity Service (employees.account_id), no cross-DB FK.
      */
-    @Column(name = "created_by")
+    @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
     @UpdateTimestamp

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,68 +16,38 @@ import java.util.UUID;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    boolean existsBySeoName(String seoName);
+    boolean existsBySeoNameAndStatusNot(String seoName, CatalogStatus status);
 
-    boolean existsByIdAndStatus(UUID id, CatalogStatus status);
-
-    boolean existsBySeoNameAndIdNot(String seoName, UUID id);
+    boolean existsBySeoNameAndIdNotAndStatusNot(String seoName, UUID id, CatalogStatus status);
 
     Optional<Product> findBySeoNameAndStatus(String seoName, CatalogStatus status);
 
-    @Query("SELECT p FROM Product p WHERE p.id = :id AND p.status = :status")
-    Optional<Product> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
+    Optional<Product> findByIdAndStatusIn(UUID id, Collection<CatalogStatus> statuses);
 
     /**
-     * Initial page for public catalog with filters.
-     * Returns products ordered by ID DESC for cursor pagination.
+     * Keyset page (newest first) of products whose status is one of {@code statuses}. A null cursor starts at the
+     * newest product. Price bounds match when at least one variant, with a status in {@code variantStatuses},
+     * falls inside them.
      */
     @Query("""
-            SELECT DISTINCT p FROM Product p
-            WHERE p.status = :status
+            SELECT p FROM Product p
+            WHERE p.status IN :statuses
+              AND (:cursor IS NULL OR p.id < :cursor)
               AND (:categoryId IS NULL OR p.categoryId = :categoryId)
               AND (:brandId IS NULL OR p.brandId = :brandId)
               AND (:keyword IS NULL OR LOWER(p.name) LIKE :keyword
                    OR LOWER(p.seoName) LIKE :keyword
-                   OR LOWER(COALESCE(p.description, '')) LIKE :keyword)
+                   OR LOWER(p.description) LIKE :keyword)
               AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR EXISTS (
                    SELECT v.id FROM ProductVariant v WHERE v.productId = p.id
-                     AND v.status = :status
-                     AND (:minPrice IS NULL OR v.listPrice >= :minPrice)
-                     AND (:maxPrice IS NULL OR v.listPrice <= :maxPrice)))
+                     AND v.status IN :variantStatuses
+                     AND (:minPrice IS NULL OR v.price >= :minPrice)
+                     AND (:maxPrice IS NULL OR v.price <= :maxPrice)))
             ORDER BY p.id DESC
             """)
-    List<Product> findInitial(
-            @Param("status") CatalogStatus status,
-            @Param("categoryId") UUID categoryId,
-            @Param("brandId") UUID brandId,
-            @Param("keyword") String keyword,
-            @Param("minPrice") Long minPrice,
-            @Param("maxPrice") Long maxPrice,
-            Pageable pageable
-    );
-
-    /**
-     * Cursor page for public catalog with filters.
-     * Continues from the given cursor UUID.
-     */
-    @Query("""
-            SELECT DISTINCT p FROM Product p
-            WHERE p.status = :status
-              AND p.id < :cursor
-              AND (:categoryId IS NULL OR p.categoryId = :categoryId)
-              AND (:brandId IS NULL OR p.brandId = :brandId)
-              AND (:keyword IS NULL OR LOWER(p.name) LIKE :keyword
-                   OR LOWER(p.seoName) LIKE :keyword
-                   OR LOWER(COALESCE(p.description, '')) LIKE :keyword)
-              AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR EXISTS (
-                   SELECT v.id FROM ProductVariant v WHERE v.productId = p.id
-                     AND v.status = :status
-                     AND (:minPrice IS NULL OR v.listPrice >= :minPrice)
-                     AND (:maxPrice IS NULL OR v.listPrice <= :maxPrice)))
-            ORDER BY p.id DESC
-            """)
-    List<Product> findAfterCursor(
-            @Param("status") CatalogStatus status,
+    List<Product> search(
+            @Param("statuses") Collection<CatalogStatus> statuses,
+            @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
             @Param("cursor") UUID cursor,
             @Param("categoryId") UUID categoryId,
             @Param("brandId") UUID brandId,
@@ -86,15 +57,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             Pageable pageable
     );
 
-    long countByCategoryId(UUID categoryId);
-
-    long countByBrandId(UUID brandId);
-
-    boolean existsByCategoryId(UUID categoryId);
-
     boolean existsByCategoryIdAndStatusNot(UUID categoryId, CatalogStatus status);
-
-    boolean existsByBrandId(UUID brandId);
 
     boolean existsByBrandIdAndStatusNot(UUID brandId, CatalogStatus status);
 }

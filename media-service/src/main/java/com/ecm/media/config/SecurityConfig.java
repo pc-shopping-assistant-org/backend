@@ -19,7 +19,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/files/**", "/actuator/health", "/actuator/info").permitAll()
-                        .anyRequest().hasRole("ADMIN"))
+                        .anyRequest().hasRole("EMPLOYEE"))
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
                         .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))

@@ -354,7 +354,7 @@ public class OrderService {
             items.add(OrderItem.builder()
                     .productVariantId(cartItem.getVariantId())
                     .quantity(cartItem.getQuantity())
-                    .unitPrice(variant.listPrice())
+                    .unitPrice(variant.price())
                     .itemDiscount(0L)
                     .status(OrderItemStatus.ACTIVE)
                     .build());

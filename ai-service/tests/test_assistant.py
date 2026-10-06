@@ -252,14 +252,14 @@ async def test_compare_requires_and_returns_requested_products() -> None:
     assert len(response.data.products) == 2
 
 
-def test_product_card_uses_lowest_variant_list_price_for_detail_payload() -> None:
+def test_product_card_uses_lowest_variant_price_for_detail_payload() -> None:
     card = AssistantService._card(
         {
             "id": "00000000-0000-0000-0000-000000000001",
             "name": "Detail PC",
             "variants": [
-                {"listPrice": 2000000},
-                {"listPrice": 1500000},
+                {"price": 2000000},
+                {"price": 1500000},
             ],
         }
     )

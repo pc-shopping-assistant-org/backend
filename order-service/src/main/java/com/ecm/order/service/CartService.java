@@ -155,7 +155,7 @@ public class CartService {
             if (variant == null || !ACTIVE_STATUS.equalsIgnoreCase(variant.status())) {
                 throw new BusinessException(OrderErrorCode.VARIANT_NOT_AVAILABLE);
             }
-            return new ProductVariantResponse(variant.id(), variant.productId(), variant.listPrice(), variant.quantity(),
+            return new ProductVariantResponse(variant.id(), variant.productId(), variant.price(), variant.quantity(),
                     variant.sku(), variant.model(), variant.status(), null, null, variant.images());
         } catch (ResourceNotFoundException ex) {
             throw new ResourceNotFoundException("ProductVariant", variantId);
@@ -204,14 +204,14 @@ public class CartService {
             }
             long lineTotal;
             try {
-                lineTotal = Math.multiplyExact(variant.listPrice(), (long) item.getQuantity());
+                lineTotal = Math.multiplyExact(variant.price(), (long) item.getQuantity());
                 subtotal = Math.addExact(subtotal, lineTotal);
                 totalItems = Math.addExact(totalItems, item.getQuantity());
             } catch (ArithmeticException ex) {
                 throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
             }
             items.add(new CartItemResponse(variant.id(), variant.productId(), variant.productName(), variant.sku(),
-                    variant.model(), variant.mainImageUrl(), variant.listPrice(), item.getQuantity(), lineTotal, variant.quantity()));
+                    variant.model(), variant.mainImageUrl(), variant.price(), item.getQuantity(), lineTotal, variant.quantity()));
         }
         items.sort(Comparator.comparing(item -> item.sku() == null ? "" : item.sku()));
         return new CartResponse(cart.getId(), List.copyOf(items), totalItems, subtotal);
