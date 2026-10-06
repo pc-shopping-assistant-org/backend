@@ -1,6 +1,7 @@
 package com.ecm.promotion.dto.response;
 
 import com.ecm.promotion.entity.ApplicationScope;
+import com.ecm.promotion.entity.DiscountState;
 import com.ecm.promotion.entity.DiscountStatus;
 import com.ecm.promotion.entity.DiscountType;
 
@@ -20,7 +21,9 @@ public record DiscountResponse(
         Instant endAt,
         String description,
         DiscountStatus status,
+        DiscountState state,
         Set<UUID> categoryIds,
-        Set<UUID> variantIds, Long usageLimit
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }

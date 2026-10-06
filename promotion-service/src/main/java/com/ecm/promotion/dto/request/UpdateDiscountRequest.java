@@ -12,7 +12,8 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-public record CreateDiscountRequest(
+/** A full replacement of the discount. An omitted {@code code} keeps the current one; a blank one removes it. */
+public record UpdateDiscountRequest(
         @Size(max = 50) String code,
         @NotBlank @Size(max = 255) String title,
         @NotNull DiscountType discountType,
