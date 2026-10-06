@@ -23,8 +23,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**",
                                 "/catalog-service/products/**", "/catalog-service/categories/**", "/catalog-service/brands/**",
                                 "/catalog-service/product-variants/**").permitAll()
-                        .requestMatchers("/cart/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/orders", "/order-service/orders").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/payments/*/webhook", "/payment-service/payments/*/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions

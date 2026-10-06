@@ -6,6 +6,7 @@ import com.ecm.common.exception.InvalidStateException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.payment.dto.request.CreatePaymentRequest;
 import com.ecm.payment.dto.request.PaymentWebhookRequest;
+import com.ecm.payment.dto.response.PaymentMethodResponse;
 import com.ecm.payment.dto.response.PaymentResponse;
 import com.ecm.payment.entity.*;
 import com.ecm.payment.mapper.PaymentMapper;
@@ -13,6 +14,7 @@ import com.ecm.payment.messaging.event.PaymentCompletedEvent;
 import com.ecm.payment.messaging.event.PaymentFailedEvent;
 import com.ecm.payment.messaging.kafka.KafkaTopics;
 import com.ecm.payment.repository.OutboxEventRepository;
+import com.ecm.payment.repository.PaymentMethodRepository;
 import com.ecm.payment.repository.PaymentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,9 +36,20 @@ public class PaymentService {
     private static final String WEBHOOK_STATUS_PAID = "PAID";
 
     private final PaymentRepository paymentRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
     private final OutboxEventRepository outboxEventRepository;
     private final PaymentMapper paymentMapper;
     private final ObjectMapper objectMapper;
+
+    @Transactional(readOnly = true)
+    public List<PaymentMethodResponse> getActivePaymentMethods() {
+        return paymentMapper.toMethodResponseList(paymentMethodRepository.findByStatusOrderByNameAsc(PaymentMethodStatus.ACTIVE));
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getPaymentsByOrder(UUID orderId) {
+        return paymentMapper.toResponseList(paymentRepository.findByOrderIdOrderByCreatedAtAsc(orderId));
+    }
 
     @Transactional
     public PaymentResponse create(CreatePaymentRequest request) {

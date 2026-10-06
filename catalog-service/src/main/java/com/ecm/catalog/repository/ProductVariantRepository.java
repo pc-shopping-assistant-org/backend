@@ -3,6 +3,8 @@ package com.ecm.catalog.repository;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.ProductVariant;
 import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -27,6 +29,11 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
 
     @Query("SELECT v FROM ProductVariant v WHERE v.id = :id AND v.status = :status")
     Optional<ProductVariant> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
+
+    /** Locks the variants in id order, so two orders reserving overlapping variants cannot deadlock. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT v FROM ProductVariant v WHERE v.id IN :ids ORDER BY v.id")
+    List<ProductVariant> findAllByIdForUpdate(@Param("ids") Collection<UUID> ids);
 
     boolean existsBySkuAndStatusNot(String sku, CatalogStatus status);
 

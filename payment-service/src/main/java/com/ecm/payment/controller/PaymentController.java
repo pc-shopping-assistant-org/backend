@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,6 +27,12 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PaymentResponse> create(@Valid @RequestBody CreatePaymentRequest request) {
         return ApiResponse.success(paymentService.create(request));
+    }
+
+    /** The payment attempts of an order, oldest first; the Order Service has already checked who owns the order. */
+    @GetMapping("/by-order/{orderId}")
+    public ApiResponse<List<PaymentResponse>> getByOrder(@PathVariable UUID orderId) {
+        return ApiResponse.success(paymentService.getPaymentsByOrder(orderId));
     }
 
     /**

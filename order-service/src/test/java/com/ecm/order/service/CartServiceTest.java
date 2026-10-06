@@ -52,7 +52,7 @@ class CartServiceTest {
         cartRepository = mock(CartRepository.class);
         cartItemRepository = mock(CartItemRepository.class);
         catalogClient = mock(CatalogServiceClient.class);
-        service = new CartService(cartRepository, cartItemRepository, catalogClient);
+        service = new CartService(cartRepository, cartItemRepository, new CatalogVariantLookup(catalogClient));
         when(cartRepository.lockByCustomerId(CUSTOMER)).thenReturn(Optional.of(cart));
         when(cartRepository.findByCustomerId(CUSTOMER)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartIdAndVariantId(any(), any())).thenReturn(Optional.empty());
@@ -60,7 +60,7 @@ class CartServiceTest {
     }
 
     private static CartVariantDetailsResponse variant(UUID id, long price, int stock, boolean sellable) {
-        return new CartVariantDetailsResponse(id, UUID.randomUUID(), "Product", "SKU-" + id.toString().substring(34), "M", price,
+        return new CartVariantDetailsResponse(id, UUID.randomUUID(), UUID.randomUUID(), "Product", "SKU-" + id.toString().substring(34), "M", "Color: Blue", price,
                 stock, sellable ? "ACTIVE" : "INACTIVE", "https://img/x.png", sellable);
     }
 

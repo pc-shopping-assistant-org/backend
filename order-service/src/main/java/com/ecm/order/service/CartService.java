@@ -1,8 +1,6 @@
 package com.ecm.order.service;
 
 import com.ecm.common.exception.BusinessException;
-import com.ecm.common.exception.ExternalServiceException;
-import com.ecm.order.client.CatalogServiceClient;
 import com.ecm.order.dto.request.AddToCartRequest;
 import com.ecm.order.dto.request.UpdateCartItemRequest;
 import com.ecm.order.dto.response.CartItemResponse;
@@ -13,7 +11,6 @@ import com.ecm.order.entity.CartItem;
 import com.ecm.order.exception.OrderErrorCode;
 import com.ecm.order.repository.CartItemRepository;
 import com.ecm.order.repository.CartRepository;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +27,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CartService {
 
-    private static final String CATALOG_SERVICE = "catalog-service";
-
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final CatalogServiceClient catalogServiceClient;
+    private final CatalogVariantLookup variantLookup;
 
     @Transactional(readOnly = true)
     public CartResponse getCart(UUID customerId) {
@@ -101,7 +96,7 @@ public class CartService {
     }
 
     private CartVariantDetailsResponse requireSellable(UUID variantId) {
-        CartVariantDetailsResponse variant = fetchDetails(List.of(variantId)).stream().findFirst().orElse(null);
+        CartVariantDetailsResponse variant = variantLookup.details(List.of(variantId)).stream().findFirst().orElse(null);
         if (variant == null || !variant.sellable()) {
             throw new BusinessException(OrderErrorCode.VARIANT_NOT_AVAILABLE);
         }
@@ -114,15 +109,6 @@ public class CartService {
         }
     }
 
-    private List<CartVariantDetailsResponse> fetchDetails(List<UUID> variantIds) {
-        try {
-            List<CartVariantDetailsResponse> details = catalogServiceClient.getCartVariantDetails(variantIds).getData();
-            return details == null ? List.of() : details;
-        } catch (FeignException ex) {
-            throw new ExternalServiceException(CATALOG_SERVICE, ex);
-        }
-    }
-
     /** Current price, name and image come from the Catalog Service; the cart only stores variant and quantity. */
     private CartResponse toResponse(Cart cart) {
         // 1. Load the lines and their variants, one call to the Catalog Service for all of them
@@ -130,7 +116,7 @@ public class CartService {
         if (cartItems.isEmpty()) {
             return emptyCart(cart.getId());
         }
-        Map<UUID, CartVariantDetailsResponse> variants = fetchDetails(cartItems.stream().map(CartItem::getVariantId).toList()).stream()
+        Map<UUID, CartVariantDetailsResponse> variants = variantLookup.details(cartItems.stream().map(CartItem::getVariantId).toList()).stream()
                 .collect(Collectors.toMap(CartVariantDetailsResponse::id, Function.identity()));
 
         // 2. Build the lines; only the lines on sale count towards the totals

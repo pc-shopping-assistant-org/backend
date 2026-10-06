@@ -10,6 +10,7 @@ import com.ecm.order.messaging.event.StockReserveFailedEvent;
 import com.ecm.order.messaging.event.StockReservedEvent;
 import com.ecm.order.messaging.kafka.KafkaTopics;
 import com.ecm.order.repository.OrderRepository;
+import com.ecm.order.service.OrderStatusService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Reacts to catalog-service's stock reservation result — the next step of the checkout saga.
+ * Reacts to the stock reservation result of catalog-service, the next step of the checkout saga.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class StockEventConsumer {
 
     private final InboxGuard inboxGuard;
     private final OrderRepository orderRepository;
+    private final OrderStatusService orderStatusService;
     private final PaymentServiceClient paymentServiceClient;
     private final ObjectMapper objectMapper;
 
@@ -42,10 +44,14 @@ public class StockEventConsumer {
         Order order = orderRepository.findById(event.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order", event.orderId()));
 
-        // 1. Stock is reserved — start the payment attempt for this order. Keyed by this
-        // event's id so a Feign retry/event redelivery can't create a second PENDING payment.
+        // 1. An order cancelled meanwhile already queued the release of this stock, and needs no payment
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            return;
+        }
+
+        // 2. Start the payment of the order. The key is the order, so a redelivery cannot create a second payment.
         paymentServiceClient.create(new CreatePaymentRequest(
-                order.getId(), order.getPaymentMethodId(), order.getTotalAmount(), event.eventId().toString()));
+                order.getId(), order.getPaymentMethodId(), order.getTotalAmount(), order.getId().toString()));
     }
 
     @KafkaListener(topics = KafkaTopics.STOCK_RESERVE_FAILED)
@@ -59,8 +65,9 @@ public class StockEventConsumer {
         Order order = orderRepository.findById(event.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order", event.orderId()));
 
-        // 1. Out of stock — the order cannot proceed, cancel it immediately.
-        order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
+        // 1. Out of stock: the order cannot go ahead. Nothing was reserved, so there is no stock to give back.
+        if (order.getStatus() == OrderStatus.PENDING_PAYMENT || order.getStatus() == OrderStatus.PENDING_CONFIRMATION) {
+            orderStatusService.transition(order, OrderStatus.CANCELLED, null, event.reason());
+        }
     }
 }
