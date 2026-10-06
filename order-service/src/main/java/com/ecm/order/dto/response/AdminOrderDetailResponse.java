@@ -6,12 +6,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** An order as it was placed, with the payment attempts the Payment Service holds for it. */
-public record OrderDetailResponse(
+/** An order as it was placed, read from its own snapshot, with its payment attempts and every status change. */
+public record AdminOrderDetailResponse(
         UUID id,
         String invoiceNumber,
+        UUID customerId,
         OrderStatus status,
-        String cancellationReason,
         String recipientName,
         String recipientPhone,
         String deliveryAddress,
@@ -24,6 +24,7 @@ public record OrderDetailResponse(
         Long shippingFee,
         Long totalAmount,
         List<PaymentResponse> payments,
+        List<OrderStatusHistoryResponse> statusHistory,
         Instant createdAt,
         Instant deliveredAt
 ) {

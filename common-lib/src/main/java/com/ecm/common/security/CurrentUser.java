@@ -7,7 +7,14 @@ import java.util.UUID;
 
 public final class CurrentUser {
 
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private CurrentUser() {
+    }
+
+    /** The token of the caller as an {@code Authorization} header value, to relay to a service called on their behalf. */
+    public static String bearerToken(Authentication authentication) {
+        return BEARER_PREFIX + ((JwtAuthenticationToken) authentication).getToken().getTokenValue();
     }
 
     public static UUID accountId(Authentication authentication) {

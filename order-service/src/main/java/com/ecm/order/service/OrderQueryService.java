@@ -2,23 +2,28 @@ package com.ecm.order.service;
 
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.CommonErrorCode;
-import com.ecm.common.exception.ExternalServiceException;
 import com.ecm.common.exception.ResourceNotFoundException;
-import com.ecm.order.client.PaymentServiceClient;
+import com.ecm.common.response.PageResponse;
+import com.ecm.order.dto.request.AdminOrderSearchRequest;
+import com.ecm.order.dto.response.AdminOrderDetailResponse;
+import com.ecm.order.dto.response.AdminOrderSummaryResponse;
 import com.ecm.order.dto.response.CursorPageResponse;
 import com.ecm.order.dto.response.OrderDetailResponse;
 import com.ecm.order.dto.response.OrderStatusResponse;
 import com.ecm.order.dto.response.OrderSummaryResponse;
-import com.ecm.order.dto.response.PaymentResponse;
 import com.ecm.order.entity.Order;
 import com.ecm.order.entity.OrderItem;
 import com.ecm.order.entity.OrderStatus;
+import com.ecm.order.entity.OrderStatusHistory;
 import com.ecm.order.mapper.OrderMapper;
 import com.ecm.order.repository.OrderItemRepository;
 import com.ecm.order.repository.OrderRepository;
-import feign.FeignException;
+import com.ecm.order.repository.OrderStatusHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,19 +34,19 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/** What a customer reads about their own orders: history and search (UC-ORD-004, 005), status (002) and detail (006). */
+/** What is read about orders: by the customer, their own history and search (UC-ORD-004, 005), status (002) and detail (006); by the shop, every order (UC-ADM-ORD-001, 002). */
 @Service
 @RequiredArgsConstructor
 public class OrderQueryService {
 
     private static final int DEFAULT_LIMIT = 20;
     private static final int MAX_LIMIT = 100;
-    private static final String PAYMENT_SERVICE = "payment-service";
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final Instant NO_UPPER_BOUND = Instant.parse("9999-12-31T00:00:00Z");
     private static final String CURSOR_SEPARATOR = "|";
     private static final Pattern UNDASHED_UUID = Pattern.compile("^[0-9a-fA-F]{32}$");
     private static final Pattern DASHED_UUID = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
@@ -51,7 +56,8 @@ public class OrderQueryService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final PaymentServiceClient paymentServiceClient;
+    private final OrderStatusHistoryRepository historyRepository;
+    private final PaymentLookup paymentLookup;
     private final OrderMapper orderMapper;
 
     /**
@@ -84,7 +90,8 @@ public class OrderQueryService {
 
     @Transactional(readOnly = true)
     public OrderStatusResponse getStatus(UUID orderId, UUID customerId) {
-        return orderMapper.toStatusResponse(findOwnedOrder(orderId, customerId));
+        Order order = findOwnedOrder(orderId, customerId);
+        return orderMapper.toStatusResponse(order, cancellationReason(order));
     }
 
     @Transactional(readOnly = true)
@@ -94,19 +101,53 @@ public class OrderQueryService {
 
         // 2. The snapshot lines, and the payment attempts, which live in the Payment Service
         List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-        return orderMapper.toDetail(order, items, fetchPayments(order.getId(), bearerToken));
+        return orderMapper.toDetail(order, items, paymentLookup.forOrder(order.getId(), bearerToken), cancellationReason(order));
+    }
+
+    /** Why the order was cancelled, for the customer to read; null when it is not cancelled or no reason was given. */
+    private String cancellationReason(Order order) {
+        if (order.getStatus() != OrderStatus.CANCELLED) {
+            return null;
+        }
+        return historyRepository.findFirstByOrderIdAndToStatusOrderByCreatedAtDesc(order.getId(), OrderStatus.CANCELLED)
+                .map(OrderStatusHistory::getReason).orElse(null);
+    }
+
+    /** The orders of every customer for the shop, newest first (UC-ADM-ORD-001). */
+    @Transactional(readOnly = true)
+    public PageResponse<AdminOrderSummaryResponse> searchOrders(AdminOrderSearchRequest filter, int page, int size) {
+        // 1. Reject a page or a period that makes no sense
+        if (page < 0 || size < 1 || size > MAX_PAGE_SIZE
+                || filter.createdFrom() != null && filter.createdTo() != null && !filter.createdFrom().isBefore(filter.createdTo())) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+
+        // 2. One page of orders
+        String keyword = filter.keyword() == null ? "" : filter.keyword().trim();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+        Page<Order> orders = orderRepository.searchAdminOrders(filter.status(), filter.customerId(),
+                filter.createdFrom() == null ? Instant.EPOCH : filter.createdFrom(),
+                filter.createdTo() == null ? NO_UPPER_BOUND : filter.createdTo(), keyword, pageable);
+
+        // 3. The lines of the whole page in one query
+        Map<UUID, List<OrderItem>> itemsByOrder = orderItemRepository.findByOrderIdIn(orders.getContent().stream().map(Order::getId).toList()).stream()
+                .collect(Collectors.groupingBy(OrderItem::getOrderId));
+        return PageResponse.of(orders.map(order -> {
+            List<OrderItem> lines = itemsByOrder.getOrDefault(order.getId(), List.of());
+            return orderMapper.toAdminSummary(order, lines.size(), lines.isEmpty() ? null : lines.getFirst().getProductName());
+        }));
+    }
+
+    /** Any order as it was placed, with its status history (UC-ADM-ORD-002); every amount comes from the order own snapshot. */
+    @Transactional(readOnly = true)
+    public AdminOrderDetailResponse getOrderDetail(UUID orderId, String bearerToken) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+        return orderMapper.toAdminDetail(order, orderItemRepository.findByOrderId(orderId),
+                paymentLookup.forOrder(orderId, bearerToken), historyRepository.findByOrderIdOrderByCreatedAtAsc(orderId));
     }
 
     private Order findOwnedOrder(UUID orderId, UUID customerId) {
         return orderRepository.findByIdAndCustomerId(orderId, customerId).orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
-    }
-
-    private List<PaymentResponse> fetchPayments(UUID orderId, String bearerToken) {
-        try {
-            return Objects.requireNonNull(paymentServiceClient.getPaymentsByOrder(orderId, bearerToken).getData());
-        } catch (FeignException ex) {
-            throw new ExternalServiceException(PAYMENT_SERVICE, ex);
-        }
     }
 
     private static UUID parseOrderId(String keyword) {

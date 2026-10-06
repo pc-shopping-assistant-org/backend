@@ -15,6 +15,8 @@ import com.ecm.order.entity.OrderStatus;
 import com.ecm.order.mapper.OrderMapper;
 import com.ecm.order.repository.OrderItemRepository;
 import com.ecm.order.repository.OrderRepository;
+import com.ecm.order.repository.OrderStatusHistoryRepository;
+import com.ecm.order.entity.OrderStatusHistory;
 import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,10 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Pageable;
 
+import com.ecm.order.dto.request.AdminOrderSearchRequest;
+import com.ecm.order.dto.response.AdminOrderDetailResponse;
+import com.ecm.order.dto.response.AdminOrderSummaryResponse;
+import org.springframework.data.domain.PageImpl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +58,7 @@ class OrderQueryServiceTest {
     private OrderRepository orderRepository;
     private OrderItemRepository orderItemRepository;
     private PaymentServiceClient paymentClient;
+    private OrderStatusHistoryRepository historyRepository;
     private OrderQueryService service;
 
     @BeforeEach
@@ -59,7 +66,9 @@ class OrderQueryServiceTest {
         orderRepository = mock(OrderRepository.class);
         orderItemRepository = mock(OrderItemRepository.class);
         paymentClient = mock(PaymentServiceClient.class);
-        service = new OrderQueryService(orderRepository, orderItemRepository, paymentClient, Mappers.getMapper(OrderMapper.class));
+        historyRepository = mock(OrderStatusHistoryRepository.class);
+        service = new OrderQueryService(orderRepository, orderItemRepository, historyRepository, new PaymentLookup(paymentClient),
+                Mappers.getMapper(OrderMapper.class));
         when(orderItemRepository.findByOrderIdIn(anyCollection())).thenReturn(List.of());
     }
 
@@ -228,6 +237,25 @@ class OrderQueryServiceTest {
     }
 
     @Test
+    void aCancelledOrderShowsTheReasonItWasCancelledFor() {
+        Order cancelled = order(ORDER_ID, Instant.now());
+        cancelled.setStatus(OrderStatus.CANCELLED);
+        when(orderRepository.findByIdAndCustomerId(ORDER_ID, CUSTOMER)).thenReturn(Optional.of(cancelled));
+        when(historyRepository.findFirstByOrderIdAndToStatusOrderByCreatedAtDesc(ORDER_ID, OrderStatus.CANCELLED))
+                .thenReturn(Optional.of(OrderStatusHistory.builder().reason("Courier lost the parcel").build()));
+
+        assertEquals("Courier lost the parcel", service.getStatus(ORDER_ID, CUSTOMER).cancellationReason());
+    }
+
+    @Test
+    void anOrderThatIsNotCancelledHasNoReasonAndNoHistoryLookup() {
+        when(orderRepository.findByIdAndCustomerId(ORDER_ID, CUSTOMER)).thenReturn(Optional.of(order(ORDER_ID, Instant.now())));
+
+        assertNull(service.getStatus(ORDER_ID, CUSTOMER).cancellationReason());
+        org.mockito.Mockito.verifyNoInteractions(historyRepository);
+    }
+
+    @Test
     void detailShowsTheSnapshotLinesAndThePaymentAttempts() {
         when(orderRepository.findByIdAndCustomerId(ORDER_ID, CUSTOMER)).thenReturn(Optional.of(order(ORDER_ID, Instant.now())));
         when(orderItemRepository.findByOrderId(ORDER_ID)).thenReturn(List.of(OrderItem.builder().id(UUID.randomUUID()).orderId(ORDER_ID)
@@ -249,5 +277,78 @@ class OrderQueryServiceTest {
         when(paymentClient.getPaymentsByOrder(ORDER_ID, TOKEN)).thenThrow(mock(FeignException.class));
 
         assertThrows(ExternalServiceException.class, () -> service.getDetail(ORDER_ID, CUSTOMER, TOKEN));
+    }
+
+    // ---- UC-ADM-ORD-001 list / UC-ADM-ORD-002 detail, for the shop ----
+
+    private static AdminOrderSearchRequest filter(String keyword, OrderStatus status, Instant from, Instant to) {
+        return new AdminOrderSearchRequest(keyword, status, from, to, null);
+    }
+
+    @Test
+    void theShopListShowsTheRecipientAndTheLinesOfEachOrder() {
+        Order order = order(ORDER_ID, Instant.now());
+        order.setRecipientName("Nguyen Van A");
+        order.setRecipientPhone("0912345678");
+        when(orderRepository.searchAdminOrders(any(), any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(List.of(order)));
+        when(orderItemRepository.findByOrderIdIn(anyCollection())).thenReturn(List.of(
+                OrderItem.builder().orderId(ORDER_ID).productName("RAM").build(), OrderItem.builder().orderId(ORDER_ID).productName("SSD").build()));
+
+        AdminOrderSummaryResponse row = service.searchOrders(filter(null, null, null, null), 0, 20).getContent().getFirst();
+
+        assertEquals("Nguyen Van A", row.recipientName());
+        assertEquals("0912345678", row.recipientPhone());
+        assertEquals(CUSTOMER, row.customerId());
+        assertEquals(2, row.itemCount());
+        assertEquals("RAM", row.firstProductName());
+    }
+
+    @Test
+    void theShopFilterIsPassedOnWithOpenEndedDatesAndATrimmedKeyword() {
+        when(orderRepository.searchAdminOrders(any(), any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+
+        service.searchOrders(filter("  an  ", OrderStatus.SHIPPING, null, null), 2, 30);
+
+        ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+        verify(orderRepository).searchAdminOrders(eq(OrderStatus.SHIPPING), any(), eq(Instant.EPOCH), any(), eq("an"), pageable.capture());
+        assertEquals(2, pageable.getValue().getPageNumber());
+        assertEquals(30, pageable.getValue().getPageSize());
+    }
+
+    @Test
+    void aBadPageOrPeriodIsRejected() {
+        Instant now = Instant.now();
+
+        assertThrows(BusinessException.class, () -> service.searchOrders(filter(null, null, null, null), -1, 20));
+        assertThrows(BusinessException.class, () -> service.searchOrders(filter(null, null, null, null), 0, 101));
+        assertThrows(BusinessException.class, () -> service.searchOrders(filter(null, null, now, now), 0, 20));
+        assertThrows(BusinessException.class, () -> service.searchOrders(filter(null, null, now, now.minusSeconds(1)), 0, 20));
+    }
+
+    @Test
+    void theShopDetailHasTheSnapshotThePaymentsAndTheStatusHistory() {
+        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order(ORDER_ID, Instant.now())));
+        when(orderItemRepository.findByOrderId(ORDER_ID)).thenReturn(List.of(OrderItem.builder().id(UUID.randomUUID()).orderId(ORDER_ID)
+                .productName("RAM").quantity(2).unitPrice(500L).discountAmount(0L).build()));
+        PaymentResponse attempt = new PaymentResponse(UUID.randomUUID(), ORDER_ID, UUID.randomUUID(), 10L, "PENDING", null, Instant.now());
+        when(paymentClient.getPaymentsByOrder(ORDER_ID, TOKEN)).thenReturn(ApiResponse.success(List.of(attempt)));
+        when(historyRepository.findByOrderIdOrderByCreatedAtAsc(ORDER_ID)).thenReturn(List.of(
+                OrderStatusHistory.builder().toStatus(OrderStatus.PENDING_PAYMENT).build(),
+                OrderStatusHistory.builder().fromStatus(OrderStatus.PENDING_PAYMENT).toStatus(OrderStatus.PENDING_CONFIRMATION).build()));
+
+        AdminOrderDetailResponse detail = service.getOrderDetail(ORDER_ID, TOKEN);
+
+        assertEquals(CUSTOMER, detail.customerId());
+        assertEquals(1000L, detail.items().getFirst().lineTotal());
+        assertEquals(List.of(attempt), detail.payments());
+        assertEquals(2, detail.statusHistory().size());
+        assertNull(detail.statusHistory().getFirst().fromStatus());
+    }
+
+    @Test
+    void theShopDetailOfAnUnknownOrderIsNotFound() {
+        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.getOrderDetail(ORDER_ID, TOKEN));
     }
 }

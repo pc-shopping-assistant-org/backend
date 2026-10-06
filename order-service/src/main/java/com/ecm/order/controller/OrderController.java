@@ -12,13 +12,12 @@ import com.ecm.order.dto.response.OrderSummaryResponse;
 import com.ecm.order.entity.OrderStatus;
 import com.ecm.order.exception.OrderErrorCode;
 import com.ecm.order.service.CheckoutService;
-import com.ecm.order.service.OrderCancellationService;
+import com.ecm.order.service.OrderService;
 import com.ecm.order.service.OrderQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,24 +27,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ecm.common.response.PageResponse;
+import com.ecm.order.dto.request.AdminCancelOrderRequest;
+import com.ecm.order.dto.request.AdminOrderSearchRequest;
+import com.ecm.order.dto.request.UpdateOrderStatusRequest;
+import com.ecm.order.dto.response.AdminOrderDetailResponse;
+import com.ecm.order.dto.response.AdminOrderSummaryResponse;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import java.util.UUID;
 
-/** The orders of the logged-in customer. */
+/** Orders: the logged-in customer's own, and under {@code /orders/admin} those of every customer for the shop. */
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
 
-    private static final String BEARER_PREFIX = "Bearer ";
-
     private final CheckoutService checkoutService;
     private final OrderQueryService orderQueryService;
-    private final OrderCancellationService orderCancellationService;
+    private final OrderService orderService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OrderDetailResponse> create(@Valid @RequestBody CreateOrderRequest request, Authentication authentication) {
-        return ApiResponse.success(checkoutService.placeOrder(request, customerId(authentication), bearerToken(authentication)));
+        return ApiResponse.success(checkoutService.placeOrder(request, customerId(authentication), CurrentUser.bearerToken(authentication)));
     }
 
     @GetMapping
@@ -60,7 +65,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public ApiResponse<OrderDetailResponse> getMyOrder(@PathVariable UUID orderId, Authentication authentication) {
-        return ApiResponse.success(orderQueryService.getDetail(orderId, customerId(authentication), bearerToken(authentication)));
+        return ApiResponse.success(orderQueryService.getDetail(orderId, customerId(authentication), CurrentUser.bearerToken(authentication)));
     }
 
     @GetMapping("/{orderId}/status")
@@ -72,8 +77,34 @@ public class OrderController {
     public ApiResponse<OrderDetailResponse> cancelMyOrder(@PathVariable UUID orderId,
                                                           @Valid @RequestBody(required = false) CancelOrderRequest request,
                                                           Authentication authentication) {
-        return ApiResponse.success(orderCancellationService.cancelByCustomer(orderId, customerId(authentication),
+        return ApiResponse.success(orderService.cancelByCustomer(orderId, customerId(authentication),
                 request == null ? null : request.reason()));
+    }
+
+    // ---- the shop: every customer's orders, employees only (see SecurityConfig) ----
+
+    @GetMapping("/admin")
+    public ApiResponse<PageResponse<AdminOrderSummaryResponse>> getOrders(@Valid @ModelAttribute AdminOrderSearchRequest filter,
+                                                                         @RequestParam(defaultValue = "0") int page,
+                                                                         @RequestParam(defaultValue = "50") int size) {
+        return ApiResponse.success(orderQueryService.searchOrders(filter, page, size));
+    }
+
+    @GetMapping("/admin/{orderId}")
+    public ApiResponse<AdminOrderDetailResponse> getOrder(@PathVariable UUID orderId, Authentication authentication) {
+        return ApiResponse.success(orderQueryService.getOrderDetail(orderId, CurrentUser.bearerToken(authentication)));
+    }
+
+    @PatchMapping("/admin/{orderId}/status")
+    public ApiResponse<OrderStatusResponse> updateStatus(@PathVariable UUID orderId, @Valid @RequestBody UpdateOrderStatusRequest request,
+                                                         Authentication authentication) {
+        return ApiResponse.success(orderService.updateStatus(orderId, request.status(), CurrentUser.accountId(authentication)));
+    }
+
+    @PostMapping("/admin/{orderId}/cancel")
+    public ApiResponse<OrderStatusResponse> cancelOrder(@PathVariable UUID orderId, @Valid @RequestBody AdminCancelOrderRequest request,
+                                                        Authentication authentication) {
+        return ApiResponse.success(orderService.cancelByEmployee(orderId, CurrentUser.accountId(authentication), request.reason()));
     }
 
     private UUID customerId(Authentication authentication) {
@@ -82,10 +113,5 @@ public class OrderController {
             throw new BusinessException(OrderErrorCode.CART_OWNER_REQUIRED);
         }
         return accountId;
-    }
-
-    /** The token of the caller, relayed to the services the order has to ask on behalf of the customer. */
-    private String bearerToken(Authentication authentication) {
-        return BEARER_PREFIX + ((JwtAuthenticationToken) authentication).getToken().getTokenValue();
     }
 }

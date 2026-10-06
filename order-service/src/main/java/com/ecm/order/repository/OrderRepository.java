@@ -57,7 +57,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             "AND o.createdAt >= :createdFrom " +
             "AND o.createdAt < :createdTo " +
             "AND (LOWER(CAST(o.id AS string)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(o.invoiceNumber) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+            "OR LOWER(o.invoiceNumber) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(o.recipientName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR o.recipientPhone LIKE CONCAT('%', :keyword, '%'))")
     Page<Order> searchAdminOrders(@Param("status") OrderStatus status,
                                   @Param("customerId") UUID customerId,
                                   @Param("createdFrom") Instant createdFrom, // never null: an untyped null breaks "IS NULL" on PostgreSQL

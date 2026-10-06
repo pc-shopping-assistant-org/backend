@@ -23,7 +23,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.GET, "/order-items/variants/*/exists").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/order-items/**").authenticated()
-                        .requestMatchers("/orders/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/orders/admin/**").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/orders").hasRole("CUSTOMER")
                         .requestMatchers("/orders/**").hasRole("CUSTOMER")
                         .requestMatchers("/cart/**").hasRole("CUSTOMER")

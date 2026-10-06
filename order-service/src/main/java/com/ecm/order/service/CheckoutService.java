@@ -72,7 +72,7 @@ public class CheckoutService {
             if (!existing.getCustomerId().equals(customerId)) {
                 throw new BusinessException(CommonErrorCode.CONFLICT, "Idempotency key already used");
             }
-            return orderMapper.toDetail(existing, orderItemRepository.findByOrderId(existing.getId()), List.of());
+            return orderMapper.toDetail(existing, orderItemRepository.findByOrderId(existing.getId()), List.of(), null);
         }
 
         // 2. The cart of the customer must hold something that can be bought now, in the stock available
@@ -111,7 +111,7 @@ public class CheckoutService {
 
         // 7. Reserve the stock through the outbox, in the same transaction as the order
         orderOutbox.reserveStock(order, savedItems);
-        return orderMapper.toDetail(order, savedItems, List.of());
+        return orderMapper.toDetail(order, savedItems, List.of(), null);
     }
 
     /** Copies each cart line with the name, SKU, label and price it has now; rejects lines off sale or short of stock. */

@@ -5,5 +5,5 @@ import com.ecm.order.entity.OrderStatus;
 import java.time.Instant;
 import java.util.UUID;
 
-public record OrderStatusResponse(UUID id, String invoiceNumber, OrderStatus status, Instant createdAt, Instant updatedAt) {
+public record OrderStatusResponse(UUID id, String invoiceNumber, OrderStatus status, String cancellationReason, Instant createdAt, Instant updatedAt) {
 }
