@@ -5,11 +5,9 @@ import org.springframework.http.HttpStatus;
 
 public enum OrderErrorCode implements ErrorCode {
 
-    CART_NOT_ACTIVE(HttpStatus.CONFLICT, "Cart is not active"),
     CART_EMPTY(HttpStatus.BAD_REQUEST, "Cart has no items"),
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart item not found"),
-    CART_OWNER_REQUIRED(HttpStatus.BAD_REQUEST, "Provide exactly one authenticated account or guest cart session"),
-    CART_SESSION_REQUIRED(HttpStatus.BAD_REQUEST, "Guest cart session is required"),
+    CART_OWNER_REQUIRED(HttpStatus.BAD_REQUEST, "An authenticated customer is required"),
     CART_QUANTITY_TOO_LARGE(HttpStatus.BAD_REQUEST, "Cart quantity or amount is too large"),
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "One or more items do not have enough stock"),
     VARIANT_NOT_AVAILABLE(HttpStatus.CONFLICT, "One or more items are no longer available"),

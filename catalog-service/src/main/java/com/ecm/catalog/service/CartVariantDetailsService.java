@@ -1,6 +1,7 @@
 package com.ecm.catalog.service;
 
 import com.ecm.catalog.dto.response.CartVariantDetailsResponse;
+import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
@@ -52,9 +53,10 @@ public class CartVariantDetailsService {
                 imageUrl = urls.get(main.getImageFileId());
             }
             Product product = products.get(variant.getProductId());
+            boolean sellable = variant.getStatus() == CatalogStatus.ACTIVE && product != null && product.getStatus() == CatalogStatus.ACTIVE;
             return new CartVariantDetailsResponse(variant.getId(), variant.getProductId(),
                     product == null ? null : product.getName(), variant.getSku(), variant.getModel(), variant.getPrice(),
-                    variant.getQuantity(), variant.getStatus().name(), imageUrl);
+                    variant.getQuantity(), variant.getStatus().name(), imageUrl, sellable);
         }).toList();
     }
 }

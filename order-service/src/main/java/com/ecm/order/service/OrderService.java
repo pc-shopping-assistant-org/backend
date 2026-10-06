@@ -206,7 +206,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse createOrder(CreateOrderRequest request, Authentication authentication, String sessionToken) {
+    public OrderResponse createOrder(CreateOrderRequest request, Authentication authentication) {
         // 1. Verify customer identity before looking up or creating orders.
         UUID accountId = requireCustomerAccountId(authentication);
 
@@ -220,10 +220,8 @@ public class OrderService {
         }
 
         // 3. Load and authorize the customer's active cart, never a client-selected cart ID.
-        Cart cart = findOwnedCart(accountId, normalizeSession(sessionToken));
-        if (cart.getStatus() != CartStatus.ACTIVE) {
-            throw new BusinessException(OrderErrorCode.CART_NOT_ACTIVE);
-        }
+        Cart cart = cartRepository.lockByCustomerId(accountId)
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.CART_EMPTY));
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
         if (cartItems.isEmpty()) {
             throw new BusinessException(OrderErrorCode.CART_EMPTY);
@@ -319,27 +317,6 @@ public class OrderService {
         }
     }
 
-    private Cart findOwnedCart(UUID accountId, String sessionToken) {
-        if ((accountId == null) == (sessionToken == null)) {
-            throw new BusinessException(OrderErrorCode.CART_OWNER_REQUIRED);
-        }
-        return (accountId != null
-                ? cartRepository.lockActiveByCustomerId(accountId, CartStatus.ACTIVE)
-                : cartRepository.lockActiveBySessionToken(sessionToken, CartStatus.ACTIVE))
-                .orElseThrow(() -> new ResourceNotFoundException("Cart", accountId != null ? accountId : sessionToken));
-    }
-
-    private String normalizeSession(String sessionToken) {
-        if (sessionToken == null || sessionToken.isBlank()) {
-            return null;
-        }
-        String normalized = sessionToken.trim();
-        if (normalized.length() > 255) {
-            throw new BusinessException(OrderErrorCode.CART_SESSION_REQUIRED);
-        }
-        return normalized;
-    }
-
     private List<OrderItem> priceCartItems(List<CartItem> cartItems) {
         // 1. Re-price each cart line and reject unavailable variants or insufficient stock.
         List<OrderItem> items = new ArrayList<>();
@@ -391,14 +368,13 @@ public class OrderService {
                     "This order was already submitted concurrently; please retry", ex);
         }
 
-        // 2. Save the order lines and convert the active cart.
+        // 2. Save the order lines and empty the cart.
         for (OrderItem item : items) {
             item.setOrderId(order.getId());
         }
         items = orderItemRepository.saveAll(items);
 
-        cart.setStatus(CartStatus.CONVERTED);
-        cartRepository.save(cart);
+        cartItemRepository.deleteByCartId(cart.getId());
 
         // 3. Queue reservation commands so they commit atomically with the order and cart.
         enqueueReservations(order, items);

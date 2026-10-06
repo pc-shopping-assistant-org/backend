@@ -56,7 +56,7 @@ class OrderServiceTest {
     private void checkoutWithDiscounts(boolean discounted) throws Exception {
         UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), variantId = UUID.randomUUID();
         UUID shippingId = UUID.randomUUID();
-        Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
+        Cart cart = Cart.builder().id(cartId).customerId(user).build();
         CartItem line = CartItem.builder().cartId(cartId).variantId(variantId).quantity(2).build();
         ProductVariantResponse variant = new ProductVariantResponse(variantId, UUID.randomUUID(), 250L, 5,
                 "sku", "model", "ACTIVE", null, null, List.of());
@@ -64,7 +64,7 @@ class OrderServiceTest {
         Order order = Order.builder().id(UUID.randomUUID()).customerId(user).status(OrderStatus.PENDING_CONFIRMATION).build();
         OrderResponse response = mock(OrderResponse.class);
         when(orderRepository.findByIdempotencyKey("key-1")).thenReturn(Optional.empty());
-        when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartRepository.lockByCustomerId(user)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(line));
         when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(variant));
         when(shippingMethodRepository.findById(shippingId)).thenReturn(Optional.of(shipping));
@@ -82,8 +82,8 @@ class OrderServiceTest {
         var auth = customerAuth(user);
 
         assertSame(response, orderService.createOrder(new CreateOrderRequest("key-1", shippingId, UUID.randomUUID(),
-                "Customer", "09123456789", "Address", null, null), auth, null));
-        assertEquals(CartStatus.CONVERTED, cart.getStatus());
+                "Customer", "09123456789", "Address", null, null), auth));
+        verify(cartItemRepository).deleteByCartId(cartId);
         verify(orderRepository).save(argThat(saved -> saved.getSubtotalAmount() == 500L
                 && saved.getShippingFee() == 500L && saved.getTotalAmount() == (discounted ? 850L : 1000L)
                 && saved.getDiscountAmount() == (discounted ? 150L : 0L)
@@ -99,7 +99,7 @@ class OrderServiceTest {
         CreateOrderRequest request = new CreateOrderRequest("anonymous-key", shippingId, UUID.randomUUID(),
                 "Customer", "09123456789", "Address", null, null);
 
-        assertThrows(RuntimeException.class, () -> orderService.createOrder(request, null, "guest-session"));
+        assertThrows(RuntimeException.class, () -> orderService.createOrder(request, null));
         verifyNoInteractions(orderRepository, cartRepository, cartItemRepository, catalogServiceClient);
     }
 
@@ -112,16 +112,16 @@ class OrderServiceTest {
     @Test
     void rejectsCheckoutForUnavailableShippingMethod() {
         UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), variantId = UUID.randomUUID(), shippingId = UUID.randomUUID();
-        Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
+        Cart cart = Cart.builder().id(cartId).customerId(user).build();
         when(orderRepository.findByIdempotencyKey("key-2")).thenReturn(Optional.empty());
-        when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartRepository.lockByCustomerId(user)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(CartItem.builder()
                 .cartId(cartId).variantId(variantId).quantity(1).build()));
         when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(new ProductVariantResponse(variantId, UUID.randomUUID(), 1L, 5, "sku", "model", "ACTIVE", null, null, List.of())));
         when(shippingMethodRepository.findById(shippingId)).thenReturn(Optional.empty());
         var auth = customerAuth(user);
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("key-2", shippingId,
-                UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
+                UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth));
         verify(orderRepository, never()).save(any(Order.class));
     }
 
@@ -136,22 +136,22 @@ class OrderServiceTest {
         var auth = customerAuth(user);
 
         assertSame(response, orderService.createOrder(new CreateOrderRequest("duplicate-key", UUID.randomUUID(),
-                UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
-        verify(cartRepository, never()).lockActiveByCustomerId(any(), any());
+                UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth));
+        verify(cartRepository, never()).lockByCustomerId(any());
         verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
     void rejectsCheckoutForEmptyCart() {
         UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), shippingId = UUID.randomUUID();
-        Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
+        Cart cart = Cart.builder().id(cartId).customerId(user).build();
         when(orderRepository.findByIdempotencyKey("empty-cart")).thenReturn(Optional.empty());
-        when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartRepository.lockByCustomerId(user)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of());
         var auth = customerAuth(user);
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("empty-cart",
-                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
+                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth));
         verify(catalogServiceClient, never()).getVariant(any());
         verify(orderRepository, never()).save(any(Order.class));
     }
@@ -159,18 +159,18 @@ class OrderServiceTest {
     @Test
     void rejectsCheckoutForInsufficientStock() {
         UUID user = UUID.randomUUID(), cartId = UUID.randomUUID(), variantId = UUID.randomUUID(), shippingId = UUID.randomUUID();
-        Cart cart = Cart.builder().id(cartId).customerId(user).status(CartStatus.ACTIVE).build();
+        Cart cart = Cart.builder().id(cartId).customerId(user).build();
         CartItem line = CartItem.builder().cartId(cartId).variantId(variantId).quantity(10).build();
         ProductVariantResponse variant = new ProductVariantResponse(variantId, UUID.randomUUID(), 100L, 3,
                 "sku", "model", "ACTIVE", null, null, List.of());
         when(orderRepository.findByIdempotencyKey("low-stock")).thenReturn(Optional.empty());
-        when(cartRepository.lockActiveByCustomerId(user, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartRepository.lockByCustomerId(user)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(line));
         when(catalogServiceClient.getVariant(variantId)).thenReturn(ApiResponse.success(variant));
         var auth = customerAuth(user);
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(new CreateOrderRequest("low-stock",
-                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth, null));
+                shippingId, UUID.randomUUID(), "Customer", "09123456789", "Address", null, null), auth));
         verify(orderRepository, never()).save(any(Order.class));
     }
 

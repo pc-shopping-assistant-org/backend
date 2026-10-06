@@ -21,7 +21,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private static final String CART_SESSION_HEADER = "X-Cart-Session";
 
     private final OrderService orderService;
 
@@ -78,8 +77,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OrderResponse> create(
             @Valid @RequestBody CreateOrderRequest request,
-            Authentication authentication,
-            @RequestHeader(value = CART_SESSION_HEADER, required = false) String sessionToken) {
-        return ApiResponse.success(orderService.createOrder(request, authentication, sessionToken));
+            Authentication authentication) {
+        return ApiResponse.success(orderService.createOrder(request, authentication));
     }
 }

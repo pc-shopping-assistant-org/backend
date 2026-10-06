@@ -26,6 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/orders/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/orders").hasRole("CUSTOMER")
                         .requestMatchers("/orders/**").hasRole("CUSTOMER")
+                        .requestMatchers("/cart/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
