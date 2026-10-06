@@ -29,6 +29,15 @@ public class ProductReview {
     @Column(name = "order_item_id", nullable = false, unique = true)
     private UUID orderItemId;
 
+    @Column(name = "product_id", nullable = false)
+    private UUID productId;
+
+    /**
+     * ref -> Identity Service (accounts.id), no cross-DB FK.
+     */
+    @Column(name = "customer_id", nullable = false)
+    private UUID customerId;
+
     @Column(name = "rating", nullable = false)
     private int rating;
 
