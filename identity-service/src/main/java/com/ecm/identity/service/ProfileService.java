@@ -1,6 +1,7 @@
 package com.ecm.identity.service;
 
 import com.ecm.common.exception.BusinessException;
+import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.identity.dto.request.UpdateProfileRequest;
 import com.ecm.identity.dto.response.UserSummaryResponse;
@@ -18,14 +19,25 @@ import com.ecm.identity.repository.CustomerRepository;
 import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
+
+    /** Enough for another service to filter by, without ever returning an unbounded list. */
+    private static final int MAX_CUSTOMER_IDS = 200;
+
+    /** Matches the page size of the public review list, the only caller. */
+    private static final int MAX_NAME_LOOKUP_IDS = 50;
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
@@ -99,5 +111,24 @@ public class ProfileService {
     private Role findRole(Account account) {
         return roleRepository.findById(account.getRoleId())
                 .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
+    }
+
+    /** The accounts of the customers whose name contains the text, for a service that holds only account ids and has to search by name. */
+    @Transactional(readOnly = true)
+    public List<UUID> findCustomerIdsByName(String name) {
+        if (name == null || name.isBlank()) {
+            return List.of();
+        }
+        return customerRepository.findAccountIdsByName(name.trim(), PageRequest.of(0, MAX_CUSTOMER_IDS));
+    }
+
+    /** Display names of the given customers, nothing else; ids with no customer are left out. */
+    @Transactional(readOnly = true)
+    public Map<UUID, String> getCustomerNames(Collection<UUID> accountIds) {
+        if (accountIds.size() > MAX_NAME_LOOKUP_IDS) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+        return customerRepository.findAllById(accountIds).stream()
+                .collect(Collectors.toMap(Customer::getAccountId, customer -> customer.getFirstName() + " " + customer.getLastName()));
     }
 }

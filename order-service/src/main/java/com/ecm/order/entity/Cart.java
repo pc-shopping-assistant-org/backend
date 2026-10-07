@@ -1,19 +1,22 @@
 package com.ecm.order.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.generator.EventType;
 
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Exactly one of {@code customerId} (logged-in cart) or {@code sessionToken} (guest
- * cart) is set — enforced by a DB CHECK constraint, not in Java.
- */
+/** The shopping cart of a customer; each customer has exactly one, and only logged-in customers have one. */
 @Entity
 @Table(name = "carts")
 @Getter
@@ -31,21 +34,10 @@ public class Cart {
     /**
      * ref -> Identity Service (customers.account_id), no cross-DB FK.
      */
-    @Column(name = "customer_id")
+    @Column(name = "customer_id", nullable = false, updatable = false)
     private UUID customerId;
-
-    @Column(name = "session_token")
-    private String sessionToken;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private CartStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }

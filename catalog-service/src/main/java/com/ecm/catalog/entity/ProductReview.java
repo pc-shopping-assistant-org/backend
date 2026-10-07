@@ -51,4 +51,10 @@ public class ProductReview {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    /**
+     * Null until the review's single allowed edit is used.
+     */
+    @Column(name = "edited_at")
+    private Instant editedAt;
 }

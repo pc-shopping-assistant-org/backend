@@ -8,13 +8,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter converter) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter converter,
+                                    RevokedTokenFilter revokedTokenFilter) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -23,10 +25,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**",
                                 "/catalog-service/products/**", "/catalog-service/categories/**", "/catalog-service/brands/**",
                                 "/catalog-service/product-variants/**").permitAll()
-                        .requestMatchers("/cart/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/orders", "/order-service/orders").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/payments/*/webhook", "/payment-service/payments/*/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
+                .addFilterAfter(revokedTokenFilter, BearerTokenAuthenticationFilter.class)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
                         .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))

@@ -33,4 +33,15 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     boolean existsByNameIgnoreCaseAndStatusNot(String name, CatalogStatus status);
 
     boolean existsByParentIdAndStatusNot(UUID parentId, CatalogStatus status);
+
+    /** The category with the given id and all its live descendants; empty when the category does not exist. */
+    @Query(value = """
+            WITH RECURSIVE tree AS (
+                SELECT id FROM categories WHERE id = :id AND status <> 'DELETED'
+                UNION ALL
+                SELECT c.id FROM categories c JOIN tree t ON c.parent_id = t.id WHERE c.status <> 'DELETED'
+            )
+            SELECT id FROM tree
+            """, nativeQuery = true)
+    List<UUID> findSelfAndDescendantIds(@Param("id") UUID id);
 }

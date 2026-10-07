@@ -26,14 +26,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     /**
      * Keyset page (newest first) of products whose status is one of {@code statuses}. A null cursor starts at the
-     * newest product. Price bounds match when at least one variant, with a status in {@code variantStatuses},
+     * newest product. Unless {@code anyCategory}, only products in {@code categoryIds} match. Price bounds match when at least one variant, with a status in {@code variantStatuses},
      * falls inside them.
      */
     @Query("""
             SELECT p FROM Product p
             WHERE p.status IN :statuses
               AND (:cursor IS NULL OR p.id < :cursor)
-              AND (:categoryId IS NULL OR p.categoryId = :categoryId)
+              AND (:anyCategory = TRUE OR p.categoryId IN :categoryIds)
               AND (:brandId IS NULL OR p.brandId = :brandId)
               AND (:keyword IS NULL OR LOWER(p.name) LIKE :keyword
                    OR LOWER(p.seoName) LIKE :keyword
@@ -49,7 +49,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("statuses") Collection<CatalogStatus> statuses,
             @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
             @Param("cursor") UUID cursor,
-            @Param("categoryId") UUID categoryId,
+            @Param("anyCategory") boolean anyCategory,
+            @Param("categoryIds") Collection<UUID> categoryIds,
             @Param("brandId") UUID brandId,
             @Param("keyword") String keyword,
             @Param("minPrice") Long minPrice,

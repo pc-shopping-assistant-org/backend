@@ -1,0 +1,80 @@
+package com.ecm.catalog.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.generator.EventType;
+import org.hibernate.type.SqlTypes;
+
+import com.ecm.common.tracing.TraceSupport;
+
+import java.time.Instant;
+import java.util.UUID;
+
+/**
+ * A row written in the same transaction as a change of stock; {@link com.ecm.catalog.messaging.OutboxRelay} publishes it later.
+ */
+@Entity
+@Table(name = "outbox_events")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class OutboxEvent {
+
+    @Id
+    @Generated(event = EventType.INSERT)
+    @Column(name = "id", insertable = false, updatable = false, nullable = false)
+    private UUID id;
+
+    @Column(name = "aggregate_type", nullable = false, length = 50)
+    private String aggregateType;
+
+    @Column(name = "aggregate_id", nullable = false)
+    private UUID aggregateId;
+
+    @Column(name = "event_type", nullable = false, length = 100)
+    private String eventType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "channel", nullable = false, length = 10)
+    private OutboxChannel channel;
+
+    /**
+     * Kafka topic.
+     */
+    @Column(name = "destination", nullable = false)
+    private String destination;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "payload", nullable = false)
+    private String payload;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private OutboxStatus status;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "published_at")
+    private Instant publishedAt;
+
+    /**
+     * W3C traceparent of the request or consumer that wrote this row, so the relay can publish the
+     * message as part of the same trace.
+     */
+    @Column(name = "trace_context", length = 100)
+    private String traceContext;
+
+    @PrePersist
+    void captureTraceContext() {
+        if (traceContext == null) {
+            traceContext = TraceSupport.currentTraceparent();
+        }
+    }
+}

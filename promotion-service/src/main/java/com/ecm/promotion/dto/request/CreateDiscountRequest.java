@@ -22,7 +22,6 @@ public record CreateDiscountRequest(
         @NotNull Instant startAt,
         @NotNull Instant endAt,
         String description,
-        Set<@NotNull UUID> categoryIds,
-        Set<@NotNull UUID> variantIds, @Positive Long usageLimit
+        Set<@NotNull UUID> categoryIds
 ) {
 }

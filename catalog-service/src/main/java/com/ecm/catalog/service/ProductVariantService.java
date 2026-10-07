@@ -1,5 +1,7 @@
 package com.ecm.catalog.service;
 
+import com.ecm.catalog.config.CatalogProperties;
+import com.ecm.catalog.dto.response.StockSummaryResponse;
 import com.ecm.catalog.client.OrderServiceClient;
 import com.ecm.catalog.dto.request.CreateVariantRequest;
 import com.ecm.catalog.dto.request.UpdateVariantRequest;
@@ -39,6 +41,7 @@ public class ProductVariantService {
     private final OrderServiceClient orderServiceClient;
     private final ProductMediaResolver mediaResolver;
     private final ProductAssembler assembler;
+    private final CatalogProperties catalogProperties;
 
     @Transactional
     public ProductVariantResponse createVariant(UUID productId, CreateVariantRequest request, UUID employeeId) {
@@ -174,5 +177,15 @@ public class ProductVariantService {
         String value = request.value().trim();
         return optionRepository.findByNameIgnoreCaseAndValueIgnoreCase(name, value)
                 .orElseGet(() -> optionRepository.save(Option.builder().name(name).value(value).build()));
+    }
+
+    /** How many active variants are running low and how many are sold out, for the dashboard (UC-ADM-DASH-001). */
+    @Transactional(readOnly = true)
+    public StockSummaryResponse getStockSummary() {
+        int threshold = catalogProperties.getLowStockThreshold();
+        return new StockSummaryResponse(
+                productVariantRepository.countByStatusAndQuantityBetween(CatalogStatus.ACTIVE, 1, threshold),
+                productVariantRepository.countByStatusAndQuantityBetween(CatalogStatus.ACTIVE, 0, 0),
+                threshold);
     }
 }

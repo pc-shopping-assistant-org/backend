@@ -1,5 +1,6 @@
 package com.ecm.promotion.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,7 +13,7 @@ import java.util.UUID;
 public record ApplyDiscountRequest(
         @Size(max = 50) String code,
         @PositiveOrZero long orderAmount,
-        @NotEmpty List<@NotNull @jakarta.validation.Valid DiscountCartItemRequest> items, @Size(max = 100) String checkoutKey
+        @NotEmpty List<@NotNull @Valid DiscountCartItemRequest> items
 ) {
     public record DiscountCartItemRequest(
             @NotNull UUID productVariantId,

@@ -1,16 +1,22 @@
 package com.ecm.catalog.service;
 
 import com.ecm.catalog.dto.response.CartVariantDetailsResponse;
+import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
+import com.ecm.catalog.entity.Option;
+import com.ecm.catalog.entity.VariantOption;
+import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductImageRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
+import com.ecm.catalog.repository.VariantOptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,6 +31,8 @@ public class CartVariantDetailsService {
     private final ProductVariantRepository variantRepository;
     private final ProductRepository productRepository;
     private final ProductImageRepository imageRepository;
+    private final VariantOptionRepository variantOptionRepository;
+    private final OptionRepository optionRepository;
     private final ProductMediaResolver mediaResolver;
 
     @Transactional(readOnly = true)
@@ -41,6 +49,8 @@ public class CartVariantDetailsService {
         Map<UUID, ProductImage> mainImages = imageRepository.findMainByProductIdIn(productIds).stream()
                 .collect(Collectors.toMap(ProductImage::getProductId, Function.identity()));
 
+        Map<UUID, String> labels = variantLabels(variantIds);
+
         // 2. A variant shows its own image, falling back to the main image of its product
         Map<UUID, String> urls = mediaResolver.resolveUrls(java.util.stream.Stream.concat(
                 variants.stream().map(ProductVariant::getImageFileId),
@@ -52,9 +62,25 @@ public class CartVariantDetailsService {
                 imageUrl = urls.get(main.getImageFileId());
             }
             Product product = products.get(variant.getProductId());
+            boolean sellable = variant.getStatus() == CatalogStatus.ACTIVE && product != null && product.getStatus() == CatalogStatus.ACTIVE;
             return new CartVariantDetailsResponse(variant.getId(), variant.getProductId(),
-                    product == null ? null : product.getName(), variant.getSku(), variant.getModel(), variant.getPrice(),
-                    variant.getQuantity(), variant.getStatus().name(), imageUrl);
+                    product == null ? null : product.getCategoryId(),
+                    product == null ? null : product.getName(), variant.getSku(), variant.getModel(), labels.get(variant.getId()), variant.getPrice(),
+                    variant.getQuantity(), variant.getStatus().name(), imageUrl, sellable);
         }).toList();
+    }
+
+    /** Each variant options joined into one line, ordered by option name, for example "Storage: 256GB, Color: Blue". */
+    private Map<UUID, String> variantLabels(List<UUID> variantIds) {
+        List<VariantOption> links = variantOptionRepository.findByProductVariantIdIn(variantIds);
+        Map<UUID, Option> options = optionRepository.findAllById(links.stream().map(VariantOption::getOptionId).distinct().toList()).stream()
+                .collect(Collectors.toMap(Option::getId, Function.identity()));
+        return links.stream().filter(link -> options.containsKey(link.getOptionId()))
+                .collect(Collectors.groupingBy(VariantOption::getProductVariantId,
+                        Collectors.collectingAndThen(Collectors.toList(), group -> group.stream()
+                                .map(link -> options.get(link.getOptionId()))
+                                .sorted(Comparator.comparing(Option::getName))
+                                .map(option -> option.getName() + ": " + option.getValue())
+                                .collect(Collectors.joining(", ")))));
     }
 }

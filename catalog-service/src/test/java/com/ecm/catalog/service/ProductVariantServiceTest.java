@@ -1,5 +1,6 @@
 package com.ecm.catalog.service;
 
+import com.ecm.catalog.config.CatalogProperties;
 import com.ecm.catalog.client.OrderServiceClient;
 import com.ecm.catalog.dto.request.CreateVariantRequest;
 import com.ecm.catalog.dto.request.UpdateVariantRequest;
@@ -63,7 +64,7 @@ class ProductVariantServiceTest {
         mediaResolver = mock(ProductMediaResolver.class);
         assembler = mock(ProductAssembler.class);
         service = new ProductVariantService(productRepository, variantRepository, optionRepository, variantOptionRepository,
-                orderServiceClient, mediaResolver, assembler);
+                orderServiceClient, mediaResolver, assembler, new CatalogProperties());
 
         when(productRepository.findByIdAndStatusIn(eq(PRODUCT_ID), anyCollection()))
                 .thenReturn(Optional.of(Product.builder().id(PRODUCT_ID).status(CatalogStatus.ACTIVE).build()));

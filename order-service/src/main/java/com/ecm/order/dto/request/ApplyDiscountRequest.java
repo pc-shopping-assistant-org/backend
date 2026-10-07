@@ -6,7 +6,7 @@ import java.util.UUID;
 public record ApplyDiscountRequest(
         String code,
         Long orderAmount,
-        List<DiscountCartItemRequest> items, String checkoutKey
+        List<DiscountCartItemRequest> items
 ) {
     public record DiscountCartItemRequest(UUID productVariantId, int quantity, long unitPrice, UUID categoryId) {
     }

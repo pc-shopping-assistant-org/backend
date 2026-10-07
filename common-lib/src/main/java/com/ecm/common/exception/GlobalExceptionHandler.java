@@ -6,11 +6,16 @@ import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
@@ -70,6 +75,39 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
         return ResponseEntity.status(CommonErrorCode.UNAUTHORIZED.getHttpStatus())
                 .body(ApiResponse.error(CommonErrorCode.UNAUTHORIZED, CommonErrorCode.UNAUTHORIZED.getDefaultMessage()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())
+                .body(ApiResponse.error(CommonErrorCode.METHOD_NOT_ALLOWED, CommonErrorCode.METHOD_NOT_ALLOWED.getDefaultMessage()));
+    }
+
+    /** A body that is not valid JSON, or has a value of the wrong type such as an unknown enum constant. */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableBody(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(CommonErrorCode.BAD_REQUEST.getHttpStatus())
+                .body(ApiResponse.error(CommonErrorCode.BAD_REQUEST, CommonErrorCode.BAD_REQUEST.getDefaultMessage()));
+    }
+
+    /** A path or query parameter of the wrong type, such as an unknown enum constant or a malformed UUID. */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleParameterTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.status(CommonErrorCode.BAD_REQUEST.getHttpStatus())
+                .body(ApiResponse.error(CommonErrorCode.BAD_REQUEST, CommonErrorCode.BAD_REQUEST.getDefaultMessage()));
+    }
+
+    /** A required query parameter that was left out. */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParameter(MissingServletRequestParameterException ex) {
+        return ResponseEntity.status(CommonErrorCode.BAD_REQUEST.getHttpStatus())
+                .body(ApiResponse.error(CommonErrorCode.BAD_REQUEST, "Required parameter '" + ex.getParameterName() + "' is missing"));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException ex) {
+        return ResponseEntity.status(CommonErrorCode.NOT_FOUND.getHttpStatus())
+                .body(ApiResponse.error(CommonErrorCode.NOT_FOUND, CommonErrorCode.NOT_FOUND.getDefaultMessage()));
     }
 
     @ExceptionHandler(Exception.class)

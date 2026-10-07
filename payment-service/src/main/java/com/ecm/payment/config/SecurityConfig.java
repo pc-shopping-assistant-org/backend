@@ -22,6 +22,7 @@ public class SecurityConfig {
                         .requestMatchers("/payments/*/webhook").permitAll()
                         // Internal saga call from order-service (Feign sends no token); the gateway still requires auth.
                         .requestMatchers(HttpMethod.POST, "/payments").permitAll()
+                        .requestMatchers("/payments/admin/**", "/payment-methods/admin").hasRole("EMPLOYEE")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
