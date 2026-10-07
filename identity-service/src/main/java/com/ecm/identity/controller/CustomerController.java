@@ -4,6 +4,7 @@ import com.ecm.common.response.ApiResponse;
 import com.ecm.common.response.PageResponse;
 import com.ecm.identity.dto.response.CustomerDetailResponse;
 import com.ecm.identity.dto.response.CustomerResponse;
+import com.ecm.identity.dto.response.CustomerSummaryResponse;
 import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,12 @@ public class CustomerController {
                                                               @RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.success(customerService.search(keyword, status, createdFrom, createdTo, page, size));
+    }
+
+    // Restricted to ROLE_ADMIN by SecurityConfig.
+    @GetMapping("/summary")
+    public ApiResponse<CustomerSummaryResponse> getSummary() {
+        return ApiResponse.success(customerService.getSummary());
     }
 
     @GetMapping("/{accountId}")

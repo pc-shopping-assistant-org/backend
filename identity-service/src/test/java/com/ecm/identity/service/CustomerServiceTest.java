@@ -8,6 +8,7 @@ import com.ecm.identity.config.JwtProperties;
 import com.ecm.identity.dto.response.AddressResponse;
 import com.ecm.identity.dto.response.CustomerDetailResponse;
 import com.ecm.identity.dto.response.CustomerResponse;
+import com.ecm.identity.dto.response.CustomerSummaryResponse;
 import com.ecm.identity.entity.Account;
 import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.CustomerAddress;
@@ -23,7 +24,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 
+import java.time.Clock;
 import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +48,9 @@ class CustomerServiceTest {
     private static final UUID ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000d1");
     private static final UUID AVATAR_ID = UUID.fromString("00000000-0000-0000-0000-0000000000d2");
     private static final long REFRESH_TTL_MS = 60_000L;
+    // 2026-03-31 18:30 UTC is already 01:30 on 1 April in Ho Chi Minh City
+    private static final Instant NOW = Instant.parse("2026-03-31T18:30:00Z");
+    private static final ZoneId ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Mock private AccountRepository accountRepository;
     @Mock private CustomerRepository customerRepository;
@@ -60,7 +67,8 @@ class CustomerServiceTest {
         jwtProperties.setRefreshTokenExpirationMs(REFRESH_TTL_MS);
         service = new CustomerService(accountRepository, customerRepository, customerAddressRepository,
                 new AddressMapperImpl(), avatarResolver,
-                new AccountLocker(accountRepository, tokenRevocationService, jwtProperties));
+                new AccountLocker(accountRepository, tokenRevocationService, jwtProperties),
+                Clock.fixed(NOW, ZoneOffset.UTC), ZONE);
         account = Account.builder().id(ACCOUNT_ID).email("c@shop.vn").phone("0911111111").status(AccountStatus.ACTIVE).build();
     }
 
@@ -150,5 +158,18 @@ class CustomerServiceTest {
 
         assertThatThrownBy(() -> service.lock(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
         verify(tokenRevocationService, never()).revokeBefore(any(), any(), any());
+    }
+
+    @Test
+    void summaryCountsRegistrationsByTheShopsCalendarNotUtc() {
+        // In the shop's zone it is 1 April, 01:30: today starts at 31 March 17:00 UTC, the month at the same instant
+        Instant startOfToday = Instant.parse("2026-03-31T17:00:00Z");
+        Instant startOfTomorrow = Instant.parse("2026-04-01T17:00:00Z");
+        when(customerRepository.count()).thenReturn(40L);
+        when(customerRepository.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(startOfToday, startOfTomorrow)).thenReturn(2L);
+
+        CustomerSummaryResponse summary = service.getSummary();
+
+        assertThat(summary).isEqualTo(new CustomerSummaryResponse(40, 2, 2));
     }
 }

@@ -35,6 +35,8 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("SELECT v FROM ProductVariant v WHERE v.id IN :ids ORDER BY v.id")
     List<ProductVariant> findAllByIdForUpdate(@Param("ids") Collection<UUID> ids);
 
+    long countByStatusAndQuantityBetween(CatalogStatus status, int minQuantity, int maxQuantity);
+
     boolean existsBySkuAndStatusNot(String sku, CatalogStatus status);
 
     boolean existsByBarcodeAndStatusNot(String barcode, CatalogStatus status);

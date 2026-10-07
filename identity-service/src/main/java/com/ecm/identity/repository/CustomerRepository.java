@@ -43,6 +43,8 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
                                   @Param("keyword") String keyword, // never null: an untyped null breaks LOWER() on PostgreSQL; "" matches everything
                                   Pageable pageable);
 
+    long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(Instant from, Instant to);
+
     @Query(SELECT_RESPONSE + "WHERE c.accountId = :id")
     Optional<CustomerResponse> findDetail(@Param("id") UUID id);
 }

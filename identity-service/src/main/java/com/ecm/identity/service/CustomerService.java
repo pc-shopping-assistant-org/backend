@@ -7,6 +7,7 @@ import com.ecm.common.response.PageResponse;
 import com.ecm.identity.dto.response.AddressResponse;
 import com.ecm.identity.dto.response.CustomerDetailResponse;
 import com.ecm.identity.dto.response.CustomerResponse;
+import com.ecm.identity.dto.response.CustomerSummaryResponse;
 import com.ecm.identity.entity.Account;
 import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.mapper.AddressMapper;
@@ -19,7 +20,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +46,8 @@ public class CustomerService {
     private final AddressMapper addressMapper;
     private final AvatarResolver avatarResolver;
     private final AccountLocker accountLocker;
+    private final Clock clock;
+    private final ZoneId zone;
 
     @Transactional(readOnly = true)
     public PageResponse<CustomerResponse> search(String keyword, AccountStatus status, Instant createdFrom,
@@ -93,6 +99,19 @@ public class CustomerService {
 
         // 3. Answer with the stored row
         return detail(accountId);
+    }
+
+    /** Registrations today and this month in the shop's time zone, for the dashboard (UC-ADM-DASH-001). */
+    @Transactional(readOnly = true)
+    public CustomerSummaryResponse getSummary() {
+        LocalDate today = LocalDate.now(clock.withZone(zone));
+        Instant startOfToday = today.atStartOfDay(zone).toInstant();
+        Instant startOfTomorrow = today.plusDays(1).atStartOfDay(zone).toInstant();
+        Instant startOfMonth = today.withDayOfMonth(1).atStartOfDay(zone).toInstant();
+        return new CustomerSummaryResponse(
+                customerRepository.count(),
+                customerRepository.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(startOfToday, startOfTomorrow),
+                customerRepository.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(startOfMonth, startOfTomorrow));
     }
 
     private CustomerResponse detail(UUID accountId) {

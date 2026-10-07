@@ -1,6 +1,7 @@
 package com.ecm.catalog.controller;
 
 import com.ecm.catalog.dto.response.ProductVariantResponse;
+import com.ecm.catalog.dto.response.StockSummaryResponse;
 import com.ecm.catalog.service.ProductVariantService;
 import com.ecm.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,12 @@ import java.util.UUID;
 public class ProductVariantController {
 
     private final ProductVariantService productVariantService;
+
+    // Restricted to ROLE_ADMIN by SecurityConfig.
+    @GetMapping("/stock-summary")
+    public ApiResponse<StockSummaryResponse> getStockSummary() {
+        return ApiResponse.success(productVariantService.getStockSummary());
+    }
 
     @GetMapping("/{id}")
     public ApiResponse<ProductVariantResponse> getById(@PathVariable UUID id) {

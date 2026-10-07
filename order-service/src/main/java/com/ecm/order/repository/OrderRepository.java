@@ -76,4 +76,37 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
                                   @Param("createdTo") Instant createdTo,
                                   @Param("keyword") String keyword, // never null: an untyped null breaks LOWER() on PostgreSQL; "" matches everything
                                   Pageable pageable);
+
+    /** What the orders completed (delivered) in the period brought in; uses the index on delivered_at of completed orders. */
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0L) FROM Order o WHERE o.status = com.ecm.order.entity.OrderStatus.COMPLETED " +
+            "AND o.deliveredAt >= :from AND o.deliveredAt < :to")
+    long sumRevenue(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("SELECT o.status AS status, COUNT(o) AS total FROM Order o WHERE o.createdAt >= :from AND o.createdAt < :to GROUP BY o.status")
+    List<StatusCount> countByStatus(@Param("from") Instant from, @Param("to") Instant to);
+
+    /**
+     * Revenue of the completed orders per day or month of the zone; periods without a sale are absent.
+     * {@code unit} is the date_trunc unit, {@code day} or {@code month}.
+     */
+    @Query(value = "SELECT CAST(date_trunc(CAST(:unit AS text), o.delivered_at AT TIME ZONE CAST(:zone AS text)) AS date) AS period, " +
+            "COALESCE(SUM(o.total_amount), 0) AS revenue, COUNT(*) AS orders " +
+            "FROM orders o WHERE o.status = 'COMPLETED' AND o.delivered_at >= :from AND o.delivered_at < :to " +
+            "GROUP BY 1 ORDER BY 1", nativeQuery = true)
+    List<RevenueRow> sumRevenueByPeriod(@Param("unit") String unit, @Param("zone") String zone,
+                                        @Param("from") Instant from, @Param("to") Instant to);
+
+    interface StatusCount {
+        OrderStatus getStatus();
+
+        long getTotal();
+    }
+
+    interface RevenueRow {
+        java.time.LocalDate getPeriod();
+
+        long getRevenue();
+
+        long getOrders();
+    }
 }
