@@ -1,5 +1,6 @@
 package com.ecm.promotion.config;
 
+import com.ecm.common.security.ApiResponseSecurityHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,9 +20,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/discounts/apply").authenticated()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
-                        .requestMatchers("/discounts/**").hasRole("ADMIN")
+                        .requestMatchers("/discounts/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE)
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
         return http.build();
     }
 }

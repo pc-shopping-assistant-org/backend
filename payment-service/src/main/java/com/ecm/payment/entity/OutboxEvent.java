@@ -8,6 +8,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.generator.EventType;
 import org.hibernate.type.SqlTypes;
 
+import com.ecm.common.tracing.TraceSupport;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -61,4 +63,18 @@ public class OutboxEvent {
 
     @Column(name = "published_at")
     private Instant publishedAt;
+
+    /**
+     * W3C traceparent of the request or consumer that wrote this row, so the relay can publish the
+     * message as part of the same trace.
+     */
+    @Column(name = "trace_context", length = 100)
+    private String traceContext;
+
+    @PrePersist
+    void captureTraceContext() {
+        if (traceContext == null) {
+            traceContext = TraceSupport.currentTraceparent();
+        }
+    }
 }

@@ -29,6 +29,15 @@ public class ProductReview {
     @Column(name = "order_item_id", nullable = false, unique = true)
     private UUID orderItemId;
 
+    @Column(name = "product_id", nullable = false)
+    private UUID productId;
+
+    /**
+     * ref -> Identity Service (accounts.id), no cross-DB FK.
+     */
+    @Column(name = "customer_id", nullable = false)
+    private UUID customerId;
+
     @Column(name = "rating", nullable = false)
     private int rating;
 
@@ -42,4 +51,10 @@ public class ProductReview {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    /**
+     * Null until the review's single allowed edit is used.
+     */
+    @Column(name = "edited_at")
+    private Instant editedAt;
 }

@@ -27,7 +27,7 @@ public class Order {
     /**
      * ref -> Identity Service (customers.account_id), no cross-DB FK.
      */
-    @Column(name = "customer_id")
+    @Column(name = "customer_id", nullable = false, updatable = false)
     private UUID customerId;
 
     /**
@@ -41,9 +41,9 @@ public class Order {
 
     /**
      * ref -> Payment Service (payment_methods.id), no cross-DB FK. Threaded through to the
-     * payment attempt created later by {@code StockEventConsumer} once stock is reserved.
+     * payment attempt created by the saga once the stock is reserved.
      */
-    @Column(name = "payment_method_id")
+    @Column(name = "payment_method_id", nullable = false, updatable = false)
     private UUID paymentMethodId;
 
     /**
@@ -54,7 +54,8 @@ public class Order {
     @Column(name = "idempotency_key")
     private String idempotencyKey;
 
-    @Column(name = "invoice_number", length = 50)
+    /** Random code of the form INV- plus 10 characters, generated when the order is created. */
+    @Column(name = "invoice_number", nullable = false, updatable = false, length = 50)
     private String invoiceNumber;
 
     @Column(name = "subtotal_amount", nullable = false)
@@ -71,9 +72,6 @@ public class Order {
 
     @Column(name = "total_amount", nullable = false)
     private Long totalAmount;
-
-    @Column(name = "order_time", nullable = false)
-    private Instant orderTime;
 
     @Column(name = "note")
     private String note;

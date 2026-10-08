@@ -24,7 +24,7 @@ public class Discount {
     @Column(name = "id", insertable = false, updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "code", unique = true, length = 50)
+    @Column(name = "code", length = 50)
     private String code;
 
     @Column(name = "title", nullable = false)
@@ -52,9 +52,6 @@ public class Discount {
 
     @Column(name = "end_at", nullable = false)
     private Instant endAt;
-
-    @Column(name = "usage_limit")
-    private Long usageLimit;
 
     @Column(name = "description")
     private String description;

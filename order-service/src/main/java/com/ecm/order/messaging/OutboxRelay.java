@@ -4,6 +4,7 @@ import com.ecm.order.entity.OutboxEvent;
 import com.ecm.order.entity.OutboxStatus;
 import com.ecm.order.messaging.rabbitmq.RabbitTopology;
 import com.ecm.order.repository.OutboxEventRepository;
+import com.ecm.common.tracing.TraceSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.MessageBuilder;
@@ -36,7 +37,9 @@ public class OutboxRelay {
         var pending = outboxEventRepository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING);
         for (OutboxEvent event : pending) {
             try {
-                dispatch(event);
+                try (TraceSupport.TraceScope ignored = TraceSupport.restore(event.getTraceContext())) {
+                    dispatch(event);
+                }
                 event.setStatus(OutboxStatus.PUBLISHED);
                 event.setPublishedAt(Instant.now());
                 outboxEventRepository.save(event);

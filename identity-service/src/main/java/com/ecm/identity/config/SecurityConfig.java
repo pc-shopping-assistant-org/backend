@@ -1,5 +1,6 @@
 package com.ecm.identity.config;
 
+import com.ecm.common.security.ApiResponseSecurityHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,9 +31,18 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/auth/register", "/auth/verify-otp",
                                 "/auth/resend-otp", "/auth/google", "/auth/forgot-password",
                                 "/auth/reset-password", "/.well-known/jwks.json").permitAll()
-                        .requestMatchers("/auth/logout", "/auth/change-password", "/profile/**").authenticated()
+                        .requestMatchers("/customers/summary").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
+                        .requestMatchers("/customers/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE")
+                        .requestMatchers("/employees/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
+                        .requestMatchers("/profile/customer-names").permitAll()
+                        .requestMatchers("/profile/admin/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE")
+                        .requestMatchers("/auth/logout", "/auth/change-password",
+                                "/auth/verify-password-change", "/profile/**").authenticated()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
+                        .accessDeniedHandler(ApiResponseSecurityHandler.INSTANCE))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

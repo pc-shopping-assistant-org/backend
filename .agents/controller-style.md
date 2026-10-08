@@ -43,17 +43,16 @@ Field-level rules (`@NotBlank`, `@Email`, `@Size`, ...) go on the DTO. Field err
 caught automatically by `GlobalExceptionHandler` — do not write manual `if (x == null)
 throw ...` for basic input shape checks.
 
-## Rule 5: every response is wrapped in `ApiResponse`, with an explicit message
+## Rule 5: every response is wrapped in `ApiResponse`
 
-Always call the `ApiResponse.success(message, data)` overload with a specific,
-action-describing message — not the message-less `success(data)` overload, which falls
-back to the generic `"Success"`. A good message tells the caller what just happened
-without them needing to infer it from the HTTP method + path.
+Always return `ApiResponse.success(data)`. There is no message overload: `message` on a
+success response is the fixed `"SUCCESS"`, and on failure it is the `ErrorCode` name (see
+`exception-handling.md`), so clients branch on it instead of parsing free text.
 
 ```java
-return ApiResponse.success("User created successfully", userService.createUser(request));
-return ApiResponse.success("Get user successfully", userService.getById(id));
-return ApiResponse.success("Get users successfully", PageResponse.of(userService.search(pageable)));
+return ApiResponse.success(userService.createUser(request));
+return ApiResponse.success(userService.getById(id));
+return ApiResponse.success(PageResponse.of(userService.search(pageable)));
 ```
 
 Lists/pages are always wrapped through `PageResponse.of(page)` — never return a raw
@@ -68,7 +67,7 @@ Lists/pages are always wrapped through `PageResponse.of(page)` — never return 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ApiResponse<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
-      return ApiResponse.success("User created successfully", userService.createUser(request));
+      return ApiResponse.success(userService.createUser(request));
   }
 
   @DeleteMapping("/{id}")
@@ -111,24 +110,24 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
-        return ApiResponse.success("User created successfully", userService.createUser(request));
+        return ApiResponse.success(userService.createUser(request));
     }
 
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getById(@PathVariable UUID id) {
-        return ApiResponse.success("Get user successfully", userService.getById(id));
+        return ApiResponse.success(userService.getById(id));
     }
 
     @GetMapping
     public ApiResponse<PageResponse<UserResponse>> list(
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(required = false) String keyword) {
-        return ApiResponse.success("Get users successfully", PageResponse.of(userService.search(keyword, pageable)));
+        return ApiResponse.success(PageResponse.of(userService.search(keyword, pageable)));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<UserResponse> update(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
-        return ApiResponse.success("User updated successfully", userService.update(id, request));
+        return ApiResponse.success(userService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
@@ -139,27 +138,23 @@ public class UserController {
 }
 ```
 
-Response shape for a success case (`ApiResponse.success(message, data)`):
+Response shape for a success case (`ApiResponse.success(data)`):
 
 ```json
 {
-  "success": true,
-  "code": "SUCCESS",
-  "message": "Get user successfully",
   "data": { "id": "...", "username": "test" },
-  "timestamp": "2026-09-27T03:20:00Z"
+  "message": "SUCCESS",
+  "errors": []
 }
 ```
 
 Error responses are entirely handled by `GlobalExceptionHandler` — see
-`exception-handling.md` for the shape of `code`/`message` on failure.
+`exception-handling.md` for the shape of `message`/`errors` on failure.
 
 ## What not to do
 
 - Do not put `try/catch` for business errors in a controller.
 - Do not return a JPA entity directly from an endpoint.
-- Do not use the message-less `ApiResponse.success(data)` when a more specific message is
-  available — bland `"Success"` messages make API responses harder to read at a glance.
 - Do not return raw `Page<T>`/`List<T>` for paginated data — always wrap with
   `PageResponse.of(...)`.
 - Do not hardcode the service name in the request mapping path.

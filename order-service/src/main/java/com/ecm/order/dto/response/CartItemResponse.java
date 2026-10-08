@@ -2,6 +2,7 @@ package com.ecm.order.dto.response;
 
 import java.util.UUID;
 
+/** A cart line. An unavailable line (hidden, deleted or out of sale) stays visible but is left out of the totals. */
 public record CartItemResponse(
         UUID productVariantId,
         UUID productId,
@@ -9,9 +10,10 @@ public record CartItemResponse(
         String sku,
         String model,
         String imageUrl,
-        Long listPrice,
+        Long price,
         Integer quantity,
         Long subtotal,
-        Integer stockQuantity
+        Integer stockQuantity,
+        boolean available
 ) {
 }

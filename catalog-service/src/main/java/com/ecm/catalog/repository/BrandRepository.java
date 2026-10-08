@@ -20,9 +20,12 @@ public interface BrandRepository extends JpaRepository<Brand, UUID> {
     @Query("SELECT b FROM Brand b WHERE b.id = :id AND b.status = :status")
     Optional<Brand> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);
 
-    boolean existsBySeoName(String seoName);
+    @Query("SELECT b FROM Brand b WHERE b.status <> :status ORDER BY b.name ASC")
+    List<Brand> findByStatusNot(@Param("status") CatalogStatus status);
 
-    boolean existsByNameIgnoreCase(String name);
+    boolean existsBySeoNameAndStatusNot(String seoName, CatalogStatus status);
+
+    boolean existsByNameIgnoreCaseAndStatusNot(String name, CatalogStatus status);
 
     boolean existsByIdAndStatus(UUID id, CatalogStatus status);
 }

@@ -5,8 +5,8 @@ service module (`identity-service`, `catalog-service`, `order-service`, ...).
 
 ## Building blocks (from `common-lib`)
 
-- `com.ecm.common.exception.ErrorCode` — interface (`getCode()`, `getDefaultMessage()`,
-  `getHttpStatus()`). Do not throw raw strings or HTTP status codes directly.
+- `com.ecm.common.exception.ErrorCode` — interface (`name()`, `getDefaultMessage()`,
+  `getHttpStatus()`); `name()` is serialized as the envelope's static `message` key. Do not throw raw strings or HTTP status codes directly.
 - `com.ecm.common.exception.CommonErrorCode` — enum implementing `ErrorCode` for
   cross-cutting cases shared by every service: `VALIDATION_ERROR`, `BAD_REQUEST`,
   `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `INTERNAL_ERROR`.
@@ -35,7 +35,8 @@ service module (`identity-service`, `catalog-service`, `order-service`, ...).
   Spring Security's `AccessDeniedException`/`AuthenticationException` (thrown from inside
   controller/service code, e.g. `@PreAuthorize` — filter-chain rejections are handled by
   Security's own entry points, not this class), and a generic `Exception` fallback. Formats
-  every error as `ApiResponse`.
+  every error as `ApiResponse` (`data: null`, `message` = `ErrorCode.name()`, details in
+  `errors[]`; see `docs/02-architecture/api-contract.md`).
 
 Every service already gets this for free by depending on `common-lib` — do not write a
 second `@RestControllerAdvice` in a service.
@@ -102,7 +103,7 @@ try {
 Annotate request DTOs with `jakarta.validation` annotations (`@NotNull`, `@Size`,
 `@Email`, ...) and `@Valid` on controller method parameters. Field-level errors are
 automatically caught by `GlobalExceptionHandler` and returned as a structured
-`ApiResponse` with a `field -> message` map — no manual `if (field == null) throw ...`
+`ApiResponse` with one `{field, message}` entry per violation in `errors` — no manual `if (field == null) throw ...`
 for basic input shape checks.
 
 ## Rule 5: use the right exception subclass for the shape of the error

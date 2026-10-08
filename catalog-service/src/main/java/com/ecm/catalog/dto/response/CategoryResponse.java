@@ -19,6 +19,7 @@ public class CategoryResponse {
     private UUID id;
     private String name;
     private String seoName;
+    private String description;
     private UUID parentId;
     private String status;
     private Instant createdAt;

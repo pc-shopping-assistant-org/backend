@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public record UpdateCategoryDetailsRequest(@NotBlank @Size(max = 255) String name,
                                            @Size(max = 255) String seoName,
+                                           String description,
                                            UUID parentId) {}

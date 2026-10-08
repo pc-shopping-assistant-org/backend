@@ -5,3 +5,5 @@ tmp
 .codegraph
 identity-service/.local/
 
+
+logs/

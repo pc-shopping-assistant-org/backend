@@ -46,6 +46,8 @@ public class RabbitConfig {
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jsonMessageConverter);
         factory.setDefaultRequeueRejected(false);
+        // Consumer span that continues the trace carried in the message headers.
+        factory.setObservationEnabled(true);
         return factory;
     }
 

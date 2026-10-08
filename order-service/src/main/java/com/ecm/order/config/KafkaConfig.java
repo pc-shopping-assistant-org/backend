@@ -34,7 +34,10 @@ public class KafkaConfig {
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(props));
+        var template = new KafkaTemplate<String, String>(new DefaultKafkaProducerFactory<>(props));
+        // Creates a producer span and injects the traceparent header so consumers continue the trace.
+        template.setObservationEnabled(true);
+        return template;
     }
 
     // Reuses the KafkaTemplate<String, String> bean above — defining a custom KafkaTemplate

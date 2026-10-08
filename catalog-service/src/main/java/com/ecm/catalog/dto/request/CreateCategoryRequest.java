@@ -6,5 +6,6 @@ import jakarta.validation.constraints.Size;
 public record CreateCategoryRequest(
         @NotBlank @Size(max = 255) String name,
         String seoName,
+        String description,
         java.util.UUID parentId
 ) {}

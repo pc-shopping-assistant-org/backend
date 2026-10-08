@@ -20,6 +20,6 @@ public class TraceTestController {
     @GetMapping("/ping")
     public ApiResponse<String> ping() {
         ApiResponse<String> catalogResponse = catalogServiceClient.ping();
-        return ApiResponse.success("Order trace-test ping", "order-service -> " + catalogResponse.getData());
+        return ApiResponse.success("order-service -> " + catalogResponse.getData());
     }
 }

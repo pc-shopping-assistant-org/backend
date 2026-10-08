@@ -19,8 +19,9 @@ function Wait-ForPort([int]$Port, [int]$TimeoutSeconds) {
 
 function Start-Service([string]$Module) {
     Write-Host "Starting $Module ..."
-    # Child windows inherit the environment variables loaded below.
-    Start-Process powershell -WorkingDirectory $PSScriptRoot -ArgumentList '-NoExit', '-Command', "`$Host.UI.RawUI.WindowTitle='$Module'; mvn -pl $Module spring-boot:run"
+    # Child windows inherit the environment variables loaded below. Each service also writes
+    # logs/<module>.log (lines carry the traceId), so one traceId can be grepped across all services.
+    Start-Process powershell -WorkingDirectory $PSScriptRoot -ArgumentList '-NoExit', '-Command', "`$Host.UI.RawUI.WindowTitle='$Module'; `$env:LOGGING_FILE_NAME='$PSScriptRoot\logs\$Module.log'; mvn -pl $Module spring-boot:run"
 }
 
 Write-Host '1. Starting infrastructure...'

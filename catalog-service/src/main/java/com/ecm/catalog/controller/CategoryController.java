@@ -21,40 +21,45 @@ public class CategoryController {
 
     @PostMapping
     public ApiResponse<CategoryResponse> create(@jakarta.validation.Valid @RequestBody CreateCategoryRequest request) {
-        return ApiResponse.success("Category created", categoryService.create(request));
+        return ApiResponse.success(categoryService.create(request));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> update(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody UpdateCategoryDetailsRequest request) {
-        return ApiResponse.success("Category updated", categoryService.update(id, request));
+        return ApiResponse.success(categoryService.update(id, request));
     }
 
     @PatchMapping("/{id}")
     public ApiResponse<CategoryResponse> updateWithStatus(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody UpdateCategoryRequest request) {
-        return ApiResponse.success("Category updated", categoryService.update(id, request));
+        return ApiResponse.success(categoryService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         categoryService.delete(id);
-        return ApiResponse.success("Category deleted", null);
+        return ApiResponse.success(null);
+    }
+
+    @GetMapping("/admin")
+    public ApiResponse<List<CategoryResponse>> getAllCategoriesForAdmin() {
+        return ApiResponse.success(categoryService.getAllCategoriesForAdmin());
     }
 
     @GetMapping("/tree")
     public ApiResponse<List<CategoryResponse>> getCategoryTree() {
         List<CategoryResponse> response = categoryService.getCategoryTree();
-        return ApiResponse.success("Get category tree successfully", response);
+        return ApiResponse.success(response);
     }
 
     @GetMapping
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         List<CategoryResponse> response = categoryService.getAllCategories();
-        return ApiResponse.success("Get categories successfully", response);
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/{id}")
     public ApiResponse<CategoryResponse> getCategoryById(@PathVariable UUID id) {
         CategoryResponse response = categoryService.getCategoryById(id);
-        return ApiResponse.success("Get category successfully", response);
+        return ApiResponse.success(response);
     }
 }
