@@ -8,7 +8,7 @@ public enum OrderErrorCode implements ErrorCode {
     CART_EMPTY(HttpStatus.BAD_REQUEST, "Cart has no items"),
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart item not found"),
     CART_OWNER_REQUIRED(HttpStatus.BAD_REQUEST, "An authenticated customer is required"),
-    CART_QUANTITY_TOO_LARGE(HttpStatus.BAD_REQUEST, "Cart quantity or amount is too large"),
+    CART_QUANTITY_TOO_LARGE(HttpStatus.BAD_REQUEST, "A cart line holds at most 9999 units"),
     INVALID_SHIPPING_METHOD(HttpStatus.BAD_REQUEST, "Shipping method does not exist or is not available"),
     INVALID_PAYMENT_METHOD(HttpStatus.BAD_REQUEST, "Payment method does not exist or is not available"),
     INVALID_RECIPIENT(HttpStatus.BAD_REQUEST, "Provide either a saved address or the recipient name, phone and address"),
