@@ -111,7 +111,7 @@ class BrandServiceTest {
         when(brandRepository.findById(ID)).thenReturn(Optional.of(existing));
         when(productRepository.existsByBrandIdAndStatusNot(ID, CatalogStatus.DELETED)).thenReturn(true);
 
-        assertThrows(BusinessException.class, () -> brandService.delete(ID));
+        assertEquals(CatalogErrorCode.BRAND_IN_USE, assertThrows(BusinessException.class, () -> brandService.delete(ID)).getErrorCode());
         assertEquals(CatalogStatus.ACTIVE, existing.getStatus());
     }
 

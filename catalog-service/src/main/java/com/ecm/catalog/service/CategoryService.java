@@ -70,7 +70,7 @@ public class CategoryService {
         Category category = findLiveCategory(id);
         if (categoryRepository.existsByParentIdAndStatusNot(id, CatalogStatus.DELETED)
                 || productRepository.existsByCategoryIdAndStatusNot(id, CatalogStatus.DELETED)) {
-            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Category has children or products");
+            throw new BusinessException(CatalogErrorCode.CATEGORY_IN_USE);
         }
 
         // 2. Soft delete so its name can be reused
@@ -147,8 +147,7 @@ public class CategoryService {
     }
 
     private String normalizeSeo(String seoName, String name) {
-        return (seoName == null || seoName.isBlank() ? name : seoName).trim().toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        return SeoNames.slug(seoName, name);
     }
 
     @Transactional(readOnly = true)

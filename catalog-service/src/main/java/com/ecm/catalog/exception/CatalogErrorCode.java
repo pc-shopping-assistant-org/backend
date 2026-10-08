@@ -8,6 +8,8 @@ public enum CatalogErrorCode implements ErrorCode {
     INVALID_PRICE_RANGE(HttpStatus.BAD_REQUEST, "Invalid price range"),
     RESOURCE_CONFLICT(HttpStatus.CONFLICT, "Catalog resource conflicts with existing data"),
     INVALID_CATALOG_REFERENCE(HttpStatus.BAD_REQUEST, "Referenced catalog resource does not exist or is inactive"),
+    CATEGORY_IN_USE(HttpStatus.CONFLICT, "Category still has sub-categories or products and cannot be deleted"),
+    BRAND_IN_USE(HttpStatus.CONFLICT, "Brand is still used by products and cannot be deleted"),
     PRODUCT_IN_USE(HttpStatus.CONFLICT, "Product has stock or order history and cannot be deleted"),
     INVALID_PRODUCT_STATUS(HttpStatus.BAD_REQUEST, "Product status transition is invalid"),
     REVIEW_ORDER_NOT_COMPLETED(HttpStatus.CONFLICT, "Only completed orders can be reviewed"),
