@@ -13,6 +13,24 @@ docker compose up -d
 mvn clean install -DskipTests
 ```
 
+### AI database (local development)
+
+The same PostgreSQL container initializes `ai_db` alongside the business-service
+databases. No extra PostgreSQL container or test database is needed. For an
+existing volume, init scripts do not run again automatically; create only the
+missing AI database without resetting any data:
+
+```sh
+docker compose up -d postgres
+docker compose exec -T -e POSTGRES_MULTIPLE_DATABASES=ai_db postgres \
+  bash /docker-entrypoint-initdb.d/init-multiple-databases.sh
+```
+
+Root `../ai-service` connects on `127.0.0.1:5432/ai_db`. Current compose dev
+credentials are `postgres` / `postgres`; use actual credentials if customized.
+Do not run another PostgreSQL compose project on the same port or delete volumes
+to add this database. AI migrations/checkpointer bootstrap are separate P2 work.
+
 Create and load the local environment file before starting `identity-service`:
 
 ```powershell
@@ -38,9 +56,29 @@ See [Running the Services](#running-the-services) for the exact commands.
 
 ### Python AI service
 
-`ai-service/` contains the existing FastAPI/PydanticAI assistant and graph
-implementation. It builds independently of the Java Maven reactor. Catalog
+`ai-service/` is a Git submodule of `git@github.com:pc-shopping-assistant-org/ai-service.git`,
+not a vendored source copy. It contains FastAPI/LangGraph/Pydantic and builds
+independently of the Java Maven reactor. Catalog
 retrieval reads the catalog-service public API; it does not access service databases.
+
+```sh
+git submodule update --init --recursive
+```
+
+Compose `build: ./ai-service` now uses this pinned submodule checkout. The sibling
+root `../ai-service` repository and this checkout do not share uncommitted work;
+commit/push AI changes first, then update the backend gitlink. Never publish a
+backend gitlink to an AI commit unavailable on GitHub. The pinned checkout includes
+the committed P0/P1 core/contracts and microservice catalog adapter. These local
+AI commits still need publication before sharing the backend commit.
+
+The prior vendored tree is preserved locally at
+`../.ai-submodule-backup.WkkAdO/ai-service` (outside this Git repository), and is
+also recoverable from backend Git history. Its `mainImageUrl` catalog-card mapping
+and microservice-specific regression are now committed and included in this pin;
+remote availability remains unverified (ISSUE-083).
+do not reintroduce the old PydanticAI runtime. Compose already explicitly supplies
+the microservice catalog URL; configure that URL when running AI directly on host.
 
 Run on the host:
 

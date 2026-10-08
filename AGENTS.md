@@ -15,7 +15,11 @@ instead of re-deriving your own convention.
 
 ## Quick facts
 
-- `ai-service/` is Python/FastAPI/PydanticAI and is outside the Maven reactor.
+- `ai-service/` is a Git submodule of `pc-shopping-assistant-org/ai-service`,
+  using Python/FastAPI, LangGraph and Pydantic, outside the Maven reactor.
+  Initialize it with `git submodule update --init --recursive`. Make AI changes
+  in its repository, commit/push them there, then stage the updated gitlink here;
+  never pin an unpublished AI commit when publishing the backend.
   Run `uv sync --frozen`, `uv run pytest -q`, `uv run ruff check src tests`, and
   `uv run mypy src` in that directory. Gateway routes `/api/v1/assistant/**`
   to its `/api/v1/**` API using `AI_SERVICE_URL`.
