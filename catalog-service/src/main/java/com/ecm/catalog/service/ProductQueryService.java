@@ -97,7 +97,7 @@ public class ProductQueryService {
         List<UUID> categoryIds = anyCategory ? List.of() : categoryRepository.findSelfAndDescendantIds(filter.getCategoryId());
 
         // 3. Read one extra row to learn whether another page follows
-        List<Product> products = productRepository.search(productStatuses, variantStatuses, filter.getCursor(),
+        List<Product> products = productRepository.search(productStatuses, variantStatuses, onlyWithVariants, filter.getCursor(),
                 anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
                 PageRequest.of(0, pageSize + 1));
         boolean hasNext = products.size() > pageSize;

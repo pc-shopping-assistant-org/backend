@@ -64,7 +64,7 @@ class ProductQueryServiceTest {
     @SuppressWarnings("unchecked")
     private ArgumentCaptor<Pageable> capturePage(List<CatalogStatus> statuses, List<CatalogStatus> variantStatuses) {
         ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-        verify(productRepository).search(eq(statuses), eq(variantStatuses), any(), anyBoolean(), any(), any(), any(), any(), any(), pageable.capture());
+        verify(productRepository).search(eq(statuses), eq(variantStatuses), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), pageable.capture());
         return pageable;
     }
 
@@ -72,7 +72,7 @@ class ProductQueryServiceTest {
 
     @Test
     void publicListSeesOnlyActiveAndOnlyProductsWithVariants() {
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(products(1));
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(products(1));
 
         service.getProducts(new ProductFilterRequest());
 
@@ -84,7 +84,7 @@ class ProductQueryServiceTest {
     void publicListIgnoresTheStatusFilter() {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setStatus(CatalogStatus.INACTIVE);
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getProducts(filter);
 
@@ -93,7 +93,7 @@ class ProductQueryServiceTest {
 
     @Test
     void adminListShowsActiveAndInactiveAndKeepsProductsWithoutVariants() {
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getAdminProducts(new ProductFilterRequest());
 
@@ -102,10 +102,21 @@ class ProductQueryServiceTest {
     }
 
     @Test
+    void publicListSkipsProductsWithoutVariantsInTheQueryAndAdminKeepsThem() {
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+
+        service.getProducts(new ProductFilterRequest());
+        service.getAdminProducts(new ProductFilterRequest());
+
+        verify(productRepository).search(any(), any(), eq(true), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+        verify(productRepository).search(any(), any(), eq(false), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
     void adminListFiltersByStatusButNeverShowsDeleted() {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setStatus(CatalogStatus.INACTIVE);
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getAdminProducts(filter);
         capturePage(List.of(CatalogStatus.INACTIVE), List.of(CatalogStatus.ACTIVE, CatalogStatus.INACTIVE));
@@ -119,12 +130,12 @@ class ProductQueryServiceTest {
     void keywordIsLowerCasedAndWrappedForLikeSearch() {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setKeyword("  RAM Kit ");
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getAdminProducts(filter);
 
         ArgumentCaptor<String> keyword = ArgumentCaptor.forClass(String.class);
-        verify(productRepository).search(any(), any(), any(), anyBoolean(), any(), any(), keyword.capture(), any(), any(), any());
+        verify(productRepository).search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), keyword.capture(), any(), any(), any());
         assertEquals("%ram kit%", keyword.getValue());
     }
 
@@ -132,12 +143,12 @@ class ProductQueryServiceTest {
     void blankKeywordMeansNoKeywordFilter() {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setKeyword("   ");
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getAdminProducts(filter);
 
         ArgumentCaptor<String> keyword = ArgumentCaptor.forClass(String.class);
-        verify(productRepository).search(any(), any(), any(), anyBoolean(), any(), any(), keyword.capture(), any(), any(), any());
+        verify(productRepository).search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), keyword.capture(), any(), any(), any());
         assertNull(keyword.getValue());
     }
 
@@ -150,7 +161,7 @@ class ProductQueryServiceTest {
             assertEquals(CatalogErrorCode.INVALID_PRICE_RANGE,
                     assertThrows(BusinessException.class, () -> service.getAdminProducts(filter)).getErrorCode());
         }
-        verify(productRepository, never()).search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+        verify(productRepository, never()).search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -158,7 +169,7 @@ class ProductQueryServiceTest {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setLimit(2);
         List<Product> three = products(3);
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(three);
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(three);
         when(assembler.summaries(any(), anyCollection(), anyBoolean())).thenReturn(List.of(new ProductSummaryResponse(), new ProductSummaryResponse()));
 
         CursorPageResponse<ProductSummaryResponse> page = service.getAdminProducts(filter);
@@ -174,7 +185,7 @@ class ProductQueryServiceTest {
     void lastPageHasNoCursor() {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setLimit(5);
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(products(2));
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(products(2));
 
         CursorPageResponse<ProductSummaryResponse> page = service.getAdminProducts(filter);
 
@@ -186,7 +197,7 @@ class ProductQueryServiceTest {
     void pageSizeIsCappedAndDefaulted() {
         ProductFilterRequest huge = new ProductFilterRequest();
         huge.setLimit(10_000);
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getAdminProducts(huge);
 
@@ -201,20 +212,20 @@ class ProductQueryServiceTest {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setCategoryId(parent);
         when(categoryRepository.findSelfAndDescendantIds(parent)).thenReturn(List.of(parent, child));
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getProducts(filter);
 
-        verify(productRepository).search(any(), any(), any(), eq(false), eq(List.of(parent, child)), any(), any(), any(), any(), any());
+        verify(productRepository).search(any(), any(), anyBoolean(), any(), eq(false), eq(List.of(parent, child)), any(), any(), any(), any(), any());
     }
 
     @Test
     void noCategoryFilterMatchesEveryCategory() {
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
         service.getProducts(new ProductFilterRequest());
 
-        verify(productRepository).search(any(), any(), any(), eq(true), eq(List.of()), any(), any(), any(), any(), any());
+        verify(productRepository).search(any(), any(), anyBoolean(), any(), eq(true), eq(List.of()), any(), any(), any(), any(), any());
         verify(categoryRepository, never()).findSelfAndDescendantIds(any());
     }
 

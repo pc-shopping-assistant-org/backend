@@ -27,7 +27,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     /**
      * Keyset page (newest first) of products whose status is one of {@code statuses}. A null cursor starts at the
      * newest product. Unless {@code anyCategory}, only products in {@code categoryIds} match. Price bounds match when at least one variant, with a status in {@code variantStatuses},
-     * falls inside them.
+     * falls inside them. With {@code onlyWithVariants}, products without a variant in {@code variantStatuses} are skipped
+     * by the query itself so a page is never short of the requested size.
      */
     @Query("""
             SELECT p FROM Product p
@@ -38,6 +39,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
               AND (:keyword IS NULL OR LOWER(p.name) LIKE :keyword
                    OR LOWER(p.seoName) LIKE :keyword
                    OR LOWER(p.description) LIKE :keyword)
+              AND (:onlyWithVariants = FALSE OR EXISTS (
+                   SELECT x.id FROM ProductVariant x WHERE x.productId = p.id AND x.status IN :variantStatuses))
               AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR EXISTS (
                    SELECT v.id FROM ProductVariant v WHERE v.productId = p.id
                      AND v.status IN :variantStatuses
@@ -48,6 +51,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> search(
             @Param("statuses") Collection<CatalogStatus> statuses,
             @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
+            @Param("onlyWithVariants") boolean onlyWithVariants,
             @Param("cursor") UUID cursor,
             @Param("anyCategory") boolean anyCategory,
             @Param("categoryIds") Collection<UUID> categoryIds,
