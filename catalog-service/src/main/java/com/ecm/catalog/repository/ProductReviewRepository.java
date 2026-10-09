@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +24,10 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, UU
     Optional<ProductReview> findByIdAndProductIdAndCustomerIdAndStatus(UUID id, UUID productId, UUID customerId, CatalogStatus status);
 
     Page<ProductReview> findByProductIdAndStatusOrderByCreatedAtDesc(UUID productId, CatalogStatus status, Pageable pageable);
+
+    List<ProductReview> findByCustomerIdAndOrderItemIdInAndStatus(UUID customerId, Collection<UUID> orderItemIds, CatalogStatus status);
+
+    List<ProductReview> findByProductIdAndCustomerIdAndStatusOrderByCreatedAtDesc(UUID productId, UUID customerId, CatalogStatus status);
 
     /**
      * Spends the single edit; zero rows means another request already did, so two concurrent edits cannot both succeed.

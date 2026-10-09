@@ -20,6 +20,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/product-variants/stock-summary").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/categories/admin", "/brands/admin", "/products/admin", "/products/admin/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/products/*/reviews/mine", "/reviews/mine").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**", "/cart-variant-details").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.POST, "/products/*/reviews").hasRole("CUSTOMER")

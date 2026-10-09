@@ -224,6 +224,46 @@ class ProductReviewServiceTests {
                 .status(CatalogStatus.ACTIVE).createdAt(createdAt).editedAt(editedAt).build();
     }
 
+    @Test
+    void listsOnlyTheCallersReviewsOfTheProductWithoutAnIdentityCall() {
+        givenActiveProduct();
+        ProductReview mine = review(customerId, Instant.now().minus(Duration.ofDays(2)), null);
+        when(reviewRepository.findByProductIdAndCustomerIdAndStatusOrderByCreatedAtDesc(productId, customerId, CatalogStatus.ACTIVE))
+                .thenReturn(List.of(mine));
+        ReviewResponse response = new ReviewResponse(reviewId, productId, null, RATING, "old", null, null);
+        when(reviewMapper.toResponse(mine, null)).thenReturn(response);
+
+        assertThat(service.getMyReviews(productId, customerId)).containsExactly(response);
+        verify(identityServiceClient, never()).getCustomerNames(any());
+    }
+
+    @Test
+    void reportsWhichOrderLinesTheCallerHasReviewed() {
+        UUID otherItem = UUID.randomUUID();
+        ProductReview mine = review(customerId, Instant.now(), null);
+        when(reviewRepository.findByCustomerIdAndOrderItemIdInAndStatus(customerId, List.of(orderItemId, otherItem), CatalogStatus.ACTIVE))
+                .thenReturn(List.of(mine));
+
+        assertThat(service.getReviewedOrderItems(List.of(orderItemId, otherItem), customerId))
+                .extracting(item -> item.reviewId())
+                .containsExactly(mine.getId());
+    }
+
+    @Test
+    void rejectsAnEmptyOrTooLongListOfOrderLines() {
+        assertThatThrownBy(() -> service.getReviewedOrderItems(List.of(), customerId)).isInstanceOf(BusinessException.class);
+        List<UUID> tooMany = java.util.stream.Stream.generate(UUID::randomUUID).limit(101).toList();
+        assertThatThrownBy(() -> service.getReviewedOrderItems(tooMany, customerId)).isInstanceOf(BusinessException.class);
+        verify(reviewRepository, never()).findByCustomerIdAndOrderItemIdInAndStatus(any(), any(), any());
+    }
+
+    @Test
+    void rejectsMyReviewsOfAnUnknownProduct() {
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getMyReviews(productId, customerId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
     private void givenReview(ProductReview review) {
         when(reviewRepository.findByIdAndProductIdAndCustomerIdAndStatus(reviewId, productId, customerId, CatalogStatus.ACTIVE))
                 .thenReturn(Optional.of(review));
