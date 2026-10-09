@@ -1,0 +1,19 @@
+{
+  "analysis": {
+    "filter": {
+      "prefix_ngram": { "type": "edge_ngram", "min_gram": 2, "max_gram": 15 }
+    },
+    "analyzer": {
+      "folded": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "filter": ["lowercase", "asciifolding"]
+      },
+      "folded_prefix": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "filter": ["lowercase", "asciifolding", "prefix_ngram"]
+      }
+    }
+  }
+}

@@ -3,10 +3,12 @@ services:
     image: postgres:18.3-alpine
     container_name: pcshop-postgres
     restart: unless-stopped
+    # Debezium reads catalog_db's WAL to feed the product search, which needs logical decoding.
+    command: [ "postgres", "-c", "wal_level=logical" ]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_MULTIPLE_DATABASES: identity_db,catalog_db,order_db,payment_db,promotion_db,search_db,media_db
+      POSTGRES_MULTIPLE_DATABASES: identity_db,catalog_db,order_db,payment_db,promotion_db,search_db,media_db,ai_db
     ports:
       - "5432:5432"
     volumes:
@@ -78,6 +80,48 @@ services:
     volumes:
       - pcshop-kafka-data:/var/lib/kafka/data
 
+  # The product index of search-service (UC-CAT-003). Single node, security off: local development only.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.5
+    container_name: pcshop-elasticsearch
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - pcshop-elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # Debezium on Kafka Connect: streams row changes of catalog_db to the Kafka topic catalog.changed.
+  # The connector itself is registered by docker/debezium/register-catalog-connector.sh.
+  kafka-connect:
+    image: quay.io/debezium/connect:3.0
+    container_name: pcshop-kafka-connect
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: pcshop-connect
+      CONFIG_STORAGE_TOPIC: pcshop_connect_configs
+      OFFSET_STORAGE_TOPIC: pcshop_connect_offsets
+      STATUS_STORAGE_TOPIC: pcshop_connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      STATUS_STORAGE_REPLICATION_FACTOR: "1"
+    ports:
+      - "18083:8083" # Kafka Connect REST API, off 8083 which order-service uses
+
   # Grafana LGTM (Loki + Grafana + Tempo + Mimir/Prometheus) with a built-in OpenTelemetry
   # Collector. Services run on the HOST and push traces, metrics and logs over OTLP to
   # localhost:4318 (HTTP) / localhost:4317 (gRPC); everything is explored in Grafana.
@@ -116,4 +160,5 @@ volumes:
   pcshop-rabbitmq-data:
   pcshop-redis-data:
   pcshop-kafka-data:
+  pcshop-elasticsearch-data:
   pcshop-lgtm-data:

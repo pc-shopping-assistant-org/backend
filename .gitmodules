@@ -1,0 +1,4 @@
+[submodule "ai-service"]
+	path = ai-service
+	url = git@github.com:pc-shopping-assistant-org/ai-service.git
+	branch = main
