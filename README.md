@@ -189,6 +189,8 @@ The following containers are started:
 | RabbitMQ Management     | http://localhost:15672             | Management UI, `guest/guest`  |
 | Redis                   | `localhost:6379`                   | Cache and identity data       |
 | Kafka                   | `localhost:29092`                  | Event streaming               |
+| Elasticsearch           | `localhost:9200`                   | Product search index          |
+| Kafka Connect (Debezium) | `localhost:18083`                 | Streams catalog_db changes to Kafka |
 | Grafana (LGTM)          | http://localhost:3300              | Traces, metrics, and logs UI  |
 | OTLP receiver           | `localhost:4317` (gRPC), `localhost:4318` (HTTP) | Receives telemetry from services |
 
@@ -256,7 +258,7 @@ Finally, start the gateway:
 mvn -pl api-gateway spring-boot:run
 ```
 
-The services require PostgreSQL and Eureka at startup. `catalog-service` and `order-service` also use Kafka; `order-service` uses RabbitMQ; and `identity-service` uses Redis and SMTP.
+The services require PostgreSQL and Eureka at startup. `catalog-service` and `order-service` also use Kafka; `search-service` uses Elasticsearch and Kafka (after `docker compose up -d`, run `docker/debezium/register-catalog-connector.sh` once to start the catalog change feed); `order-service` uses RabbitMQ; and `identity-service` uses Redis and SMTP.
 
 ## Common Commands
 
