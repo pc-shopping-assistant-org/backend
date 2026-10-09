@@ -16,5 +16,6 @@ public interface CustomerMapper {
 
     @Mapping(target = "accountId", source = "account.id")
     @Mapping(target = "role", source = "role.name")
+    @Mapping(target = "avatarUrl", ignore = true)
     UserSummaryResponse toSummary(Account account, Role role, Customer customer);
 }

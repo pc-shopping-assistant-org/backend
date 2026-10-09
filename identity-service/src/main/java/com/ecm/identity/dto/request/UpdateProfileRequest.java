@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record UpdateProfileRequest(
         @NotBlank(message = "First name is required")
@@ -23,6 +24,9 @@ public record UpdateProfileRequest(
         LocalDate birthday,
 
         @Pattern(regexp = "^(\\+84|0)[0-9]{9}$", message = "Invalid phone number format")
-        String phone
+        String phone,
+
+        /** A file already uploaded to the Media Service; omitted to keep the current avatar. */
+        UUID avatarFileId
 ) {
 }

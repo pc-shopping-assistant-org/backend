@@ -6,6 +6,7 @@ import com.ecm.catalog.dto.request.CreateReviewRequest;
 import com.ecm.catalog.dto.request.UpdateReviewRequest;
 import com.ecm.catalog.dto.response.OrderItemResponse;
 import com.ecm.catalog.dto.response.ReviewResponse;
+import com.ecm.catalog.dto.response.ReviewedOrderItemResponse;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.ProductReview;
 import com.ecm.catalog.exception.CatalogErrorCode;
@@ -43,6 +44,7 @@ public class ProductReviewService {
     private static final String RESOURCE_ORDER_ITEM = "Order item";
     private static final String ORDER_STATUS_COMPLETED = "COMPLETED";
     private static final int MAX_PAGE_SIZE = 50;
+    private static final int MAX_ORDER_ITEMS_PER_LOOKUP = 100;
     private static final Duration EDIT_WINDOW = Duration.ofDays(30);
 
     private final ProductReviewRepository reviewRepository;
@@ -107,6 +109,25 @@ public class ProductReviewService {
         // 3. One identity call for the whole page; a failure surfaces as 503 rather than a list with missing names.
         Map<UUID, String> names = reviewerNames(reviews.getContent());
         return PageResponse.of(reviews.map(review -> reviewMapper.toResponse(review, names.get(review.getCustomerId()))));
+    }
+
+    /** Which of the given order lines the caller has reviewed; one query for the whole order, however many lines it has. */
+    @Transactional(readOnly = true)
+    public List<ReviewedOrderItemResponse> getReviewedOrderItems(List<UUID> orderItemIds, UUID customerId) {
+        if (orderItemIds.isEmpty() || orderItemIds.size() > MAX_ORDER_ITEMS_PER_LOOKUP) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+        return reviewRepository.findByCustomerIdAndOrderItemIdInAndStatus(customerId, orderItemIds, CatalogStatus.ACTIVE).stream()
+                .map(review -> new ReviewedOrderItemResponse(review.getOrderItemId(), review.getProductId(), review.getId()))
+                .toList();
+    }
+
+    /** The reviews of the caller for this product, newest first: the storefront pins them above the public list so they can be edited. */
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getMyReviews(UUID productId, UUID customerId) {
+        requireProduct(productId);
+        return reviewRepository.findByProductIdAndCustomerIdAndStatusOrderByCreatedAtDesc(productId, customerId, CatalogStatus.ACTIVE)
+                .stream().map(review -> reviewMapper.toResponse(review, null)).toList();
     }
 
     @Transactional

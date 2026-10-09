@@ -14,6 +14,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -102,6 +103,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMissingParameter(MissingServletRequestParameterException ex) {
         return ResponseEntity.status(CommonErrorCode.BAD_REQUEST.getHttpStatus())
                 .body(ApiResponse.error(CommonErrorCode.BAD_REQUEST, "Required parameter '" + ex.getParameterName() + "' is missing"));
+    }
+
+    /** An upload above the configured multipart limit. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUploadTooLarge(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(CommonErrorCode.PAYLOAD_TOO_LARGE.getHttpStatus())
+                .body(ApiResponse.error(CommonErrorCode.PAYLOAD_TOO_LARGE, CommonErrorCode.PAYLOAD_TOO_LARGE.getDefaultMessage()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

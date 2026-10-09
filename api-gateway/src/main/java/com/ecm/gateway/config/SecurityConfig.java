@@ -25,8 +25,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**",
                                 "/catalog-service/products/**", "/catalog-service/categories/**", "/catalog-service/brands/**",
                                 "/catalog-service/product-variants/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/products/search", "/search-service/products/search").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/payments/*/webhook", "/payment-service/payments/*/webhook").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/payments/vnpay/ipn", "/payments/vnpay/return",
+                                "/payment-service/payments/vnpay/ipn", "/payment-service/payments/vnpay/return").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(revokedTokenFilter, BearerTokenAuthenticationFilter.class)

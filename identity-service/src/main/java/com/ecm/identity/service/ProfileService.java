@@ -47,6 +47,7 @@ public class ProfileService {
     private final CustomerMapper customerMapper;
     private final EmployeeMapper employeeMapper;
     private final AdminMapper adminMapper;
+    private final AvatarResolver avatarResolver;
 
     @Transactional(readOnly = true)
     public UserSummaryResponse getProfile(UUID accountId) {
@@ -56,13 +57,22 @@ public class ProfileService {
         Role role = findRole(account);
 
         // 2. Map the existing customer, employee or admin profile
-        return customerRepository.findById(accountId)
+        UserSummaryResponse summary = customerRepository.findById(accountId)
                 .map(customer -> customerMapper.toSummary(account, role, customer))
                 .or(() -> employeeRepository.findById(accountId)
                         .map(employee -> employeeMapper.toSummary(account, role, employee)))
                 .or(() -> adminRepository.findById(accountId)
                         .map(admin -> adminMapper.toSummary(account, role, admin)))
                 .orElseThrow(() -> new ResourceNotFoundException("UserProfile", accountId));
+        return withAvatarUrl(summary);
+    }
+
+    private UserSummaryResponse withAvatarUrl(UserSummaryResponse summary) {
+        UUID fileId = summary.avatarFileId();
+        if (fileId == null) {
+            return summary;
+        }
+        return summary.withAvatarUrl(avatarResolver.resolveUrls(List.of(fileId)).get(fileId));
     }
 
     @Transactional
@@ -81,7 +91,10 @@ public class ProfileService {
             account.setPhone(request.phone());
         }
 
-        // 3. Update customer profile fields
+        // 3. The avatar has to be a file the Media Service knows
+        avatarResolver.requireExisting(request.avatarFileId());
+
+        // 4. Update customer profile fields
         customer.setFirstName(request.firstName().trim());
         customer.setLastName(request.lastName().trim());
         if (request.gender() != null) {
@@ -90,11 +103,14 @@ public class ProfileService {
         if (request.birthday() != null) {
             customer.setBirthday(request.birthday());
         }
+        if (request.avatarFileId() != null) {
+            customer.setAvatarFileId(request.avatarFileId());
+        }
         accountRepository.save(account);
         customerRepository.save(customer);
 
-        // 4. Map the updated profile
-        return customerMapper.toSummary(account, findRole(account), customer);
+        // 5. Map the updated profile
+        return withAvatarUrl(customerMapper.toSummary(account, findRole(account), customer));
     }
 
     private Account findAccount(UUID accountId) {
@@ -129,6 +145,6 @@ public class ProfileService {
             throw new BusinessException(CommonErrorCode.BAD_REQUEST);
         }
         return customerRepository.findAllById(accountIds).stream()
-                .collect(Collectors.toMap(Customer::getAccountId, customer -> customer.getFirstName() + " " + customer.getLastName()));
+                .collect(Collectors.toMap(Customer::getAccountId, customer -> customer.getLastName() + " " + customer.getFirstName()));
     }
 }

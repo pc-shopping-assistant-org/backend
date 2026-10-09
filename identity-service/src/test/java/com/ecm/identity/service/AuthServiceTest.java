@@ -197,6 +197,70 @@ class AuthServiceTest {
         verify(tokenRevocationService, never()).revokeBefore(any(), any(), any());
     }
 
+    // ---- refresh token ----
+
+    private void refreshTokenIssuedAt(Instant issuedAt) {
+        when(tokenProvider.validateToken("refresh")).thenReturn(true);
+        when(tokenProvider.isRefreshToken("refresh")).thenReturn(true);
+        when(tokenProvider.getAccountId("refresh")).thenReturn(ACCOUNT_ID);
+        when(tokenProvider.getIssuedAt("refresh")).thenReturn(issuedAt);
+    }
+
+    @Test
+    void refreshIssuesANewTokenPairForAValidRefreshToken() {
+        Account account = account(AccountStatus.ACTIVE);
+        Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
+        Customer customer = Customer.builder().accountId(ACCOUNT_ID).build();
+        UserSummaryResponse summary = mock(UserSummaryResponse.class);
+        refreshTokenIssuedAt(Instant.now());
+        when(tokenRevocationService.isRevoked(eq(ACCOUNT_ID), any())).thenReturn(false);
+        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
+        when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
+        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
+        when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
+        when(tokenProvider.generateAccessToken(ACCOUNT_ID, EMAIL, "ROLE_CUSTOMER", "ACTIVE")).thenReturn("access2");
+        when(tokenProvider.generateRefreshToken(ACCOUNT_ID, EMAIL)).thenReturn("refresh2");
+        when(jwtProperties.getAccessTokenExpirationMs()).thenReturn(86_400_000L);
+
+        AuthResponse response = authService.refresh("refresh");
+
+        assertEquals("access2", response.accessToken());
+        assertEquals("refresh2", response.refreshToken());
+    }
+
+    @Test
+    void refreshRejectsAnInvalidTokenOrAnAccessToken() {
+        when(tokenProvider.validateToken("bad")).thenReturn(false);
+        when(tokenProvider.validateToken("access")).thenReturn(true);
+        when(tokenProvider.isRefreshToken("access")).thenReturn(false);
+
+        assertEquals(IdentityErrorCode.INVALID_CREDENTIALS,
+                assertThrows(BusinessException.class, () -> authService.refresh("bad")).getErrorCode());
+        assertEquals(IdentityErrorCode.INVALID_CREDENTIALS,
+                assertThrows(BusinessException.class, () -> authService.refresh("access")).getErrorCode());
+        verify(tokenProvider, never()).generateAccessToken(any(), any(), any(), any());
+    }
+
+    @Test
+    void refreshRejectsATokenIssuedBeforeALogout() {
+        refreshTokenIssuedAt(Instant.now().minusSeconds(60));
+        when(tokenRevocationService.isRevoked(eq(ACCOUNT_ID), any())).thenReturn(true);
+
+        assertEquals(IdentityErrorCode.INVALID_CREDENTIALS,
+                assertThrows(BusinessException.class, () -> authService.refresh("refresh")).getErrorCode());
+        verify(tokenProvider, never()).generateAccessToken(any(), any(), any(), any());
+    }
+
+    @Test
+    void refreshRejectsALockedAccount() {
+        refreshTokenIssuedAt(Instant.now());
+        when(tokenRevocationService.isRevoked(eq(ACCOUNT_ID), any())).thenReturn(false);
+        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account(AccountStatus.LOCKED)));
+
+        assertEquals(IdentityErrorCode.ACCOUNT_LOCKED,
+                assertThrows(BusinessException.class, () -> authService.refresh("refresh")).getErrorCode());
+    }
+
     // ---- UC-AUTH-003 reset password ----
 
     @Test

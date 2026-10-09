@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CartService {
 
+    /** The most a customer can hold of one variant. */
+    public static final int MAX_LINE_QUANTITY = 9999;
+
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final CatalogVariantLookup variantLookup;
@@ -47,9 +50,9 @@ public class CartService {
         // 3. Add to the quantity already in the cart, which together must not exceed the stock
         CartItem item = cartItemRepository.findByCartIdAndVariantId(cart.getId(), variant.id())
                 .orElseGet(() -> CartItem.builder().cartId(cart.getId()).variantId(variant.id()).quantity(0).build());
-        int quantity = item.getQuantity() + request.quantity();
-        requireStock(variant, quantity);
-        item.setQuantity(quantity);
+        long quantity = (long) item.getQuantity() + request.quantity();
+        requireQuantity(variant, quantity);
+        item.setQuantity((int) quantity);
         cartItemRepository.save(item);
         return toResponse(cart);
     }
@@ -64,7 +67,7 @@ public class CartService {
 
         // 2. The new quantity replaces the old one, within the stock
         CartVariantDetailsResponse variant = requireSellable(variantId);
-        requireStock(variant, request.quantity());
+        requireQuantity(variant, request.quantity());
         item.setQuantity(request.quantity());
         cartItemRepository.save(item);
         return toResponse(cart);
@@ -103,7 +106,10 @@ public class CartService {
         return variant;
     }
 
-    private static void requireStock(CartVariantDetailsResponse variant, int quantity) {
+    private static void requireQuantity(CartVariantDetailsResponse variant, long quantity) {
+        if (quantity > MAX_LINE_QUANTITY) {
+            throw new BusinessException(OrderErrorCode.CART_QUANTITY_TOO_LARGE);
+        }
         if (variant.quantity() == null || quantity > variant.quantity()) {
             throw new BusinessException(OrderErrorCode.INSUFFICIENT_STOCK);
         }
@@ -129,10 +135,10 @@ public class CartService {
 
     private CartItemResponse toItemResponse(CartItem item, CartVariantDetailsResponse variant) {
         if (variant == null) {
-            return new CartItemResponse(item.getVariantId(), null, null, null, null, null, null, item.getQuantity(), 0L, null, false);
+            return new CartItemResponse(item.getVariantId(), null, null, null, null, null, null, null, null, item.getQuantity(), 0L, null, false);
         }
         long lineTotal = variant.price() * item.getQuantity();
-        return new CartItemResponse(variant.id(), variant.productId(), variant.productName(), variant.sku(), variant.model(),
+        return new CartItemResponse(variant.id(), variant.productId(), variant.categoryId(), variant.productName(), variant.sku(), variant.model(), variant.variantLabel(),
                 variant.mainImageUrl(), variant.price(), item.getQuantity(), lineTotal, variant.quantity(), variant.sellable());
     }
 
