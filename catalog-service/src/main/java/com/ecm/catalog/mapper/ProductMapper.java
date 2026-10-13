@@ -13,6 +13,8 @@ public interface ProductMapper {
     @Mapping(target = "categoryName", ignore = true)
     @Mapping(target = "minPrice", ignore = true)
     @Mapping(target = "maxPrice", ignore = true)
+    @Mapping(target = "variantCount", ignore = true)
+    @Mapping(target = "totalQuantity", ignore = true)
     @Mapping(target = "mainImageUrl", ignore = true)
     ProductSummaryResponse toSummaryResponse(Product product);
 
