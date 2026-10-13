@@ -3,6 +3,7 @@ package com.ecm.identity.service;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.DuplicateResourceException;
+import com.ecm.common.exception.InvalidStateException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.response.PageResponse;
 import com.ecm.identity.dto.request.CreateEmployeeRequest;
@@ -49,6 +50,7 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final AvatarResolver avatarResolver;
     private final AccountLocker accountLocker;
+    private final AccountStateChanger accountStateChanger;
 
     @Transactional
     public EmployeeResponse create(CreateEmployeeRequest request) {
@@ -122,6 +124,9 @@ public class EmployeeService {
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId));
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId));
+        if (account.getStatus() == AccountStatus.DELETED) {
+            throw new InvalidStateException(RESOURCE_EMPLOYEE, accountId, account.getStatus().name(), "update");
+        }
 
         // 2. Email and phone must stay unique across every other account
         applyContact(account, request);
@@ -159,6 +164,32 @@ public class EmployeeService {
 
         // 3. Answer with the stored row
         return detail(accountId);
+    }
+
+    @Transactional
+    public EmployeeResponse deactivate(UUID accountId) {
+        accountStateChanger.deactivate(employeeAccount(accountId), RESOURCE_EMPLOYEE);
+        return detail(accountId);
+    }
+
+    @Transactional
+    public EmployeeResponse activate(UUID accountId) {
+        accountStateChanger.activate(employeeAccount(accountId), RESOURCE_EMPLOYEE);
+        return detail(accountId);
+    }
+
+    @Transactional
+    public void delete(UUID accountId) {
+        accountStateChanger.delete(employeeAccount(accountId), RESOURCE_EMPLOYEE);
+    }
+
+    /** Only an employee account can be moved between states here. */
+    private Account employeeAccount(UUID accountId) {
+        if (!employeeRepository.existsById(accountId)) {
+            throw new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId);
+        }
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId));
     }
 
     private void applyContact(Account account, UpdateEmployeeRequest request) {

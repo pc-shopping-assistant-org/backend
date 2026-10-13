@@ -10,6 +10,7 @@ import com.ecm.identity.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,22 @@ public class EmployeeController {
     public ApiResponse<EmployeeResponse> update(@PathVariable UUID accountId,
                                                 @Valid @RequestBody UpdateEmployeeRequest request) {
         return ApiResponse.success(employeeService.update(accountId, request));
+    }
+
+    @PostMapping("/{accountId}/deactivate")
+    public ApiResponse<EmployeeResponse> deactivate(@PathVariable UUID accountId) {
+        return ApiResponse.success(employeeService.deactivate(accountId));
+    }
+
+    @PostMapping("/{accountId}/activate")
+    public ApiResponse<EmployeeResponse> activate(@PathVariable UUID accountId) {
+        return ApiResponse.success(employeeService.activate(accountId));
+    }
+
+    @DeleteMapping("/{accountId}")
+    public ApiResponse<Void> delete(@PathVariable UUID accountId) {
+        employeeService.delete(accountId);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/{accountId}/lock")

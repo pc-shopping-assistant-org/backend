@@ -23,6 +23,9 @@ public class ProductSummaryResponse {
     private String categoryName;
     private Long minPrice;
     private Long maxPrice;
+    /** How many variants the listing counted, and their stock added up. */
+    private Integer variantCount;
+    private Long totalQuantity;
     private String mainImageUrl;
     private String status;
     private Instant createdAt;
