@@ -26,7 +26,9 @@ docker compose exec -T -e POSTGRES_MULTIPLE_DATABASES=ai_db postgres \
   bash /docker-entrypoint-initdb.d/init-multiple-databases.sh
 ```
 
-Root `../ai-service` connects on `127.0.0.1:5432/ai_db`. Current compose dev
+Root `../ai-service` connects on `127.0.0.1:5433/ai_db`. Host port defaults to
+5433 (`POSTGRES_PORT` override); the container still uses 5432. Host Java services
+use the same variable/default. Current compose dev
 credentials are `postgres` / `postgres`; use actual credentials if customized.
 Do not run another PostgreSQL compose project on the same port or delete volumes
 to add this database. AI migrations/checkpointer bootstrap are separate P2 work.
@@ -161,7 +163,7 @@ Business services register with Eureka. External clients should normally call th
 - Java `25`
 - Maven `3.9+`
 - Docker Desktop with Docker Compose support
-- The following ports must be available: `5432`, `5672`, `6379`, `8761`, `8080-8087`, `15672`, `29092`, `3300`, `4317-4318`
+- The following ports must be available: `5433`, `5672`, `6379`, `8761`, `8080-8087`, `15672`, `29092`, `3300`, `4317-4318`
 
 Check Java and Maven in PowerShell:
 
@@ -184,7 +186,7 @@ The following containers are started:
 
 | Component               | Address                            | Purpose                       |
 | ----------------------- | ---------------------------------- | ----------------------------- |
-| PostgreSQL              | `localhost:5432`                   | Database for the services     |
+| PostgreSQL              | `localhost:5433`                   | Database for the services     |
 | RabbitMQ                | `localhost:5672`                   | AMQP messaging                |
 | RabbitMQ Management     | http://localhost:15672             | Management UI, `guest/guest`  |
 | Redis                   | `localhost:6379`                   | Cache and identity data       |

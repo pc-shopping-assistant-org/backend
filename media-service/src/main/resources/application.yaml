@@ -7,7 +7,7 @@ spring:
   application:
     name: media-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/media_db
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5433}/media_db
     username: postgres
     password: postgres
   flyway:

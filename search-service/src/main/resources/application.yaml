@@ -2,7 +2,7 @@ spring:
   application:
     name: search-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/search_db
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5433}/search_db
     username: postgres
     password: postgres
   flyway:

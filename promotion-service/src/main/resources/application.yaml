@@ -2,7 +2,7 @@ spring:
   application:
     name: promotion-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/promotion_db
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5433}/promotion_db
     username: postgres
     password: postgres
   flyway:
