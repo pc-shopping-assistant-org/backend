@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +44,14 @@ public class ProductQueryService {
     @Transactional(readOnly = true)
     public CursorPageResponse<ProductSummaryResponse> getProducts(ProductFilterRequest filter) {
         return page(filter, PUBLIC_STATUSES, PUBLIC_STATUSES, true);
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public CursorPageResponse<ProductDetailResponse> getProductSnapshots(ProductFilterRequest filter) {
+        ProductPage page = selectPage(filter, PUBLIC_STATUSES, PUBLIC_STATUSES);
+        List<ProductDetailResponse> items = assembler.details(page.products(), PUBLIC_STATUSES);
+        return CursorPageResponse.<ProductDetailResponse>builder()
+                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
     }
 
     @Transactional(readOnly = true)
@@ -85,6 +94,16 @@ public class ProductQueryService {
 
     private CursorPageResponse<ProductSummaryResponse> page(ProductFilterRequest filter, List<CatalogStatus> productStatuses,
                                                             List<CatalogStatus> variantStatuses, boolean onlyWithVariants) {
+        ProductPage page = selectPage(filter, productStatuses, variantStatuses);
+        List<ProductSummaryResponse> items = assembler.summaries(page.products(), variantStatuses, onlyWithVariants);
+        return CursorPageResponse.<ProductSummaryResponse>builder()
+                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
+    }
+
+    private record ProductPage(List<Product> products, boolean hasNext, String nextCursor) { }
+
+    private ProductPage selectPage(ProductFilterRequest filter, List<CatalogStatus> productStatuses,
+                                   List<CatalogStatus> variantStatuses) {
         // 1. Validate the price range and sanitize the page size and keyword
         validatePriceRange(filter);
         int pageSize = filter.getLimit() != null && filter.getLimit() > 0 ? Math.min(filter.getLimit(), MAX_LIMIT) : DEFAULT_LIMIT;
@@ -104,10 +123,7 @@ public class ProductQueryService {
         List<Product> results = hasNext ? products.subList(0, pageSize) : products;
         String nextCursor = hasNext ? results.get(results.size() - 1).getId().toString() : null;
 
-        // 4. Assemble the summaries
-        List<ProductSummaryResponse> items = assembler.summaries(results, variantStatuses, onlyWithVariants);
-        return CursorPageResponse.<ProductSummaryResponse>builder()
-                .items(items).nextCursor(nextCursor).hasNext(hasNext).size(items.size()).build();
+        return new ProductPage(results, hasNext, nextCursor);
     }
 
     private void validatePriceRange(ProductFilterRequest filter) {

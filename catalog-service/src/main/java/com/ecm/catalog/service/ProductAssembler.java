@@ -56,25 +56,40 @@ public class ProductAssembler {
     private final ProductMediaResolver mediaResolver;
 
     public ProductDetailResponse detail(Product product, Collection<CatalogStatus> variantStatuses) {
-        // 1. Load everything the response needs
-        List<ProductImage> gallery = productImageRepository.findByProductIdIn(List.of(product.getId()));
-        List<ProductVariant> variants = productVariantRepository.findByProductIdAndStatusIn(product.getId(), variantStatuses);
-        Map<UUID, List<OptionResponse>> optionsByVariant = optionsByVariant(variants);
+        return details(List.of(product), variantStatuses).get(0);
+    }
 
-        // 2. One Media Service call for the gallery and the variant images together
+    public List<ProductDetailResponse> details(List<Product> products, Collection<CatalogStatus> variantStatuses) {
+        if (products.isEmpty()) {
+            return List.of();
+        }
+        // 1. Batch-load associations without a query per product/variant
+        List<UUID> productIds = products.stream().map(Product::getId).toList();
+        List<ProductVariant> variants = productVariantRepository.findByProductIdInAndStatusIn(productIds, variantStatuses);
+        Map<UUID, List<ProductVariant>> variantsByProduct = variants.stream().collect(Collectors.groupingBy(ProductVariant::getProductId));
+        List<ProductImage> gallery = productImageRepository.findByProductIdIn(productIds);
+        Map<UUID, List<ProductImage>> imagesByProduct = gallery.stream().collect(Collectors.groupingBy(ProductImage::getProductId));
+        Map<UUID, List<OptionResponse>> options = optionsByVariant(variants);
+        Map<UUID, String> brands = brandNames(products);
+        Map<UUID, String> categories = categoryNames(products);
+
+        // 2. Resolve all image files once for the page
         Set<UUID> fileIds = new HashSet<>();
         gallery.forEach(image -> fileIds.add(image.getImageFileId()));
         variants.forEach(variant -> fileIds.add(variant.getImageFileId()));
         Map<UUID, String> urls = mediaResolver.resolveUrls(fileIds);
 
-        // 3. Assemble
-        ProductDetailResponse response = productMapper.toDetailResponse(product);
-        response.setBrandName(product.getBrandId() == null ? null
-                : brandRepository.findById(product.getBrandId()).map(Brand::getName).orElse(null));
-        response.setCategoryName(categoryRepository.findById(product.getCategoryId()).map(Category::getName).orElse(null));
-        response.setImages(gallery.stream().map(image -> toImageResponse(image, urls)).toList());
-        response.setVariants(variants.stream().map(variant -> toVariantResponse(variant, optionsByVariant, urls)).toList());
-        return response;
+        // 3. Assemble canonical detail DTOs in cursor order
+        return products.stream().map(product -> {
+            ProductDetailResponse response = productMapper.toDetailResponse(product);
+            response.setBrandName(lookup(brands, product.getBrandId()));
+            response.setCategoryName(lookup(categories, product.getCategoryId()));
+            response.setImages(imagesByProduct.getOrDefault(product.getId(), List.of()).stream()
+                    .map(image -> toImageResponse(image, urls)).toList());
+            response.setVariants(variantsByProduct.getOrDefault(product.getId(), List.of()).stream()
+                    .map(variant -> toVariantResponse(variant, options, urls)).toList());
+            return response;
+        }).toList();
     }
 
     public List<ProductVariantResponse> variants(List<ProductVariant> variants) {

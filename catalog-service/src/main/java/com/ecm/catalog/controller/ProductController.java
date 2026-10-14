@@ -114,6 +114,11 @@ public class ProductController {
         return ApiResponse.success(productQueryService.getProductById(id));
     }
 
+    @GetMapping("/snapshot")
+    public ApiResponse<CursorPageResponse<ProductDetailResponse>> getProductSnapshots(@Valid @ModelAttribute ProductFilterRequest filter) {
+        return ApiResponse.success(productQueryService.getProductSnapshots(filter));
+    }
+
     @GetMapping("/slug/{seoName}")
     public ApiResponse<ProductDetailResponse> getProductBySeoName(@PathVariable String seoName) {
         return ApiResponse.success(productQueryService.getProductBySeoName(seoName));

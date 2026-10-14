@@ -3,6 +3,7 @@ package com.ecm.catalog.service;
 import com.ecm.catalog.dto.request.ProductFilterRequest;
 import com.ecm.catalog.dto.response.CursorPageResponse;
 import com.ecm.catalog.dto.response.ProductSummaryResponse;
+import com.ecm.catalog.dto.response.ProductDetailResponse;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.exception.CatalogErrorCode;
@@ -69,6 +70,39 @@ class ProductQueryServiceTest {
     }
 
     // ---- UC-ADM-PROD-001 / 002 ----
+
+    @Test
+    void snapshotPageReturnsActiveDetailsInOneBatchWithCursor() {
+        ProductFilterRequest filter = new ProductFilterRequest();
+        filter.setLimit(2);
+        filter.setStatus(CatalogStatus.INACTIVE);
+        List<Product> results = products(3);
+        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(results);
+        List<ProductDetailResponse> details = List.of(
+                ProductDetailResponse.builder().id(results.get(0).getId()).build(),
+                ProductDetailResponse.builder().id(results.get(1).getId()).build());
+        when(assembler.details(results.subList(0, 2), List.of(CatalogStatus.ACTIVE))).thenReturn(details);
+
+        CursorPageResponse<ProductDetailResponse> page = service.getProductSnapshots(filter);
+
+        assertEquals(details, page.getItems());
+        assertTrue(page.isHasNext());
+        assertEquals(results.get(1).getId().toString(), page.getNextCursor());
+        assertEquals(3, capturePage(List.of(CatalogStatus.ACTIVE), List.of(CatalogStatus.ACTIVE)).getValue().getPageSize());
+        verify(assembler).details(results.subList(0, 2), List.of(CatalogStatus.ACTIVE));
+        verify(assembler, never()).detail(any(), anyCollection());
+    }
+
+    @Test
+    void emptySnapshotPageIsTerminal() {
+        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(assembler.details(List.of(), List.of(CatalogStatus.ACTIVE))).thenReturn(List.of());
+        CursorPageResponse<ProductDetailResponse> page = service.getProductSnapshots(new ProductFilterRequest());
+        assertEquals(List.of(), page.getItems());
+        assertFalse(page.isHasNext());
+        assertNull(page.getNextCursor());
+    }
 
     @Test
     void publicListSeesOnlyActiveAndOnlyProductsWithVariants() {

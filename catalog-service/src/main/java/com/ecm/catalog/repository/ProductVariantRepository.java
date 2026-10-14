@@ -17,7 +17,7 @@ import java.util.UUID;
 @Repository
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
 
-    @Query("SELECT v FROM ProductVariant v WHERE v.productId IN :productIds AND v.status IN :statuses ORDER BY v.productId, v.price")
+    @Query("SELECT v FROM ProductVariant v WHERE v.productId IN :productIds AND v.status IN :statuses ORDER BY v.productId, v.price, v.id")
     List<ProductVariant> findByProductIdInAndStatusIn(@Param("productIds") Collection<UUID> productIds,
                                                       @Param("statuses") Collection<CatalogStatus> statuses);
 
