@@ -48,7 +48,7 @@ public class ProductQueryService {
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public CursorPageResponse<ProductDetailResponse> getProductSnapshots(ProductFilterRequest filter) {
-        ProductPage page = selectPage(filter, PUBLIC_STATUSES, PUBLIC_STATUSES);
+        ProductPage page = selectPage(filter, PUBLIC_STATUSES, PUBLIC_STATUSES, true);
         List<ProductDetailResponse> items = assembler.details(page.products(), PUBLIC_STATUSES);
         return CursorPageResponse.<ProductDetailResponse>builder()
                 .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
@@ -94,7 +94,7 @@ public class ProductQueryService {
 
     private CursorPageResponse<ProductSummaryResponse> page(ProductFilterRequest filter, List<CatalogStatus> productStatuses,
                                                             List<CatalogStatus> variantStatuses, boolean onlyWithVariants) {
-        ProductPage page = selectPage(filter, productStatuses, variantStatuses);
+        ProductPage page = selectPage(filter, productStatuses, variantStatuses, onlyWithVariants);
         List<ProductSummaryResponse> items = assembler.summaries(page.products(), variantStatuses, onlyWithVariants);
         return CursorPageResponse.<ProductSummaryResponse>builder()
                 .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
@@ -103,7 +103,7 @@ public class ProductQueryService {
     private record ProductPage(List<Product> products, boolean hasNext, String nextCursor) { }
 
     private ProductPage selectPage(ProductFilterRequest filter, List<CatalogStatus> productStatuses,
-                                   List<CatalogStatus> variantStatuses) {
+                                   List<CatalogStatus> variantStatuses, boolean onlyWithVariants) {
         // 1. Validate the price range and sanitize the page size and keyword
         validatePriceRange(filter);
         int pageSize = filter.getLimit() != null && filter.getLimit() > 0 ? Math.min(filter.getLimit(), MAX_LIMIT) : DEFAULT_LIMIT;

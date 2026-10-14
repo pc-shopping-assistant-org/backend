@@ -77,7 +77,7 @@ class ProductQueryServiceTest {
         filter.setLimit(2);
         filter.setStatus(CatalogStatus.INACTIVE);
         List<Product> results = products(3);
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any()))
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(results);
         List<ProductDetailResponse> details = List.of(
                 ProductDetailResponse.builder().id(results.get(0).getId()).build(),
@@ -96,7 +96,7 @@ class ProductQueryServiceTest {
 
     @Test
     void emptySnapshotPageIsTerminal() {
-        when(productRepository.search(any(), any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(List.of());
         when(assembler.details(List.of(), List.of(CatalogStatus.ACTIVE))).thenReturn(List.of());
         CursorPageResponse<ProductDetailResponse> page = service.getProductSnapshots(new ProductFilterRequest());
         assertEquals(List.of(), page.getItems());
