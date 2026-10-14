@@ -19,7 +19,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     String SELECT_RESPONSE = "SELECT new com.ecm.identity.dto.response.EmployeeResponse(a.id, a.email, a.phone, a.status, " +
             "e.firstName, e.lastName, e.gender, e.birthday, e.address, e.avatarFileId, e.createdAt) " + FROM_EMPLOYEE;
 
-    String FILTER = "WHERE (:filterByStatus = false OR a.status = :status) AND (:keyword = '' " +
+    // Deleted employees are only listed when that status is asked for
+    String FILTER = "WHERE ((:filterByStatus = true AND a.status = :status) " +
+            "OR (:filterByStatus = false AND a.status <> com.ecm.identity.entity.AccountStatus.DELETED)) AND (:keyword = '' " +
             "OR LOWER(CONCAT(e.firstName, ' ', e.lastName)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(CONCAT(e.lastName, ' ', e.firstName)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +

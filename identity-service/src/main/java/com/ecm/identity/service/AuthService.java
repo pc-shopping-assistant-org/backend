@@ -225,7 +225,7 @@ public class AuthService {
 
         customerAddressRepository.save(CustomerAddress.builder()
                 .customerId(customer.getAccountId())
-                .recipientName(pending.firstName() + " " + pending.lastName())
+                .recipientName(pending.lastName() + " " + pending.firstName())
                 .phone(pending.phone())
                 .addressLine(pending.address())
                 .isDefault(true)
@@ -253,6 +253,29 @@ public class AuthService {
                 request.gender(),
                 request.birthday(),
                 request.address().trim());
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse refresh(String refreshToken) {
+        // 1. Only a valid, unexpired refresh token is accepted; an access token is not
+        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isRefreshToken(refreshToken)) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
+
+        // 2. A logout (or lock) revokes every token issued before it, refresh tokens included
+        UUID accountId = tokenProvider.getAccountId(refreshToken);
+        Instant issuedAt = tokenProvider.getIssuedAt(refreshToken);
+        if (accountId == null || issuedAt == null || tokenRevocationService.isRevoked(accountId, issuedAt)) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
+
+        // 3. The account has to be usable still; its role may have changed since the last token
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS));
+        ensureAccountUsable(account);
+        Role role = roleRepository.findById(account.getRoleId())
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
+        return issueTokenPair(account, role, buildUserSummary(account, role));
     }
 
     public boolean logout(String accessToken) {

@@ -73,9 +73,9 @@ public class DiscountController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+    public ApiResponse<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
         discountService.delete(id, employeeId(jwt));
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/apply")

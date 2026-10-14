@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/auth/verify-otp",
                                 "/auth/resend-otp", "/auth/google", "/auth/forgot-password",
-                                "/auth/reset-password", "/.well-known/jwks.json").permitAll()
+                                "/auth/reset-password", "/auth/refresh-token", "/.well-known/jwks.json").permitAll()
                         .requestMatchers("/customers/summary").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
                         .requestMatchers("/customers/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE")
                         .requestMatchers("/employees/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")

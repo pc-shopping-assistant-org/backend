@@ -86,6 +86,7 @@ class CartServiceTest {
         verify(cartItemRepository).save(saved.capture());
         assertEquals(2, saved.getValue().getQuantity());
         assertEquals(2_000_000L, response.subtotalAmount());
+        assertEquals("Color: Blue", response.items().getFirst().variantLabel());
         assertEquals(2, response.totalItems());
     }
 
@@ -110,6 +111,19 @@ class CartServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> service.addItem(CUSTOMER, new AddToCartRequest(VARIANT, 3)));
 
         assertEquals(OrderErrorCode.INSUFFICIENT_STOCK, ex.getErrorCode());
+        assertEquals(3, existing.getQuantity());
+        verify(cartItemRepository, never()).save(any());
+    }
+
+    @Test
+    void addRejectsAQuantityPastTheLineLimitEvenWhenTheSumOverflowsAnInt() {
+        catalogReturns(variant(VARIANT, 1000, 5, true));
+        CartItem existing = line(VARIANT, 3);
+        when(cartItemRepository.findByCartIdAndVariantId(CART_ID, VARIANT)).thenReturn(Optional.of(existing));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.addItem(CUSTOMER, new AddToCartRequest(VARIANT, Integer.MAX_VALUE)));
+
+        assertEquals(OrderErrorCode.CART_QUANTITY_TOO_LARGE, ex.getErrorCode());
         assertEquals(3, existing.getQuantity());
         verify(cartItemRepository, never()).save(any());
     }

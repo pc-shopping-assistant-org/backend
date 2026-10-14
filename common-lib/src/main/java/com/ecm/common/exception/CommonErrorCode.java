@@ -19,7 +19,8 @@ public enum CommonErrorCode implements ErrorCode {
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "Downstream service unavailable"),
     INVALID_STATE(HttpStatus.CONFLICT, "Invalid state for this operation"),
-    EXPIRED(HttpStatus.GONE, "Resource has expired");
+    EXPIRED(HttpStatus.GONE, "Resource has expired"),
+    PAYLOAD_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE, "Uploaded content is too large");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;

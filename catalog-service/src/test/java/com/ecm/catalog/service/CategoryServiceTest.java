@@ -192,7 +192,7 @@ class CategoryServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> categoryService.delete(ID));
 
-        assertEquals(CatalogErrorCode.RESOURCE_CONFLICT, ex.getErrorCode());
+        assertEquals(CatalogErrorCode.CATEGORY_IN_USE, ex.getErrorCode());
         assertEquals(CatalogStatus.ACTIVE, existing.getStatus());
     }
 

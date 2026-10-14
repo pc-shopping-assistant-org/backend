@@ -184,8 +184,7 @@ public class ProductService {
     }
 
     private String normalizeSeo(String seoName, String name) {
-        String value = (seoName == null || seoName.isBlank() ? name : seoName).trim().toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        String value = SeoNames.slug(seoName, name);
         if (value.isBlank()) {
             throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "SEO name is invalid");
         }

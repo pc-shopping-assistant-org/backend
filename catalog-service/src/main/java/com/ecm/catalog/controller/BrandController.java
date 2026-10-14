@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -55,7 +56,7 @@ public class BrandController {
 
     private List<BrandResponse> withImageUrls(List<BrandResponse> response) {
         List<UUID> imageFileIds = response.stream().map(BrandResponse::getImageFileId)
-                .filter(id -> id != null).distinct().toList();
+                .filter(Objects::nonNull).distinct().toList();
         if (!imageFileIds.isEmpty()) {
             var imageUrls = mediaServiceClient.getFiles(imageFileIds).getData().stream()
                     .filter(file -> file.url() != null)

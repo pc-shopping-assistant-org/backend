@@ -41,6 +41,7 @@ class ProfileServiceTest {
     @Mock private CustomerRepository customerRepository;
     @Mock private RoleRepository roleRepository;
     @Mock private CustomerMapper customerMapper;
+    @Mock private AvatarResolver avatarResolver;
     @InjectMocks private ProfileService profileService;
 
     private Account account;
@@ -57,16 +58,17 @@ class ProfileServiceTest {
     @Test
     void updateProfileTrimsNamesAndAppliesChangedPhone() {
         Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
-        UserSummaryResponse summary = mock(UserSummaryResponse.class);
+        UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0987654321", "ROLE_CUSTOMER",
+                "Binh", "Nguyen", null, null, null, null);
         when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(accountRepository.existsByPhone("0987654321")).thenReturn(false);
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
         when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
 
         UserSummaryResponse result = profileService.updateProfile(ACCOUNT_ID,
-                new UpdateProfileRequest(" Binh ", " Nguyen ", null, null, "0987654321"));
+                new UpdateProfileRequest(" Binh ", " Nguyen ", null, null, "0987654321", null));
 
-        assertSame(summary, result);
+        assertEquals(summary, result);
         assertEquals("Binh", customer.getFirstName());
         assertEquals("Nguyen", customer.getLastName());
         assertEquals("0987654321", account.getPhone());
@@ -80,7 +82,7 @@ class ProfileServiceTest {
         when(accountRepository.existsByPhone("0987654321")).thenReturn(true);
 
         BusinessException ex = assertThrows(BusinessException.class, () -> profileService.updateProfile(ACCOUNT_ID,
-                new UpdateProfileRequest("An", "Test", null, null, "0987654321")));
+                new UpdateProfileRequest("An", "Test", null, null, "0987654321", null)));
 
         assertEquals(IdentityErrorCode.PHONE_ALREADY_IN_USE, ex.getErrorCode());
         verify(customerRepository, never()).save(any());
@@ -91,7 +93,7 @@ class ProfileServiceTest {
         when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class, () -> profileService.updateProfile(ACCOUNT_ID,
-                new UpdateProfileRequest("An", "Test", null, null, null)));
+                new UpdateProfileRequest("An", "Test", null, null, null, null)));
 
         assertEquals(IdentityErrorCode.CUSTOMER_PROFILE_REQUIRED, ex.getErrorCode());
     }
@@ -129,7 +131,7 @@ class ProfileServiceTest {
     void returnsOnlyTheNamesOfTheRequestedCustomers() {
         when(customerRepository.findAllById(java.util.List.of(ACCOUNT_ID))).thenReturn(java.util.List.of(customer));
 
-        assertEquals(java.util.Map.of(ACCOUNT_ID, "An Test"), profileService.getCustomerNames(java.util.List.of(ACCOUNT_ID)));
+        assertEquals(java.util.Map.of(ACCOUNT_ID, "Test An"), profileService.getCustomerNames(java.util.List.of(ACCOUNT_ID)));
     }
 
     @Test
@@ -138,5 +140,50 @@ class ProfileServiceTest {
 
         assertThrows(BusinessException.class, () -> profileService.getCustomerNames(tooMany));
         verify(customerRepository, never()).findAllById(any());
+    }
+
+    @Test
+    void updateProfileKeepsTheAvatarFileAfterCheckingItExists() {
+        UUID fileId = UUID.fromString("00000000-0000-0000-0000-0000000000f1");
+        Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
+        UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0912345678", "ROLE_CUSTOMER",
+                "An", "Test", null, null, fileId, null);
+        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
+        when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
+        when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
+        when(avatarResolver.resolveUrls(java.util.List.of(fileId))).thenReturn(java.util.Map.of(fileId, "http://img/a.png"));
+
+        UserSummaryResponse result = profileService.updateProfile(ACCOUNT_ID,
+                new UpdateProfileRequest("An", "Test", null, null, null, fileId));
+
+        verify(avatarResolver).requireExisting(fileId);
+        assertEquals(fileId, customer.getAvatarFileId());
+        assertEquals("http://img/a.png", result.avatarUrl());
+    }
+
+    @Test
+    void updateProfileRejectsAnAvatarFileTheMediaServiceDoesNotKnow() {
+        UUID fileId = UUID.fromString("00000000-0000-0000-0000-0000000000f2");
+        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
+        org.mockito.Mockito.doThrow(new BusinessException(IdentityErrorCode.INVALID_AVATAR_FILE)).when(avatarResolver).requireExisting(fileId);
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> profileService.updateProfile(ACCOUNT_ID,
+                new UpdateProfileRequest("An", "Test", null, null, null, fileId)));
+
+        assertEquals(IdentityErrorCode.INVALID_AVATAR_FILE, ex.getErrorCode());
+        verify(customerRepository, never()).save(any());
+    }
+
+    @Test
+    void getProfileWithoutAnAvatarDoesNotCallTheMediaService() {
+        Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
+        UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0912345678", "ROLE_CUSTOMER",
+                "An", "Test", null, null, null, null);
+        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
+        when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
+        when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
+
+        assertEquals(summary, profileService.getProfile(ACCOUNT_ID));
+        org.mockito.Mockito.verifyNoInteractions(avatarResolver);
     }
 }

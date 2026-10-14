@@ -54,7 +54,8 @@ public class PaymentController {
     }
 
     /**
-     * Called by the payment gateway (use case 6 in service-communication.md) to report the outcome.
+     * Reports the outcome of an online payment by hand (use case 6 in service-communication.md); employees only, because
+     * VNPAY itself settles through its signed callbacks.
      */
     @PostMapping("/{id}/webhook")
     public ApiResponse<PaymentResponse> webhook(@PathVariable UUID id, @Valid @RequestBody PaymentWebhookRequest request) {

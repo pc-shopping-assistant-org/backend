@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -44,6 +45,11 @@ public class ProductReviewController {
                                               Authentication authentication) {
         return ApiResponse.success(
                 reviewService.updateReview(productId, reviewId, request, CurrentUser.accountId(authentication)));
+    }
+
+    @GetMapping("/mine")
+    public ApiResponse<List<ReviewResponse>> mine(@PathVariable UUID productId, Authentication authentication) {
+        return ApiResponse.success(reviewService.getMyReviews(productId, CurrentUser.accountId(authentication)));
     }
 
     @GetMapping

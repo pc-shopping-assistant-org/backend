@@ -60,10 +60,10 @@ public class AddressController {
     }
 
     @DeleteMapping("/{addressId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public ApiResponse<Void> delete(
             @PathVariable UUID addressId,
             @AuthenticationPrincipal UserPrincipal principal) {
         addressService.delete(principal.getAccountId(), addressId);
+        return ApiResponse.success(null);
     }
 }

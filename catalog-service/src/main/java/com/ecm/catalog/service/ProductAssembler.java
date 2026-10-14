@@ -106,7 +106,7 @@ public class ProductAssembler {
     }
 
     /**
-     * Summaries with brand and category names, the price range of the variants whose status is in
+     * Summaries with brand and category names, the price range, count and stock of the variants whose status is in
      * {@code variantStatuses}, and the main gallery image. With {@code onlyWithVariants} products that have no such
      * variant are left out (the public storefront does not list products that cannot be bought).
      */
@@ -135,6 +135,8 @@ public class ProductAssembler {
                     List<ProductVariant> variants = variantsByProduct.getOrDefault(product.getId(), List.of());
                     summary.setMinPrice(variants.stream().map(ProductVariant::getPrice).min(Long::compareTo).orElse(null));
                     summary.setMaxPrice(variants.stream().map(ProductVariant::getPrice).max(Long::compareTo).orElse(null));
+                    summary.setVariantCount(variants.size());
+                    summary.setTotalQuantity(variants.stream().mapToLong(ProductVariant::getQuantity).sum());
                     ProductImage main = mainImages.get(product.getId());
                     summary.setMainImageUrl(main == null ? null : lookup(urls, main.getImageFileId()));
                     return summary;

@@ -18,7 +18,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info", "/products/search").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/products/sync").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)

@@ -85,7 +85,7 @@ public class BrandService {
         // 1. A brand still assigned to a non-deleted product cannot be removed
         Brand brand = findLiveBrand(id);
         if (productRepository.existsByBrandIdAndStatusNot(id, CatalogStatus.DELETED)) {
-            throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Brand is assigned to products");
+            throw new BusinessException(CatalogErrorCode.BRAND_IN_USE);
         }
 
         // 2. Soft delete so its name can be reused
@@ -102,8 +102,7 @@ public class BrandService {
     }
 
     private String normalizeSeo(String seoName, String name) {
-        return (seoName == null || seoName.isBlank() ? name : seoName).trim().toLowerCase(java.util.Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        return SeoNames.slug(seoName, name);
     }
 
     @Transactional(readOnly = true)

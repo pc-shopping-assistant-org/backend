@@ -68,7 +68,8 @@ class EmployeeServiceTest {
         jwtProperties.setRefreshTokenExpirationMs(REFRESH_TTL_MS);
         service = new EmployeeService(accountRepository, employeeRepository, roleRepository, passwordEncoder,
                 new EmployeeMapperImpl(), avatarResolver,
-                new AccountLocker(accountRepository, tokenRevocationService, jwtProperties));
+                new AccountLocker(accountRepository, tokenRevocationService, jwtProperties),
+                new AccountStateChanger(accountRepository, tokenRevocationService, jwtProperties));
         account = Account.builder().id(ACCOUNT_ID).email("old@shop.vn").phone("0911111111").roleId(ROLE_ID)
                 .status(AccountStatus.ACTIVE).build();
         employee = Employee.builder().accountId(ACCOUNT_ID).firstName("An").lastName("Nguyen").gender(Gender.MALE).build();
@@ -257,5 +258,95 @@ class EmployeeServiceTest {
 
         assertThatThrownBy(() -> service.lock(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
         verify(tokenRevocationService, never()).revokeBefore(any(), any(), any());
+    }
+
+    private void employeeExists() {
+        when(employeeRepository.existsById(ACCOUNT_ID)).thenReturn(true);
+        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
+    }
+
+    @Test
+    void deactivateSwitchesAnActiveAccountOffAndRevokesItsTokens() {
+        employeeExists();
+        when(employeeRepository.findDetail(ACCOUNT_ID)).thenReturn(Optional.of(response(AccountStatus.INACTIVE, null)));
+
+        EmployeeResponse result = service.deactivate(ACCOUNT_ID);
+
+        assertThat(account.getStatus()).isEqualTo(AccountStatus.INACTIVE);
+        assertThat(result.status()).isEqualTo(AccountStatus.INACTIVE);
+        verify(tokenRevocationService).revokeBefore(eq(ACCOUNT_ID), any(Instant.class), eq(Duration.ofMillis(REFRESH_TTL_MS)));
+    }
+
+    @Test
+    void deactivateRefusesAnAccountThatIsNotActive() {
+        account.setStatus(AccountStatus.LOCKED);
+        employeeExists();
+
+        assertThatThrownBy(() -> service.deactivate(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
+        verify(tokenRevocationService, never()).revokeBefore(any(), any(), any());
+    }
+
+    @Test
+    void activateBringsBackAnAccountThatWasSwitchedOff() {
+        account.setStatus(AccountStatus.INACTIVE);
+        employeeExists();
+        when(employeeRepository.findDetail(ACCOUNT_ID)).thenReturn(Optional.of(response(AccountStatus.ACTIVE, null)));
+
+        assertThat(service.activate(ACCOUNT_ID).status()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(account.getStatus()).isEqualTo(AccountStatus.ACTIVE);
+    }
+
+    @Test
+    void activateDoesNotUnlockAnAccount() {
+        account.setStatus(AccountStatus.LOCKED);
+        employeeExists();
+
+        assertThatThrownBy(() -> service.activate(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
+        assertThat(account.getStatus()).isEqualTo(AccountStatus.LOCKED);
+    }
+
+    @Test
+    void deleteMarksTheAccountDeletedWhateverItWasAndRevokesItsTokens() {
+        for (AccountStatus before : List.of(AccountStatus.ACTIVE, AccountStatus.INACTIVE, AccountStatus.LOCKED)) {
+            account.setStatus(before);
+            employeeExists();
+
+            service.delete(ACCOUNT_ID);
+
+            assertThat(account.getStatus()).isEqualTo(AccountStatus.DELETED);
+        }
+        verify(tokenRevocationService, org.mockito.Mockito.times(3)).revokeBefore(eq(ACCOUNT_ID), any(Instant.class), any(Duration.class));
+    }
+
+    @Test
+    void deleteAndLockRefuseAnAccountThatIsAlreadyDeleted() {
+        account.setStatus(AccountStatus.DELETED);
+        employeeExists();
+
+        assertThatThrownBy(() -> service.delete(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
+        assertThatThrownBy(() -> service.lock(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
+        assertThatThrownBy(() -> service.deactivate(ACCOUNT_ID)).isInstanceOf(InvalidStateException.class);
+        assertThat(account.getStatus()).isEqualTo(AccountStatus.DELETED);
+        verify(tokenRevocationService, never()).revokeBefore(any(), any(), any());
+    }
+
+    @Test
+    void aDeletedEmployeeCannotBeEdited() {
+        account.setStatus(AccountStatus.DELETED);
+        when(employeeRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(employee));
+        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> service.update(ACCOUNT_ID, new UpdateEmployeeRequest(null, null, "Binh", null, null, null, null, null)))
+                .isInstanceOf(InvalidStateException.class);
+        verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    void stateChangesRefuseAnAccountThatIsNotAnEmployee() {
+        when(employeeRepository.existsById(ACCOUNT_ID)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.deactivate(ACCOUNT_ID)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.activate(ACCOUNT_ID)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.delete(ACCOUNT_ID)).isInstanceOf(ResourceNotFoundException.class);
     }
 }

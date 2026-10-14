@@ -24,7 +24,8 @@ public class AccountLocker {
     private final JwtProperties jwtProperties;
 
     public void lock(Account account, String resourceName) {
-        if (account.getStatus() == AccountStatus.LOCKED) {
+        // A deleted account is gone for good, so locking it would bring it back as a locked one
+        if (account.getStatus() == AccountStatus.LOCKED || account.getStatus() == AccountStatus.DELETED) {
             throw new InvalidStateException(resourceName, account.getId(), account.getStatus().name(), "lock");
         }
         account.setStatus(AccountStatus.LOCKED);

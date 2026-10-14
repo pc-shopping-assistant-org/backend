@@ -8,6 +8,7 @@ import com.ecm.identity.dto.request.ChangePasswordRequest;
 import com.ecm.identity.dto.request.ForgotPasswordRequest;
 import com.ecm.identity.dto.request.GoogleLoginRequest;
 import com.ecm.identity.dto.request.LoginRequest;
+import com.ecm.identity.dto.request.RefreshTokenRequest;
 import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.dto.request.ResendOtpRequest;
 import com.ecm.identity.dto.request.ResetPasswordRequest;
@@ -56,6 +57,11 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         return ApiResponse.success(authService.verifyRegistrationOtp(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ApiResponse<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        return ApiResponse.success(authService.refresh(request.refreshToken()));
     }
 
     @PostMapping("/google")

@@ -128,23 +128,31 @@ public class PaymentService {
             throw new BusinessException(PaymentErrorCode.DUPLICATE_TRANSACTION_CODE);
         }
 
-        // 2. Apply the gateway's outcome to the payment record.
-        boolean paid = WEBHOOK_STATUS_PAID.equalsIgnoreCase(request.status());
+        // 2. Apply the gateway's outcome
+        return paymentMapper.toResponse(settleOnline(payment, WEBHOOK_STATUS_PAID.equalsIgnoreCase(request.status()),
+                request.providerTransactionCode(), "Payment gateway reported failure"));
+    }
+
+    /** Records what the payment gateway reported and tells the order through the outbox; the payment is locked and pending. */
+    @Transactional
+    @SneakyThrows
+    public Payment settleOnline(Payment payment, boolean paid, String providerTransactionCode, String failureReason) {
+        // 1. Apply the gateway's outcome to the payment record.
         payment.setStatus(paid ? PaymentStatus.PAID : PaymentStatus.FAILED);
-        payment.setProviderTransactionCode(request.providerTransactionCode());
+        payment.setProviderTransactionCode(providerTransactionCode);
         if (paid) {
             payment.setPaidAt(Instant.now());
         }
         payment = paymentRepository.save(payment);
 
-        // 3. Write the outcome event in the same transaction as the status change — the
+        // 2. Write the outcome event in the same transaction as the status change — the
         // outbox relay publishes it to Kafka afterward (see docs "Outbox pattern").
         UUID eventId = UUID.randomUUID();
         String topic = paid ? KafkaTopics.PAYMENT_COMPLETED : KafkaTopics.PAYMENT_FAILED;
         String eventType = paid ? "PaymentCompletedEvent" : "PaymentFailedEvent";
         String eventPayload = paid
                 ? objectMapper.writeValueAsString(new PaymentCompletedEvent(eventId, payment.getOrderId(), payment.getId()))
-                : objectMapper.writeValueAsString(new PaymentFailedEvent(eventId, payment.getOrderId(), payment.getId(), "Payment gateway reported failure"));
+                : objectMapper.writeValueAsString(new PaymentFailedEvent(eventId, payment.getOrderId(), payment.getId(), failureReason));
 
         outboxEventRepository.save(OutboxEvent.builder()
                 .aggregateType(AGGREGATE_TYPE_PAYMENT)
@@ -160,7 +168,7 @@ public class PaymentService {
                 .status(OutboxStatus.PENDING)
                 .build());
 
-        return paymentMapper.toResponse(payment);
+        return payment;
     }
 
     /** The order was cancelled: a payment still waiting for the customer has nothing left to settle. A paid one stays, for a refund by hand. */
