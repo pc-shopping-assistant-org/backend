@@ -146,11 +146,19 @@ services:
     profiles: [ai]
     build: ./ai-service
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
     environment:
       AI_BACKEND_API_URL: ${AI_BACKEND_API_URL:-http://host.docker.internal:8082}
-      AI_PROVIDER: ${AI_PROVIDER:-fallback}
+      AI_DATABASE_URL: ${AI_DATABASE_URL:-postgresql+psycopg://postgres:postgres@postgres:5432/ai_db}
+      AI_JWT_JWKS_URL: ${AI_JWT_JWKS_URL:-http://host.docker.internal:8081/.well-known/jwks.json}
+      AI_JWT_ISSUER: ${AI_JWT_ISSUER:-http://identity-service}
+      AI_JWT_AUDIENCE: ${AI_JWT_AUDIENCE:-pc-shopping-api}
+      AI_HARDWARE_CATALOG_MAPPING: ${AI_HARDWARE_CATALOG_MAPPING:-{}}
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
       AI_OPENAI_API_KEY: ${AI_OPENAI_API_KEY:-}
       AI_GEMINI_API_KEY: ${AI_GEMINI_API_KEY:-}
     extra_hosts:
