@@ -71,14 +71,10 @@ Compose `build: ./ai-service` now uses this pinned submodule checkout. The sibli
 root `../ai-service` repository and this checkout do not share uncommitted work;
 commit/push AI changes first, then update the backend gitlink. Never publish a
 backend gitlink to an AI commit unavailable on GitHub. The pinned checkout includes
-the committed P0/P1 core/contracts and microservice catalog adapter. These local
-AI commits still need publication before sharing the backend commit.
-
-The prior vendored tree is preserved locally at
-`../.ai-submodule-backup.WkkAdO/ai-service` (outside this Git repository), and is
-also recoverable from backend Git history. Its `mainImageUrl` catalog-card mapping
-and microservice-specific regression are now committed and included in this pin;
-remote availability remains unverified (ISSUE-083).
+the published AI `e3e1bd2` code baseline: V2-only runtime, native persistence,
+canonical catalog tools and curated parser fixes. Documentation-only commits may
+advance the gitlink; inspect it with `git ls-tree HEAD ai-service`.
+The previous vendored tree is recoverable from Git history;
 do not reintroduce the old PydanticAI runtime. Compose already explicitly supplies
 the microservice catalog URL; configure that URL when running AI directly on host.
 
@@ -87,36 +83,41 @@ Run on the host:
 ```bash
 cd ai-service
 uv sync --frozen
+uv run alembic upgrade head
+uv run python -m ai_service.bootstrap_stateful
 uv run uvicorn ai_service.main:app --host 127.0.0.1 --port 8000
 ```
 
 Alternatively, from this backend directory:
+
+Configure the AI variables in ignored `.env` and initialize the application/saver
+schema first. Compose supplies dependencies but does not run migrations at startup.
 
 ```bash
 docker compose --profile ai up -d --build ai-service
 ```
 
 Start catalog-service on port 8082 and the gateway on port 8080. Gateway routes
-`/api/v1/assistant/chat` and `/api/v1/assistant/chat/stream` to the AI service's
-`/api/v1/chat` and `/api/v1/chat/stream`. Existing gateway JWT authentication
+`/api/v1/assistant/conversations/**` to the AI service's
+`/api/v1/conversations/**`. Existing gateway JWT authentication
 applies to these routes. Set `AI_SERVICE_URL` on the gateway if the AI host changes.
 Swagger is available locally at `http://localhost:8000/docs`.
 
 ```bash
-curl -N http://localhost:8080/api/v1/assistant/chat/stream \
+curl -sS -X POST http://localhost:8080/api/v1/assistant/conversations \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"message":"Tìm laptop chơi game"}'
+  -d '{"title":"Build PC"}'
 ```
 
-The default `AI_PROVIDER=fallback` produces deterministic catalog-grounded answers.
-Configure `AI_PROVIDER=openai` or `gemini` and the corresponding API key to enable
-model generation; use `ai-service/.env.example` for host execution. AI responses
+V2 is the only runtime. Configure DB/JWKS/catalog mapping and `AI_PROVIDER=openai`
+or `gemini` with its API key; missing dependencies fail startup. Apply Alembic and
+native bootstrap first (see `../docs/04-ai/getting-started.md`). Old `/chat` endpoints
+are removed; submit V2 runs and subscribe to their committed SSE events. AI responses
 retain `{data, message, errors}` with static message keys, including SSE frames.
 
-Current integration limits: conversation storage is process-local and has no
-per-account ownership binding; keep this local integration until ownership is
-implemented before exposing persistent conversations to multiple users. The AI
+Conversations/runs use PostgreSQL/native saver with owner-bound JWT authorization.
+Live identity/catalog/model integration remains a separate smoke-test gate. The AI
 service currently has no OTLP exporter, and Gateway SSE forwarding still requires
 an end-to-end runtime check. Search-service indexing remains outside this integration.
 
