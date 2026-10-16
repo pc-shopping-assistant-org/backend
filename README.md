@@ -361,6 +361,14 @@ http://localhost:8080/auth/login
 
 The `lgtm` container (`grafana/otel-lgtm`) bundles an OpenTelemetry Collector with Loki (logs), Tempo (traces), Prometheus (metrics), and Grafana. It replaces the previous standalone OpenTelemetry Collector and Zipkin.
 
+AI runs also send logs/traces to this stack. Start only this dependency with
+`docker compose up -d lgtm`; host AI uses `AI_OTLP_ENDPOINT=http://localhost:4318`
+(the compose AI profile uses `http://lgtm:4318`). Open **PC Shopping - AI Runs**
+at `/d/pcshop-ai` and paste the run's `trace_id` to filter logs. Tempo shows named
+graph/tool/finalize spans. Retries reuse the run trace; log/trace data persists in
+`pcshop-lgtm-data`. See [AI observability](../docs/04-ai/observability.md) for scope
+and retention limits.
+
 Every service (including the gateway) pushes all three signals over OTLP/HTTP to `localhost:4318`:
 
 | Signal  | Spring property                                           | Backend    |
