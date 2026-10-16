@@ -1,0 +1,148 @@
+name: Build and publish backend service images
+
+on:
+  push:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: backend-images-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify Java backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      POSTGRES_PORT: '5433'
+      JWT_ALLOW_DEV_KEY_GENERATION: 'true'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Start test dependencies
+        run: docker compose up --detach --wait postgres redis rabbitmq kafka elasticsearch
+
+      - name: Wait for Kafka
+        run: |
+          for attempt in $(seq 1 30); do
+            if docker exec pcshop-kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              break
+            fi
+            sleep 2
+          done
+          echo 'Kafka did not become ready' >&2
+          exit 1
+
+      - name: Run backend tests and verify Maven reactor
+        run: mvn -B -ntp verify
+
+      - name: Upload executable service JARs
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-service-jars
+          path: |
+            api-gateway/target/api-gateway-*.jar
+            discovery-server/target/discovery-server-*.jar
+            identity-service/target/identity-service-*.jar
+            catalog-service/target/catalog-service-*.jar
+            order-service/target/order-service-*.jar
+            payment-service/target/payment-service-*.jar
+            promotion-service/target/promotion-service-*.jar
+            search-service/target/search-service-*.jar
+            media-service/target/media-service-*.jar
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  image:
+    name: Build ${{ matrix.service }} image
+    needs: verify
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - api-gateway
+          - discovery-server
+          - identity-service
+          - catalog-service
+          - order-service
+          - payment-service
+          - promotion-service
+          - search-service
+          - media-service
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download verified JARs
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-service-jars
+          path: .
+
+      - name: Prepare image context
+        run: |
+          mkdir image-context
+          cp '${{ matrix.service }}'/target/'${{ matrix.service }}'-*.jar image-context/app.jar
+          cp docker/Dockerfile.service image-context/Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/backend-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha,format=short,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and publish image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./image-context
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          provenance: mode=max
+          sbom: true

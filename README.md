@@ -4,6 +4,33 @@ The backend for **PC Shopping Assistant** is a Spring Boot and Spring Cloud micr
 
 The project is organized as a single Maven reactor. Services run on the host during local development, while infrastructure dependencies run in Docker Compose.
 
+## GitHub Actions and service images
+
+The `Build and publish backend service images` workflow runs `mvn verify` on
+every push, pull request, and merge queue. This executes the Maven reactor tests;
+any test failure blocks JAR upload and all image builds. After verification, it
+builds one image per Spring Boot service from the verified JARs:
+
+```text
+ghcr.io/pc-shopping-assistant-org/backend-api-gateway
+ghcr.io/pc-shopping-assistant-org/backend-discovery-server
+ghcr.io/pc-shopping-assistant-org/backend-identity-service
+ghcr.io/pc-shopping-assistant-org/backend-catalog-service
+ghcr.io/pc-shopping-assistant-org/backend-order-service
+ghcr.io/pc-shopping-assistant-org/backend-payment-service
+ghcr.io/pc-shopping-assistant-org/backend-promotion-service
+ghcr.io/pc-shopping-assistant-org/backend-search-service
+ghcr.io/pc-shopping-assistant-org/backend-media-service
+```
+
+Pull requests build images without publishing. A push to `main`, a `v*` tag, or
+manual dispatch publishes the images to GHCR. Merge queue runs verification;
+the resulting merge to `main` publishes them. `common-lib` is packaged into
+dependent service JARs and does not have its own image. This workflow publishes
+images only; deployment Compose configuration remains separate.
+Use `Verify Java backend` as a required check if GitHub branch rules should block
+merges when Maven verification fails.
+
 ## Quick Start
 
 From the repository root:
