@@ -29,9 +29,6 @@ import java.time.Instant;
 @Builder
 public class ProductDocument {
 
-    public static final String FIELD_BRAND_ID = "brandId";
-    public static final String FIELD_CATEGORY_ID = "categoryId";
-
     @Id
     private String id;
 

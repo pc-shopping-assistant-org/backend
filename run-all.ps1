@@ -6,7 +6,7 @@ $EurekaPort = 8761
 $PortWaitTimeoutSeconds = 180
 $PortPollIntervalSeconds = 3
 $ServiceStartDelaySeconds = 5
-$BusinessServices = @('identity-service', 'catalog-service', 'order-service', 'payment-service', 'promotion-service', 'search-service', 'media-service')
+$BusinessServices = @('identity-service', 'catalog-service', 'order-service', 'payment-service', 'promotion-service', 'search-service', 'sync-service', 'media-service')
 
 function Wait-ForPort([int]$Port, [int]$TimeoutSeconds) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)

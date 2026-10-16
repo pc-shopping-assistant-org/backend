@@ -35,6 +35,7 @@
         <module>promotion-service</module>
         <module>search-service</module>
         <module>media-service</module>
+        <module>sync-service</module>
     </modules>
 
     <dependencyManagement>

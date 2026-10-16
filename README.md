@@ -182,6 +182,7 @@ an end-to-end runtime check. Search-service indexing remains outside this integr
 | `payment-service`   | Payment processing                                  |
 | `promotion-service` | Promotions                                          |
 | `search-service`    | Product search                                      |
+| `sync-service`      | Keeps the product search index in step with the catalog |
 | `media-service`     | Media management                                    |
 
 Business services register with Eureka. External clients should normally call them through the API Gateway rather than directly.
@@ -279,6 +280,7 @@ mvn -pl order-service spring-boot:run
 mvn -pl payment-service spring-boot:run
 mvn -pl promotion-service spring-boot:run
 mvn -pl search-service spring-boot:run
+mvn -pl sync-service spring-boot:run
 mvn -pl media-service spring-boot:run
 ```
 
@@ -288,7 +290,7 @@ Finally, start the gateway:
 mvn -pl api-gateway spring-boot:run
 ```
 
-The services require PostgreSQL and Eureka at startup. `catalog-service` and `order-service` also use Kafka; `search-service` uses Elasticsearch and Kafka (after `docker compose up -d`, run `docker/debezium/register-catalog-connector.sh` once to start the catalog change feed); `order-service` uses RabbitMQ; and `identity-service` uses Redis and SMTP.
+The services require PostgreSQL and Eureka at startup. `catalog-service` and `order-service` also use Kafka; `search-service` uses Elasticsearch, and `sync-service` uses Elasticsearch and Kafka (after `docker compose up -d`, run `docker/debezium/register-catalog-connector.sh` once to start the catalog change feed); `order-service` uses RabbitMQ; and `identity-service` uses Redis and SMTP.
 
 ## Common Commands
 
@@ -343,6 +345,7 @@ http://localhost:8080/order-service/**
 http://localhost:8080/payment-service/**
 http://localhost:8080/promotion-service/**
 http://localhost:8080/search-service/**
+http://localhost:8080/sync-service/**
 http://localhost:8080/media-service/**
 ```
 
@@ -484,6 +487,7 @@ backend/
 ├── payment-service/
 ├── promotion-service/
 ├── search-service/
+├── sync-service/
 ├── docker/
 │   └── grafana/        # provisioned dashboards for the LGTM container
 ├── docker-compose.yml
