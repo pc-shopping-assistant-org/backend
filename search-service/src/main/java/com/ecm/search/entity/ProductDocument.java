@@ -14,6 +14,7 @@ import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * A product as the search sees it, flattened from the catalog: only products the storefront shows are indexed.
@@ -28,9 +29,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class ProductDocument {
-
-    public static final String FIELD_BRAND_ID = "brandId";
-    public static final String FIELD_CATEGORY_ID = "categoryId";
 
     @Id
     private String id;
@@ -52,6 +50,10 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     private String categoryId;
 
+    /** The product's category and all its parents, so a filter by a parent category finds the products below it. */
+    @Field(type = FieldType.Keyword)
+    private List<String> categoryIds;
+
     @Field(type = FieldType.Text, analyzer = "folded")
     private String categoryName;
 
@@ -63,6 +65,10 @@ public class ProductDocument {
 
     @Field(type = FieldType.Long)
     private Long maxPrice;
+
+    /** The price of every variant: a price range matches when at least one variant falls inside it. */
+    @Field(type = FieldType.Long)
+    private List<Long> prices;
 
     @Field(type = FieldType.Boolean)
     private boolean inStock;

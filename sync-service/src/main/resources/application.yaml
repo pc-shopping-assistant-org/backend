@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: sync-service
+  elasticsearch:
+    # The product index lives in an Elasticsearch node of docker-compose.yml.
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: sync-service
+      # A new group has to start from the snapshot Debezium wrote, not from "now", or the index starts empty.
+      auto-offset-reset: earliest
+    listener:
+      observation-enabled: true
+
+server:
+  port: 8088
+
+security:
+  jwt:
+    jwks-uri: ${JWT_JWKS_URI:http://localhost:8080/.well-known/jwks.json}
+    issuer: ${JWT_SECURITY_ISSUER:http://identity-service}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/logs
+  otlp:
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/metrics
+        step: 15s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

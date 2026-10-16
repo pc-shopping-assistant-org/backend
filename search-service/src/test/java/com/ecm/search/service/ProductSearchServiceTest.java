@@ -2,6 +2,7 @@ package com.ecm.search.service;
 
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.response.PageResponse;
+import com.ecm.search.dto.request.ProductSearchFilterRequest;
 import com.ecm.search.dto.response.ProductSearchResponse;
 import com.ecm.search.entity.ProductDocument;
 import com.ecm.search.mapper.ProductDocumentMapperImpl;
@@ -26,6 +27,8 @@ import static org.mockito.Mockito.when;
 
 class ProductSearchServiceTest {
 
+    private static final ProductSearchFilterRequest NO_FILTER = new ProductSearchFilterRequest(null, null, null, null);
+
     private final ElasticsearchOperations operations = mock(ElasticsearchOperations.class);
     private final ProductSearchService service = new ProductSearchService(operations, new ProductDocumentMapperImpl());
 
@@ -42,6 +45,18 @@ class ProductSearchServiceTest {
         return hits;
     }
 
+    /** Runs a search that finds nothing and returns the query that was sent to the index. */
+    private String queryFor(ProductSearchFilterRequest filter) {
+        SearchHits<ProductDocument> result = hits(0);
+        when(operations.search(any(NativeQuery.class), eq(ProductDocument.class))).thenReturn(result);
+
+        service.search("ram", filter, 0, 20);
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(operations).search(captor.capture(), eq(ProductDocument.class));
+        return String.valueOf(captor.getValue().getQuery());
+    }
+
     @Test
     void returnsTheMatchesInRankOrderWithThePageTotal() {
         UUID id = UUID.randomUUID();
@@ -50,7 +65,7 @@ class ProductSearchServiceTest {
         SearchHits<ProductDocument> result = hits(41, document);
         when(operations.search(any(NativeQuery.class), eq(ProductDocument.class))).thenReturn(result);
 
-        PageResponse<ProductSearchResponse> page = service.search("  rtx 40 ", 1, 20);
+        PageResponse<ProductSearchResponse> page = service.search("  rtx 40 ", NO_FILTER, 1, 20);
 
         assertThat(page.getContent()).singleElement().satisfies(item -> {
             assertThat(item.id()).isEqualTo(id);
@@ -67,7 +82,7 @@ class ProductSearchServiceTest {
         SearchHits<ProductDocument> result = hits(0);
         when(operations.search(any(NativeQuery.class), eq(ProductDocument.class))).thenReturn(result);
 
-        assertThat(service.search("zzzz", 0, 20).getContent()).isEmpty();
+        assertThat(service.search("zzzz", NO_FILTER, 0, 20).getContent()).isEmpty();
     }
 
     @Test
@@ -75,7 +90,7 @@ class ProductSearchServiceTest {
         SearchHits<ProductDocument> result = hits(0);
         when(operations.search(any(NativeQuery.class), eq(ProductDocument.class))).thenReturn(result);
 
-        service.search("rtx 40", 0, 20);
+        service.search("rtx 40", NO_FILTER, 0, 20);
 
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
         verify(operations).search(captor.capture(), eq(ProductDocument.class));
@@ -84,13 +99,50 @@ class ProductSearchServiceTest {
     }
 
     @Test
+    void withoutAFilterTheSearchIsNotNarrowed() {
+        assertThat(queryFor(NO_FILTER)).doesNotContain("categoryIds").doesNotContain("brandId").doesNotContain("prices");
+    }
+
+    @Test
+    void aCategoryMatchesItsSubCategoriesAndABrandItsOwnProducts() {
+        UUID category = UUID.randomUUID();
+        UUID brand = UUID.randomUUID();
+
+        String query = queryFor(new ProductSearchFilterRequest(category, brand, null, null));
+
+        assertThat(query).contains("categoryIds").contains(category.toString()).contains("brandId").contains(brand.toString());
+    }
+
+    @Test
+    void aPriceRangeIsAskedOfTheVariantPrices() {
+        String query = queryFor(new ProductSearchFilterRequest(null, null, 1_000_000L, 5_000_000L));
+
+        assertThat(query).contains("prices").contains("1000000").contains("5000000");
+    }
+
+    @Test
+    void anOpenEndedPriceRangeBoundsOneSideOnly() {
+        String query = queryFor(new ProductSearchFilterRequest(null, null, 2_000_000L, null));
+
+        assertThat(query).contains("prices").contains("2000000");
+    }
+
+    @Test
     void rejectsABlankOrOversizedQueryAndABadPage() {
-        assertThatThrownBy(() -> service.search(null, 0, 20)).isInstanceOf(BusinessException.class);
-        assertThatThrownBy(() -> service.search("   ", 0, 20)).isInstanceOf(BusinessException.class);
-        assertThatThrownBy(() -> service.search("x".repeat(201), 0, 20)).isInstanceOf(BusinessException.class);
-        assertThatThrownBy(() -> service.search("rtx", -1, 20)).isInstanceOf(BusinessException.class);
-        assertThatThrownBy(() -> service.search("rtx", 0, 0)).isInstanceOf(BusinessException.class);
-        assertThatThrownBy(() -> service.search("rtx", 0, 51)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search(null, NO_FILTER, 0, 20)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("   ", NO_FILTER, 0, 20)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("x".repeat(201), NO_FILTER, 0, 20)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("rtx", NO_FILTER, -1, 20)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("rtx", NO_FILTER, 0, 0)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("rtx", NO_FILTER, 0, 51)).isInstanceOf(BusinessException.class);
+        verify(operations, never()).search(any(NativeQuery.class), eq(ProductDocument.class));
+    }
+
+    @Test
+    void rejectsANegativePriceOrARangeThatEndsBeforeItStarts() {
+        assertThatThrownBy(() -> service.search("ram", new ProductSearchFilterRequest(null, null, -1L, null), 0, 20)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("ram", new ProductSearchFilterRequest(null, null, null, -5L), 0, 20)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> service.search("ram", new ProductSearchFilterRequest(null, null, 9L, 3L), 0, 20)).isInstanceOf(BusinessException.class);
         verify(operations, never()).search(any(NativeQuery.class), eq(ProductDocument.class));
     }
 }

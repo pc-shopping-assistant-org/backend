@@ -119,6 +119,16 @@ spring:
                 - name: StripPrefix
                   args:
                     parts: "1"
+            - id: sync-service
+              uri: lb://sync-service
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /sync-service/**
+              filters:
+                - name: StripPrefix
+                  args:
+                    parts: "1"
             - id: media-service
               uri: lb://media-service
               predicates:

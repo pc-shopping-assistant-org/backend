@@ -24,7 +24,7 @@ public class SecurityConfig {
                                 "/identity-service/auth/**", "/identity-service/.well-known/jwks.json").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/brands/**", "/product-variants/**",
                                 "/catalog-service/products/**", "/catalog-service/categories/**", "/catalog-service/brands/**",
-                                "/catalog-service/product-variants/**").permitAll()
+                                "/catalog-service/product-variants/**", "/search-service/products/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/payments/vnpay/ipn", "/payments/vnpay/return",
                                 "/payment-service/payments/vnpay/ipn", "/payment-service/payments/vnpay/return").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
