@@ -2,6 +2,7 @@ package com.ecm.search.controller;
 
 import com.ecm.common.response.ApiResponse;
 import com.ecm.common.response.PageResponse;
+import com.ecm.search.dto.request.ProductSearchFilterRequest;
 import com.ecm.search.dto.response.ProductSearchResponse;
 import com.ecm.search.service.ProductSearchService;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,9 @@ public class ProductSearchController {
 
     @GetMapping("/search")
     public ApiResponse<PageResponse<ProductSearchResponse>> search(@RequestParam("q") String query,
+                                                                   ProductSearchFilterRequest filter,
                                                                    @RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success(searchService.search(query, page, size));
+        return ApiResponse.success(searchService.search(query, filter, page, size));
     }
 }

@@ -48,12 +48,12 @@ public class CatalogChangeConsumer {
             return;
         }
 
-        // 2. A changed row makes one product document stale, or renames a brand or category inside many
+        // 2. A changed row makes one product document stale, or renames a brand inside many, or moves a category with its products
         switch (change.table()) {
             case TABLE_PRODUCTS -> indexService.reindexProduct(uuid(row, COLUMN_ID));
             case TABLE_PRODUCT_VARIANTS, TABLE_PRODUCT_IMAGES -> indexService.reindexProduct(uuid(row, COLUMN_PRODUCT_ID));
             case TABLE_BRANDS -> renameBrand(change, row);
-            case TABLE_CATEGORIES -> renameCategory(change, row);
+            case TABLE_CATEGORIES -> reindexCategory(change, row);
             default -> log.debug("Ignoring a change of table {}", change.table());
         }
     }
@@ -64,9 +64,9 @@ public class CatalogChangeConsumer {
         }
     }
 
-    private void renameCategory(CatalogChange change, JsonNode row) {
+    private void reindexCategory(CatalogChange change, JsonNode row) {
         if (change.after() != null && !change.after().isNull()) {
-            indexService.renameCategory(uuid(row, COLUMN_ID), row.get(COLUMN_NAME).asText());
+            indexService.reindexCategory(uuid(row, COLUMN_ID));
         }
     }
 

@@ -4,6 +4,7 @@ import com.ecm.common.exception.ExternalServiceException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.response.ApiResponse;
 import com.ecm.sync.client.CatalogServiceClient;
+import com.ecm.sync.dto.response.CatalogCategoryResponse;
 import com.ecm.sync.dto.response.CatalogProductResponse;
 import com.ecm.sync.entity.ProductDocument;
 import com.ecm.sync.mapper.ProductDocumentMapperImpl;
@@ -11,7 +12,10 @@ import com.ecm.sync.repository.ProductSearchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
@@ -21,6 +25,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,6 +37,8 @@ class ProductIndexServiceTest {
     private static final UUID PRODUCT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000c1");
     private static final UUID BRAND_ID = UUID.fromString("00000000-0000-0000-0000-0000000000c2");
     private static final UUID CATEGORY_ID = UUID.fromString("00000000-0000-0000-0000-0000000000c3");
+    private static final UUID PARENT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000c4");
+    private static final UUID ROOT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000c5");
 
     private final CatalogServiceClient catalogClient = mock(CatalogServiceClient.class);
     private final ProductSearchRepository repository = mock(ProductSearchRepository.class);
@@ -40,6 +48,10 @@ class ProductIndexServiceTest {
     @BeforeEach
     void setUp() {
         service = new ProductIndexService(catalogClient, repository, operations, new ProductDocumentMapperImpl());
+        when(catalogClient.getCategories()).thenReturn(ApiResponse.success(List.of(
+                new CatalogCategoryResponse(ROOT_ID, null),
+                new CatalogCategoryResponse(PARENT_ID, ROOT_ID),
+                new CatalogCategoryResponse(CATEGORY_ID, PARENT_ID))));
     }
 
     private CatalogProductResponse product(List<CatalogProductResponse.Image> images, List<CatalogProductResponse.Variant> variants) {
@@ -70,6 +82,7 @@ class ProductIndexServiceTest {
         assertThat(document.getCategoryName()).isEqualTo("Card đồ họa");
         assertThat(document.getMinPrice()).isEqualTo(7_000_000L);
         assertThat(document.getMaxPrice()).isEqualTo(9_000_000L);
+        assertThat(document.getPrices()).containsExactlyInAnyOrder(9_000_000L, 7_000_000L);
         assertThat(document.isInStock()).isTrue();
         assertThat(document.getMainImageUrl()).isEqualTo("http://img/main.png");
         assertThat(document.getIndexedAt()).isNotNull();
@@ -129,13 +142,54 @@ class ProductIndexServiceTest {
     }
 
     @Test
-    void renamingACategoryUpdatesTheCategoryNameField() {
-        when(operations.getIndexCoordinatesFor(ProductDocument.class)).thenReturn(IndexCoordinates.of("products"));
+    void theDocumentKnowsTheCategoryAndEveryParentAboveIt() {
+        when(catalogClient.getProduct(PRODUCT_ID)).thenReturn(ApiResponse.success(product(null, null)));
 
-        service.renameCategory(CATEGORY_ID, "Laptop");
+        service.reindexProduct(PRODUCT_ID);
 
-        ArgumentCaptor<UpdateQuery> captor = ArgumentCaptor.forClass(UpdateQuery.class);
-        verify(operations).updateByQuery(captor.capture(), any(IndexCoordinates.class));
-        assertThat(captor.getValue().getScript()).contains("categoryName");
+        assertThat(savedDocument().getCategoryIds()).containsExactly(CATEGORY_ID.toString(), PARENT_ID.toString(), ROOT_ID.toString());
+    }
+
+    @Test
+    void aLoopInTheCategoryDataEndsTheWalkInsteadOfLoopingForever() {
+        when(catalogClient.getCategories()).thenReturn(ApiResponse.success(List.of(
+                new CatalogCategoryResponse(CATEGORY_ID, PARENT_ID),
+                new CatalogCategoryResponse(PARENT_ID, CATEGORY_ID))));
+        when(catalogClient.getProduct(PRODUCT_ID)).thenReturn(ApiResponse.success(product(null, null)));
+
+        service.reindexProduct(PRODUCT_ID);
+
+        assertThat(savedDocument().getCategoryIds()).containsExactly(CATEGORY_ID.toString(), PARENT_ID.toString());
+    }
+
+    @Test
+    void aCategoryAbsentFromTheListStillKeepsItsOwnId() {
+        when(catalogClient.getCategories()).thenReturn(ApiResponse.success(List.of()));
+        when(catalogClient.getProduct(PRODUCT_ID)).thenReturn(ApiResponse.success(product(null, null)));
+
+        service.reindexProduct(PRODUCT_ID);
+
+        assertThat(savedDocument().getCategoryIds()).containsExactly(CATEGORY_ID.toString());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void aChangedCategoryRebuildsEveryProductBelowIt() {
+        UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000c6");
+        SearchHits<ProductDocument> hits = mock(SearchHits.class);
+        List<SearchHit<ProductDocument>> searchHits = List.of(PRODUCT_ID, other).stream().map(id -> {
+            SearchHit<ProductDocument> hit = mock(SearchHit.class);
+            when(hit.getContent()).thenReturn(ProductDocument.builder().id(id.toString()).build());
+            return hit;
+        }).toList();
+        when(hits.getSearchHits()).thenReturn(searchHits);
+        when(operations.search(any(NativeQuery.class), eq(ProductDocument.class))).thenReturn(hits);
+        when(catalogClient.getProduct(any(UUID.class))).thenReturn(ApiResponse.success(product(null, null)));
+
+        service.reindexCategory(PARENT_ID);
+
+        verify(catalogClient).getProduct(PRODUCT_ID);
+        verify(catalogClient).getProduct(other);
+        verify(repository, times(2)).save(any(ProductDocument.class));
     }
 }

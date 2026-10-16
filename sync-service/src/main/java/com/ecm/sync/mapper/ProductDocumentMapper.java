@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.time.Instant;
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProductDocumentMapper {
@@ -19,5 +20,6 @@ public interface ProductDocumentMapper {
     @Mapping(target = "categoryName", source = "product.categoryName")
     @Mapping(target = "description", source = "product.description")
     ProductDocument toDocument(CatalogProductResponse product, Long minPrice, Long maxPrice, boolean inStock,
-                               String mainImageUrl, Instant indexedAt);
+                               String mainImageUrl, List<String> categoryIds, List<Long> prices,
+                               Instant indexedAt);
 }

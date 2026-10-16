@@ -48,12 +48,12 @@ class CatalogChangeConsumerTest {
     }
 
     @Test
-    void aRenamedBrandOrCategoryIsRenamedInsideTheIndex() {
+    void aRenamedBrandIsRenamedAndAChangedCategoryIsRebuiltInsideTheIndex() {
         consumer.onCatalogChanged(event("brands", "null", "{\"id\":\"" + ID + "\",\"name\":\"Asus\"}"));
         consumer.onCatalogChanged(event("categories", "null", "{\"id\":\"" + ID + "\",\"name\":\"Laptop\"}"));
 
         verify(indexService).renameBrand(ID, "Asus");
-        verify(indexService).renameCategory(ID, "Laptop");
+        verify(indexService).reindexCategory(ID);
     }
 
     @Test
