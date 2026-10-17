@@ -32,11 +32,12 @@ ghcr.io/pc-shopping-assistant-org/backend-media-service
 ghcr.io/pc-shopping-assistant-org/backend-sync-service
 ```
 
-Only a push or manual dispatch on the exact `release` branch builds/publishes
-images, tagged `release` and `sha-<full commit>`. Other branches, tags, PRs and
+Only a push or manual dispatch on `release/vX.Y.Z` (or `release/vX.Y.Z-rc.N`)
+builds/publishes images tagged `X.Y.Z` (or `X.Y.Z-rc.N`) and `sha-<full commit>`.
+For example, `release/v1.0.0` publishes all ten images as `1.0.0`. Other branches, tags, PRs and
 merge queues verify only. This repository never deploys or connects to the server.
 `common-lib` is embedded in service JARs, not a separate image. Only the infra
-repository's `release` workflow deploys the stack; see `../infra/README.md`.
+repository's versioned release workflow deploys the stack; see `../infra/README.md`.
 Server runtime configuration comes from `infra/.env.docker`, never an image env file.
 Use `Verify Java backend` as a required check if GitHub branch rules should block
 merges when Maven verification fails.
