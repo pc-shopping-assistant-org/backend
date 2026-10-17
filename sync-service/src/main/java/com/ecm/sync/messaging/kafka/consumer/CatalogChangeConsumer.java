@@ -1,11 +1,12 @@
 package com.ecm.sync.messaging.kafka.consumer;
 
+import com.ecm.sync.exception.InvalidChangeEventException;
 import com.ecm.sync.messaging.event.CatalogChange;
 import com.ecm.sync.service.ProductIndexService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class CatalogChangeConsumer {
 
+    public static final String TOPIC = "catalog.changed";
     static final String TABLE_PRODUCTS = "products";
     static final String TABLE_PRODUCT_VARIANTS = "product_variants";
     static final String TABLE_PRODUCT_IMAGES = "product_images";
@@ -35,14 +37,17 @@ public class CatalogChangeConsumer {
     private final ProductIndexService indexService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "catalog.changed", groupId = "sync-service")
-    @SneakyThrows
+    /**
+     * A record that cannot be read throws {@link InvalidChangeEventException}, which goes straight to the dead-letter
+     * topic; any other failure (catalog or Elasticsearch unavailable) is retried until it recovers.
+     */
+    @KafkaListener(topics = TOPIC, groupId = "sync-service")
     public void onCatalogChanged(String payload) {
         // 1. Debezium also sends a null-valued tombstone after a delete; there is nothing in it to act on
         if (payload == null) {
             return;
         }
-        CatalogChange change = objectMapper.readValue(payload, CatalogChange.class);
+        CatalogChange change = parse(payload);
         JsonNode row = change.row();
         if (change.table() == null || row == null || row.isNull()) {
             return;
@@ -58,9 +63,17 @@ public class CatalogChangeConsumer {
         }
     }
 
+    private CatalogChange parse(String payload) {
+        try {
+            return objectMapper.readValue(payload, CatalogChange.class);
+        } catch (JsonProcessingException ex) {
+            throw new InvalidChangeEventException("Unreadable catalog change: " + ex.getOriginalMessage(), ex);
+        }
+    }
+
     private void renameBrand(CatalogChange change, JsonNode row) {
         if (change.after() != null && !change.after().isNull()) {
-            indexService.renameBrand(uuid(row, COLUMN_ID), row.get(COLUMN_NAME).asText());
+            indexService.renameBrand(uuid(row, COLUMN_ID), text(row, COLUMN_NAME));
         }
     }
 
@@ -71,6 +84,18 @@ public class CatalogChangeConsumer {
     }
 
     private UUID uuid(JsonNode row, String column) {
-        return UUID.fromString(row.get(column).asText());
+        try {
+            return UUID.fromString(text(row, column));
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidChangeEventException("Column " + column + " is not an id: " + row.get(column), ex);
+        }
+    }
+
+    private String text(JsonNode row, String column) {
+        JsonNode value = row.get(column);
+        if (value == null || value.isNull()) {
+            throw new InvalidChangeEventException("Row has no column " + column, null);
+        }
+        return value.asText();
     }
 }

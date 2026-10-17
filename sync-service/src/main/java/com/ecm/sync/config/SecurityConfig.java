@@ -19,7 +19,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/products/sync").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/products/sync", "/products/sync/dlt/replay").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/products/sync/dlt").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(ApiResponseSecurityHandler.INSTANCE)
