@@ -1,5 +1,6 @@
 package com.ecm.catalog;
 
+import com.ecm.catalog.bootstrap.CatalogSeed;
 import com.ecm.catalog.config.FeignConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +12,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class CatalogServiceApplication {
 
-    public static void main(String[] args) {
+    private static final String SEED_PROD_ARGUMENT = "--seed-prod";
+
+    public static void main(String[] args) throws Exception {
+        if (args.length == 1 && SEED_PROD_ARGUMENT.equals(args[0])) {
+            CatalogSeed.run();
+            return;
+        }
         SpringApplication.run(CatalogServiceApplication.class, args);
     }
 

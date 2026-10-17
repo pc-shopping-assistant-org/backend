@@ -42,6 +42,16 @@ Server runtime configuration comes from `infra/.env.docker`, never an image env 
 Use `Verify Java backend` as a required check if GitHub branch rules should block
 merges when Maven verification fails.
 
+## Production catalog seed
+
+From `../infra/`, run `./scripts/seed-prod.sh`; full `./scripts/deploy.sh` calls it
+automatically. The catalog image supports `java -jar /app/app.jar --seed-prod`:
+Flyway migrations, production hardware taxonomy UPSERT, then exit without starting
+the web server or message listeners. It requires `SPRING_DATASOURCE_URL`,
+`SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` at runtime.
+No demo products/stock are seeded. Hardware types are included in category/product
+detail responses so AI does not need a category UUID mapping in its environment.
+
 ## Quick Start
 
 From the repository root:
