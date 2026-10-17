@@ -3,6 +3,8 @@ package com.ecm.catalog.service;
 import com.ecm.catalog.dto.response.ProductDetailResponse;
 import com.ecm.catalog.dto.response.ProductVariantResponse;
 import com.ecm.catalog.entity.CatalogStatus;
+import com.ecm.catalog.entity.Category;
+import com.ecm.catalog.entity.HardwareType;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.mapper.OptionMapper;
@@ -44,6 +46,9 @@ class ProductSnapshotAssemblerTest {
         ProductAssembler assembler = new ProductAssembler(brands, categories, images, variants, links, options,
                 productMapper, variantMapper, mock(OptionMapper.class), media);
         UUID categoryId = UUID.randomUUID();
+        when(categories.findAllById(anyCollection())).thenReturn(List.of(Category.builder()
+                .id(categoryId).name("Renamed processors").hardwareType(HardwareType.CPU)
+                .status(CatalogStatus.ACTIVE).build()));
         List<Product> products = IntStream.range(0, 16).mapToObj(index -> Product.builder()
                 .id(UUID.randomUUID()).name("P" + index).categoryId(categoryId).status(CatalogStatus.ACTIVE).build()).toList();
         List<UUID> ids = products.stream().map(Product::getId).toList();
@@ -68,6 +73,7 @@ class ProductSnapshotAssemblerTest {
 
         assertEquals(ids, result.stream().map(ProductDetailResponse::getId).toList());
         for (int index = 0; index < result.size(); index++) {
+            assertEquals(HardwareType.CPU, result.get(index).getHardwareType());
             ProductVariantResponse variant = result.get(index).getVariants().get(0);
             assertEquals(rows.get(index).getId(), variant.getId());
             assertEquals(rows.get(index).getPrice(), variant.getPrice());

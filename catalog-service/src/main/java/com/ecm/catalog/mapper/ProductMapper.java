@@ -22,5 +22,6 @@ public interface ProductMapper {
     @Mapping(target = "categoryName", ignore = true)
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "variants", ignore = true)
+    @Mapping(target = "hardwareType", ignore = true)
     ProductDetailResponse toDetailResponse(Product product);
 }

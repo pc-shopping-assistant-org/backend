@@ -1,5 +1,6 @@
 package com.ecm.catalog.dto.response;
 
+import com.ecm.catalog.entity.HardwareType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class ProductDetailResponse {
     private String brandName;
     private UUID categoryId;
     private String categoryName;
+    private HardwareType hardwareType;
     
     @Builder.Default
     private Map<String, Object> specifications = new HashMap<>();

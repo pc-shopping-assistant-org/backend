@@ -29,6 +29,10 @@ public class Category {
     @Column(name = "seo_name", nullable = false)
     private String seoName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "hardware_type", length = 20)
+    private HardwareType hardwareType;
+
     @Column(name = "description")
     private String description;
 
