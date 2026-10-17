@@ -71,7 +71,9 @@ public class ProductAssembler {
         Map<UUID, List<ProductImage>> imagesByProduct = gallery.stream().collect(Collectors.groupingBy(ProductImage::getProductId));
         Map<UUID, List<OptionResponse>> options = optionsByVariant(variants);
         Map<UUID, String> brands = brandNames(products);
-        Map<UUID, String> categories = categoryNames(products);
+        Set<UUID> categoryIds = products.stream().map(Product::getCategoryId).collect(Collectors.toSet());
+        Map<UUID, Category> categories = categoryRepository.findAllById(categoryIds).stream()
+                .collect(Collectors.toMap(Category::getId, category -> category));
 
         // 2. Resolve all image files once for the page
         Set<UUID> fileIds = new HashSet<>();
@@ -83,7 +85,11 @@ public class ProductAssembler {
         return products.stream().map(product -> {
             ProductDetailResponse response = productMapper.toDetailResponse(product);
             response.setBrandName(lookup(brands, product.getBrandId()));
-            response.setCategoryName(lookup(categories, product.getCategoryId()));
+            Category category = categories.get(product.getCategoryId());
+            if (category != null) {
+                response.setCategoryName(category.getName());
+                response.setHardwareType(category.getStatus() == CatalogStatus.ACTIVE ? category.getHardwareType() : null);
+            }
             response.setImages(imagesByProduct.getOrDefault(product.getId(), List.of()).stream()
                     .map(image -> toImageResponse(image, urls)).toList());
             response.setVariants(variantsByProduct.getOrDefault(product.getId(), List.of()).stream()

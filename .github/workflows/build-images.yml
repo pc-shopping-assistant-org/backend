@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: backend-images-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads/release/') }}
 
 permissions:
   contents: read
@@ -66,6 +66,7 @@ jobs:
             promotion-service/target/promotion-service-*.jar
             search-service/target/search-service-*.jar
             media-service/target/media-service-*.jar
+            sync-service/target/sync-service-*.jar
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
@@ -74,10 +75,8 @@ jobs:
     name: Build ${{ matrix.service }} image
     needs: verify
     if: >-
-      github.event_name == 'pull_request' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' &&
-        (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
+      startsWith(github.ref, 'refs/heads/release/') &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -96,6 +95,7 @@ jobs:
           - promotion-service
           - search-service
           - media-service
+          - sync-service
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -111,6 +111,16 @@ jobs:
           mkdir image-context
           cp '${{ matrix.service }}'/target/'${{ matrix.service }}'-*.jar image-context/app.jar
           cp docker/Dockerfile.service image-context/Dockerfile
+
+      - name: Resolve image version from release branch
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=${GITHUB_REF_NAME#release/v}
+          version_pattern='(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.[1-9][0-9]*)?'
+          [[ "$GITHUB_REF_NAME" == release/v* && "$version" =~ ^${version_pattern}$ ]] || { echo 'Use release/vX.Y.Z or release/vX.Y.Z-rc.N' >&2; exit 2; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -129,11 +139,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/backend-${{ matrix.service }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=ref,event=pr
-            type=sha,format=short,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=sha,format=long,prefix=sha-
 
       - name: Build and publish image
         uses: docker/build-push-action@v6

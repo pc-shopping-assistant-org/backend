@@ -2,7 +2,7 @@ spring:
   application:
     name: catalog-service
   datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5433}/catalog_db
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/catalog_db
     username: postgres
     password: postgres
   flyway:

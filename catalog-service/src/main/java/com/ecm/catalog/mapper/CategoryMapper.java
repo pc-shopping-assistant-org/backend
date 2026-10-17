@@ -13,6 +13,7 @@ public interface CategoryMapper {
     @Mapping(target = "children", ignore = true)
     CategoryResponse toResponse(Category category);
 
+    @Mapping(target = "hardwareType", ignore = true)
     Category toEntity(com.ecm.catalog.dto.request.CreateCategoryRequest request);
 
     List<CategoryResponse> toResponseList(List<Category> categories);

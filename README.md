@@ -4,6 +4,14 @@ The backend for **PC Shopping Assistant** is a Spring Boot and Spring Cloud micr
 
 The project is organized as a single Maven reactor. Services run on the host during local development, while infrastructure dependencies run in Docker Compose.
 
+For **server infrastructure + local application development**, use the independent
+`../infra/` checkout and its README. Its single compose starts dependencies by default;
+profile `apps` adds GHCR application images for server deployment. Import
+`../infra/env/backend.env.example` settings into the local process, using actual
+server credentials. `docker-compose.yml` here remains the isolated local/CI stack;
+do not run both stacks against the same ports/volumes. The local commands below
+describe that existing local/CI stack, not the remote server configuration.
+
 ## GitHub Actions and service images
 
 The `Build and publish backend service images` workflow runs `mvn verify` on
@@ -21,15 +29,28 @@ ghcr.io/pc-shopping-assistant-org/backend-payment-service
 ghcr.io/pc-shopping-assistant-org/backend-promotion-service
 ghcr.io/pc-shopping-assistant-org/backend-search-service
 ghcr.io/pc-shopping-assistant-org/backend-media-service
+ghcr.io/pc-shopping-assistant-org/backend-sync-service
 ```
 
-Pull requests build images without publishing. A push to `main`, a `v*` tag, or
-manual dispatch publishes the images to GHCR. Merge queue runs verification;
-the resulting merge to `main` publishes them. `common-lib` is packaged into
-dependent service JARs and does not have its own image. This workflow publishes
-images only; deployment Compose configuration remains separate.
+Only a push or manual dispatch on `release/vX.Y.Z` (or `release/vX.Y.Z-rc.N`)
+builds/publishes images tagged `X.Y.Z` (or `X.Y.Z-rc.N`) and `sha-<full commit>`.
+For example, `release/v1.0.0` publishes all ten images as `1.0.0`. Other branches, tags, PRs and
+merge queues verify only. This repository never deploys or connects to the server.
+`common-lib` is embedded in service JARs, not a separate image. Only the infra
+repository's versioned release workflow deploys the stack; see `../infra/README.md`.
+Server runtime configuration comes from `infra/.env.docker`, never an image env file.
 Use `Verify Java backend` as a required check if GitHub branch rules should block
 merges when Maven verification fails.
+
+## Production catalog seed
+
+From `../infra/`, run `./scripts/seed-prod.sh`; full `./scripts/deploy.sh` calls it
+automatically. The catalog image supports `java -jar /app/app.jar --seed-prod`:
+Flyway migrations, production hardware taxonomy UPSERT, then exit without starting
+the web server or message listeners. It requires `SPRING_DATASOURCE_URL`,
+`SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` at runtime.
+No demo products/stock are seeded. Hardware types are included in category/product
+detail responses so AI does not need a category UUID mapping in its environment.
 
 ## Quick Start
 

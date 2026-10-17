@@ -4,6 +4,7 @@ import com.ecm.catalog.dto.request.CreateCategoryRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryDetailsRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryRequest;
 import com.ecm.catalog.entity.CatalogStatus;
+import com.ecm.catalog.entity.HardwareType;
 import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
@@ -53,6 +54,17 @@ class CategoryServiceTest {
     }
 
     // ---- UC-ADM-CAT-002 add ----
+
+    @Test
+    void categoryResponseExposesStableHardwareTypeWithoutInferringFromName() {
+        Category renamedCategory = category(ID, "Processors", null, CatalogStatus.ACTIVE);
+        renamedCategory.setHardwareType(HardwareType.CPU);
+
+        var response = new CategoryMapperImpl().toResponse(renamedCategory);
+
+        assertEquals(HardwareType.CPU, response.getHardwareType());
+        assertEquals("Processors", response.getName());
+    }
 
     @Test
     void createTrimsInputDerivesSeoNameAndStoresDescription() {
