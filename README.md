@@ -34,10 +34,9 @@ ghcr.io/pc-shopping-assistant-org/backend-sync-service
 
 Only a push or manual dispatch on the exact `release` branch builds/publishes
 images, tagged `release` and `sha-<full commit>`. Other branches, tags, PRs and
-merge queues verify only. After all ten images publish, the release job SSHes to
-the server and updates only the backend group through infra's release script.
-`common-lib` is embedded in service JARs, not a separate image. Configure GitHub
-Environment `release` with SSH variables/secrets documented in `../infra/README.md`.
+merge queues verify only. This repository never deploys or connects to the server.
+`common-lib` is embedded in service JARs, not a separate image. Only the infra
+repository's `release` workflow deploys the stack; see `../infra/README.md`.
 Server runtime configuration comes from `infra/.env.docker`, never an image env file.
 Use `Verify Java backend` as a required check if GitHub branch rules should block
 merges when Maven verification fails.
