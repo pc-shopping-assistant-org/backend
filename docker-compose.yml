@@ -76,6 +76,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      # An application that runs outside this host (sync-service, ...) can be offline for days. Records must outlive
+      # that (30 days instead of the default 7), and so must the group's committed offset, or it would start over.
+      # Topics that already exist keep their own setting: run docker/kafka/set-retention.sh once for them.
+      KAFKA_LOG_RETENTION_HOURS: "720"
+      KAFKA_OFFSETS_RETENTION_MINUTES: "43200"
     ports:
       - "29092:29092"
     volumes:

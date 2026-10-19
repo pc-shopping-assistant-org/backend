@@ -18,6 +18,7 @@ import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.CustomerAddress;
 import com.ecm.identity.entity.Role;
+import com.ecm.identity.event.GoogleAvatarRequested;
 import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.mapper.AdminMapper;
 import com.ecm.identity.mapper.CustomerMapper;
@@ -31,10 +32,12 @@ import com.ecm.identity.repository.RoleRepository;
 import com.ecm.identity.service.google.GoogleIdentity;
 import com.ecm.identity.service.google.GoogleIdentityVerifier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
@@ -51,6 +54,7 @@ public class AuthService {
     private static final String OTP_PURPOSE_PASSWORD_RESET = "PASSWORD_RESET";
     private static final String OTP_PURPOSE_PASSWORD_CHANGE = "PASSWORD_CHANGE";
     private static final int MILLIS_IN_SECOND = 1000;
+    private static final int MAX_NAME_LENGTH = 100;
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
@@ -67,6 +71,8 @@ public class AuthService {
     private final EmployeeMapper employeeMapper;
     private final AdminMapper adminMapper;
     private final TokenRevocationService tokenRevocationService;
+    private final TransactionTemplate transactionTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void register(RegisterRequest request) {
         // 1. Normalize identity fields so later lookups/comparisons are case/whitespace-stable
@@ -98,7 +104,9 @@ public class AuthService {
         ensureAccountUsable(account);
 
         // 3. Match the password.
-        if (!passwordEncoder.matches(request.password(), account.getPasswordHash())) {
+        // A Google-only account has no password to match
+        if (account.getPasswordHash() == null
+                || !passwordEncoder.matches(request.password(), account.getPasswordHash())) {
             throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
         }
 
@@ -117,31 +125,94 @@ public class AuthService {
         Account account = accountRepository.findByGoogleSubject(identity.subject()).orElse(null);
 
         if (account == null) {
-            // 3. First time: link to existing local account by email
+            // 3. First time: link to the local account with the same verified email, or sign up a new customer
             account = accountRepository.findByEmailIgnoreCase(identity.email())
-                    .orElseThrow(() -> new BusinessException(IdentityErrorCode.GOOGLE_ACCOUNT_NOT_LINKED));
-
-            // 4. Prevent re-linking if another Google identity is already bound
-            if (StringUtils.hasText(account.getGoogleSubject())
-                    && !identity.subject().equals(account.getGoogleSubject())) {
-                throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
-            }
-
-            // 5. Check account is active before linking
-            ensureAccountUsable(account);
-
-            // 6. Persist the link
-            account.setGoogleSubject(identity.subject());
-            account = accountRepository.save(account);
+                    .map(existing -> linkGoogle(existing, identity))
+                    .orElseGet(() -> signUpWithGoogle(identity));
         } else {
             // Already linked — just validate usability
             ensureAccountUsable(account);
         }
 
-        // 7. Issue token pair
+        // 4. Issue token pair
         Role role = roleRepository.findById(account.getRoleId())
                 .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
         return issueTokenPair(account, role, buildUserSummary(account, role));
+    }
+
+    private Account linkGoogle(Account account, GoogleIdentity identity) {
+        // Prevent re-linking if another Google identity is already bound
+        if (StringUtils.hasText(account.getGoogleSubject())
+                && !identity.subject().equals(account.getGoogleSubject())) {
+            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
+        }
+        ensureAccountUsable(account);
+
+        account.setGoogleSubject(identity.subject());
+        return accountRepository.save(account);
+    }
+
+    /** Creates a customer with no password and no phone; never any other role. */
+    private Account signUpWithGoogle(GoogleIdentity identity) {
+        Role customerRole = roleRepository.findByName(ROLE_CUSTOMER)
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
+        try {
+            // Its own transaction, so the picture import only starts once the signup is really saved
+            return transactionTemplate.execute(status -> {
+                Account account = accountRepository.save(Account.builder()
+                        .email(identity.email())
+                        .googleSubject(identity.subject())
+                        .roleId(customerRole.getId())
+                        .status(AccountStatus.ACTIVE)
+                        .build());
+                customerRepository.save(Customer.builder()
+                        .accountId(account.getId())
+                        .firstName(firstNameOf(identity))
+                        .lastName(lastNameOf(identity))
+                        .build());
+                if (StringUtils.hasText(identity.pictureUrl())) {
+                    eventPublisher.publishEvent(
+                            new GoogleAvatarRequested(account.getId(), account.getEmail(), identity.pictureUrl()));
+                }
+                return account;
+            });
+        } catch (DataIntegrityViolationException ex) {
+            // Another request signed this person up first (double click, two tabs): use theirs
+            return accountRepository.findByGoogleSubject(identity.subject())
+                    .or(() -> accountRepository.findByEmailIgnoreCase(identity.email()))
+                    .map(existing -> linkGoogle(existing, identity))
+                    .orElseThrow(() -> ex);
+        }
+    }
+
+    /** Google's given name, else the last word of the full name, else the part of the email before the @. */
+    private static String firstNameOf(GoogleIdentity identity) {
+        if (StringUtils.hasText(identity.givenName())) {
+            return limitName(identity.givenName());
+        }
+        if (StringUtils.hasText(identity.fullName())) {
+            String full = identity.fullName().trim();
+            return limitName(full.substring(full.lastIndexOf(' ') + 1));
+        }
+        return limitName(identity.email().substring(0, identity.email().indexOf('@')));
+    }
+
+    /** Google's family name, else the rest of the full name once the last word is the first name, else empty. */
+    private static String lastNameOf(GoogleIdentity identity) {
+        if (StringUtils.hasText(identity.familyName())) {
+            return limitName(identity.familyName());
+        }
+        if (!StringUtils.hasText(identity.givenName()) && StringUtils.hasText(identity.fullName())) {
+            String full = identity.fullName().trim();
+            int cut = full.lastIndexOf(' ');
+            return cut < 0 ? "" : limitName(full.substring(0, cut));
+        }
+        return "";
+    }
+
+    private static String limitName(String name) {
+        String trimmed = name.trim();
+        return trimmed.length() <= MAX_NAME_LENGTH ? trimmed : trimmed.substring(0, MAX_NAME_LENGTH);
     }
 
     private void ensureAccountUsable(Account account) {
@@ -330,8 +401,10 @@ public class AuthService {
                 .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
 
-        // 2. Verify the current password before sending the confirmation OTP
-        if (!passwordEncoder.matches(currentPassword, account.getPasswordHash())) {
+        // 2. Verify the current password before sending the confirmation OTP; a Google-only account has none yet,
+        // and the OTP sent to its email is then the only proof asked for
+        if (account.getPasswordHash() != null
+                && (currentPassword == null || !passwordEncoder.matches(currentPassword, account.getPasswordHash()))) {
             throw new BusinessException(IdentityErrorCode.INCORRECT_PASSWORD);
         }
 

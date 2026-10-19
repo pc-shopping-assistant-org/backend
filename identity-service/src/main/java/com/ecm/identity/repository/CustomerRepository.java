@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -47,4 +49,10 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @Query(SELECT_RESPONSE + "WHERE c.accountId = :id")
     Optional<CustomerResponse> findDetail(@Param("id") UUID id);
+
+    /** Sets the avatar only while there is none, so a picture the customer chose first is never overwritten. */
+    @Transactional
+    @Modifying
+    @Query("UPDATE Customer c SET c.avatarFileId = :fileId WHERE c.accountId = :id AND c.avatarFileId IS NULL")
+    int setAvatarIfAbsent(@Param("id") UUID id, @Param("fileId") UUID fileId);
 }

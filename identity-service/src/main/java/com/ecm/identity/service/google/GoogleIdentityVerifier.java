@@ -69,7 +69,11 @@ public class GoogleIdentityVerifier {
             // 3. Return normalized identity
             return new GoogleIdentity(
                     payload.getSubject().trim(),
-                    payload.getEmail().trim().toLowerCase(Locale.ROOT)
+                    payload.getEmail().trim().toLowerCase(Locale.ROOT),
+                    claim(payload, "given_name"),
+                    claim(payload, "family_name"),
+                    claim(payload, "name"),
+                    claim(payload, "picture")
             );
         } catch (BusinessException ex) {
             throw ex;
@@ -77,6 +81,11 @@ public class GoogleIdentityVerifier {
             log.warn("Google ID-token verification failed: {}", ex.getMessage());
             throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS, "Google authentication failed");
         }
+    }
+
+    private static String claim(GoogleIdToken.Payload payload, String name) {
+        Object value = payload.get(name);
+        return value instanceof String text && StringUtils.hasText(text) ? text.trim() : null;
     }
 
     private GoogleIdTokenVerifier getVerifier(String clientId) throws GeneralSecurityException, java.io.IOException {

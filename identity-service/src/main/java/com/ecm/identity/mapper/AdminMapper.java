@@ -13,5 +13,6 @@ public interface AdminMapper {
     @Mapping(target = "accountId", source = "account.id")
     @Mapping(target = "role", source = "role.name")
     @Mapping(target = "avatarUrl", ignore = true)
+    @Mapping(target = "hasPassword", expression = "java(account.getPasswordHash() != null)")
     UserSummaryResponse toSummary(Account account, Role role, Admin admin);
 }

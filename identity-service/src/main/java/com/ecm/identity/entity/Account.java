@@ -35,13 +35,13 @@ public class Account {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone", nullable = false, unique = true, length = 15)
+    @Column(name = "phone", unique = true, length = 15)
     private String phone;
 
     @Column(name = "google_subject", unique = true)
     private String googleSubject;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Column(name = "role_id", nullable = false)

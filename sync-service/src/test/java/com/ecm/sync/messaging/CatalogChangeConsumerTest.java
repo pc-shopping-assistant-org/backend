@@ -1,5 +1,6 @@
 package com.ecm.sync.messaging;
 
+import com.ecm.sync.exception.InvalidChangeEventException;
 import com.ecm.sync.messaging.kafka.consumer.CatalogChangeConsumer;
 import com.ecm.sync.service.ProductIndexService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -73,8 +75,23 @@ class CatalogChangeConsumerTest {
     }
 
     @Test
-    void anEventThatCannotBeReadIsReportedSoKafkaRetriesIt() {
-        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> consumer.onCatalogChanged("not json"));
+    void anEventThatCannotBeReadIsMarkedInvalidSoItIsParkedInsteadOfRetried() {
+        assertThrows(InvalidChangeEventException.class, () -> consumer.onCatalogChanged("not json"));
         verify(indexService, org.mockito.Mockito.never()).renameBrand(any(), anyString());
+    }
+
+    @Test
+    void aRowWithoutItsIdOrWithABadIdIsInvalid() {
+        assertThrows(InvalidChangeEventException.class, () -> consumer.onCatalogChanged(event("products", "null", "{\"status\":\"ACTIVE\"}")));
+        assertThrows(InvalidChangeEventException.class, () -> consumer.onCatalogChanged(event("products", "null", "{\"id\":\"nope\"}")));
+        assertThrows(InvalidChangeEventException.class, () -> consumer.onCatalogChanged(event("brands", "null", "{\"id\":\"" + ID + "\"}")));
+        verifyNoInteractions(indexService);
+    }
+
+    @Test
+    void aFailureOfTheIndexIsNotInvalidSoItIsRetriedUntilItRecovers() {
+        org.mockito.Mockito.doThrow(new IllegalStateException("catalog down")).when(indexService).reindexProduct(ID);
+
+        assertThrows(IllegalStateException.class, () -> consumer.onCatalogChanged(event("products", "null", "{\"id\":\"" + ID + "\"}")));
     }
 }
