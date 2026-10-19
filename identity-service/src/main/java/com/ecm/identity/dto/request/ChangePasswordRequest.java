@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record ChangePasswordRequest(
-        @NotBlank(message = "Current password is required")
+        /** Absent for an account that signed up with Google and has no password yet. */
         String currentPassword,
 
         @NotBlank(message = "New password is required")
