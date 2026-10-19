@@ -15,10 +15,11 @@ public record UserSummaryResponse(
         Gender gender,
         LocalDate birthday,
         UUID avatarFileId,
-        String avatarUrl) {
+        String avatarUrl,
+        boolean hasPassword) {
 
     /** The same summary with the URL of the avatar file, which only the Media Service knows. */
     public UserSummaryResponse withAvatarUrl(String url) {
-        return new UserSummaryResponse(accountId, email, phone, role, firstName, lastName, gender, birthday, avatarFileId, url);
+        return new UserSummaryResponse(accountId, email, phone, role, firstName, lastName, gender, birthday, avatarFileId, url, hasPassword);
     }
 }

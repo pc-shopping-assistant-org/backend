@@ -59,7 +59,7 @@ class ProfileServiceTest {
     void updateProfileTrimsNamesAndAppliesChangedPhone() {
         Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
         UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0987654321", "ROLE_CUSTOMER",
-                "Binh", "Nguyen", null, null, null, null);
+                "Binh", "Nguyen", null, null, null, null, true);
         when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(accountRepository.existsByPhone("0987654321")).thenReturn(false);
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
@@ -147,7 +147,7 @@ class ProfileServiceTest {
         UUID fileId = UUID.fromString("00000000-0000-0000-0000-0000000000f1");
         Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
         UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0912345678", "ROLE_CUSTOMER",
-                "An", "Test", null, null, fileId, null);
+                "An", "Test", null, null, fileId, null, true);
         when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
         when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
@@ -178,7 +178,7 @@ class ProfileServiceTest {
     void getProfileWithoutAnAvatarDoesNotCallTheMediaService() {
         Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
         UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0912345678", "ROLE_CUSTOMER",
-                "An", "Test", null, null, null, null);
+                "An", "Test", null, null, null, null, true);
         when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
         when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
