@@ -1,7 +1,6 @@
 package com.ecm.catalog.service;
 
 import com.ecm.catalog.dto.response.CategoryAttributeTemplateResponse;
-import com.ecm.catalog.dto.response.CategoryAttributeTemplateResponse.Group;
 import com.ecm.catalog.dto.response.CategoryAttributeTemplateResponse.Item;
 import com.ecm.catalog.entity.AttributeDataType;
 import com.ecm.catalog.exception.CatalogErrorCode;
@@ -34,8 +33,7 @@ class ProductSpecificationValidatorTest {
                 item("ram_type", AttributeDataType.ENUM, List.of("DDR4", "DDR5"), true, 1),
                 item("brand_line", AttributeDataType.STRING, null, false, 2),
                 item("rgb", AttributeDataType.BOOLEAN, null, false, 3));
-        when(templates.getTemplate(CATEGORY_ID)).thenReturn(new CategoryAttributeTemplateResponse(CATEGORY_ID,
-                List.of(new Group(UUID.randomUUID(), "Memory", 0, items))));
+        when(templates.getTemplate(CATEGORY_ID)).thenReturn(new CategoryAttributeTemplateResponse(CATEGORY_ID, items));
         validator = new ProductSpecificationValidator(templates);
     }
 

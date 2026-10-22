@@ -30,8 +30,7 @@ public class ProductSpecificationValidator {
 
     public Map<String, Object> validate(UUID categoryId, Map<String, Object> specifications) {
         Map<String, Object> input = specifications == null ? Map.of() : specifications;
-        List<CategoryAttributeTemplateResponse.Item> template = categoryAttributeService.getTemplate(categoryId).groups().stream()
-                .flatMap(group -> group.attributes().stream()).toList();
+        List<CategoryAttributeTemplateResponse.Item> template = categoryAttributeService.getTemplate(categoryId).attributes();
 
         List<String> errors = new ArrayList<>();
         Map<String, Object> normalized = new LinkedHashMap<>();

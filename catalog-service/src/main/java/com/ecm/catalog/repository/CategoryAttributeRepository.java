@@ -7,19 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface CategoryAttributeRepository extends JpaRepository<CategoryAttribute, UUID> {
 
-    List<CategoryAttribute> findByCategoryGroupIdInOrderByDisplayOrderAsc(Collection<UUID> categoryGroupIds);
+    List<CategoryAttribute> findByCategoryIdOrderByDisplayOrderAsc(UUID categoryId);
 
     boolean existsByAttributeId(UUID attributeId);
 
     @Modifying
-    @Query("DELETE FROM CategoryAttribute ca WHERE ca.categoryGroupId IN "
-            + "(SELECT g.id FROM CategoryAttributeGroup g WHERE g.categoryId = :categoryId)")
+    @Query("DELETE FROM CategoryAttribute ca WHERE ca.categoryId = :categoryId")
     void deleteByCategoryId(@Param("categoryId") UUID categoryId);
 }

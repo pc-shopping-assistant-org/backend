@@ -5,10 +5,8 @@ import com.ecm.catalog.entity.AttributeDataType;
 import java.util.List;
 import java.util.UUID;
 
-/** The specification form of a category: ordered groups of attributes a product in it must fill in. */
-public record CategoryAttributeTemplateResponse(UUID categoryId, List<Group> groups) {
-
-    public record Group(UUID id, String name, int displayOrder, List<Item> attributes) {}
+/** The specification form of a category: the ordered attributes a product in it must fill in. */
+public record CategoryAttributeTemplateResponse(UUID categoryId, List<Item> attributes) {
 
     public record Item(
             UUID attributeId,
