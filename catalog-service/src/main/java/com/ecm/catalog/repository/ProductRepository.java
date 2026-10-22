@@ -62,6 +62,20 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             Pageable pageable
     );
 
+    /**
+     * How many products the storefront lists in each category: active, with at least one variant in
+     * {@code variantStatus}, the same rule the public product list applies. Categories without any are absent.
+     */
+    @Query("""
+            SELECT new com.ecm.catalog.repository.CategoryProductCount(p.categoryId, COUNT(p))
+            FROM Product p
+            WHERE p.status = :status
+              AND EXISTS (SELECT x.id FROM ProductVariant x WHERE x.productId = p.id AND x.status = :variantStatus)
+            GROUP BY p.categoryId
+            """)
+    List<CategoryProductCount> countListedByCategory(
+            @Param("status") CatalogStatus status, @Param("variantStatus") CatalogStatus variantStatus);
+
     boolean existsByCategoryIdAndStatusNot(UUID categoryId, CatalogStatus status);
 
     boolean existsByBrandIdAndStatusNot(UUID brandId, CatalogStatus status);

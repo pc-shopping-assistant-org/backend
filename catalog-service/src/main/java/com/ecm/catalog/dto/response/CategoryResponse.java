@@ -25,6 +25,9 @@ public class CategoryResponse {
     private UUID parentId;
     private String status;
     private Instant createdAt;
+
+    /** Products a shopper can see in this category and in every category under it. */
+    private long productCount;
     
     @Builder.Default
     private List<CategoryResponse> children = new ArrayList<>();
