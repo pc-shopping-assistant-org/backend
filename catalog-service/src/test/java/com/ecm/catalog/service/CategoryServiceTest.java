@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
 import com.ecm.catalog.mapper.CategoryMapperImpl;
+import com.ecm.catalog.repository.CategoryProductCount;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.common.exception.BusinessException;
@@ -240,5 +241,50 @@ class CategoryServiceTest {
 
         assertEquals(1, roots.size());
         assertEquals(CHILD_ID, roots.get(0).getChildren().get(0).getId());
+    }
+
+    // ---- product counts on the storefront category tree ----
+
+    @Test
+    void treeCountsTheListedProductsOfACategoryAndOfEverythingUnderIt() {
+        Category parent = category(PARENT_ID, "Parent", null, CatalogStatus.ACTIVE);
+        Category child = category(CHILD_ID, "Child", PARENT_ID, CatalogStatus.ACTIVE);
+        Category other = category(ID, "Other", null, CatalogStatus.ACTIVE);
+        when(categoryRepository.findByStatus(CatalogStatus.ACTIVE)).thenReturn(List.of(parent, child, other));
+        when(productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE))
+                .thenReturn(List.of(new CategoryProductCount(PARENT_ID, 2), new CategoryProductCount(CHILD_ID, 3)));
+
+        var roots = categoryService.getCategoryTree();
+
+        var parentNode = roots.stream().filter(node -> node.getId().equals(PARENT_ID)).findFirst().orElseThrow();
+        assertEquals(5, parentNode.getProductCount());
+        assertEquals(3, parentNode.getChildren().get(0).getProductCount());
+        assertEquals(0, roots.stream().filter(node -> node.getId().equals(ID)).findFirst().orElseThrow().getProductCount());
+    }
+
+    @Test
+    void flatListCarriesTheSameBranchCounts() {
+        Category parent = category(PARENT_ID, "Parent", null, CatalogStatus.ACTIVE);
+        Category child = category(CHILD_ID, "Child", PARENT_ID, CatalogStatus.ACTIVE);
+        when(categoryRepository.findByStatus(CatalogStatus.ACTIVE)).thenReturn(List.of(parent, child));
+        when(productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE))
+                .thenReturn(List.of(new CategoryProductCount(CHILD_ID, 4)));
+
+        var all = categoryService.getAllCategories();
+
+        assertEquals(4, all.stream().filter(node -> node.getId().equals(PARENT_ID)).findFirst().orElseThrow().getProductCount());
+        assertEquals(4, all.stream().filter(node -> node.getId().equals(CHILD_ID)).findFirst().orElseThrow().getProductCount());
+    }
+
+    @Test
+    void aProductInACategoryThatIsNotActiveCountsForNoCategory() {
+        Category parent = category(PARENT_ID, "Parent", null, CatalogStatus.ACTIVE);
+        when(categoryRepository.findByStatus(CatalogStatus.ACTIVE)).thenReturn(List.of(parent));
+        when(productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE))
+                .thenReturn(List.of(new CategoryProductCount(CHILD_ID, 7)));
+
+        var roots = categoryService.getCategoryTree();
+
+        assertEquals(0, roots.get(0).getProductCount());
     }
 }

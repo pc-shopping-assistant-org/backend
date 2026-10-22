@@ -8,6 +8,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
+import com.ecm.catalog.repository.CategoryProductCount;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.common.exception.ResourceNotFoundException;
@@ -160,7 +161,10 @@ public class CategoryService {
                 .map(categoryMapper::toResponse)
                 .collect(Collectors.toMap(CategoryResponse::getId, c -> c));
 
-        // 3. Build tree structure
+        // 3. Each category counts the products it lists, its sub-categories' included
+        addProductCounts(categoryMap);
+
+        // 4. Build tree structure
         List<CategoryResponse> roots = new ArrayList<>();
         for (CategoryResponse category : categoryMap.values()) {
             if (category.getParentId() == null) {
@@ -173,8 +177,20 @@ public class CategoryService {
             }
         }
 
-        // 4. Return root categories with nested children
+        // 5. Return root categories with nested children
         return roots;
+    }
+
+    /** Adds each category's listed products to it and to every category above it, so a parent shows its whole branch. */
+    private void addProductCounts(Map<UUID, CategoryResponse> categories) {
+        for (CategoryProductCount own : productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE)) {
+            Set<UUID> visited = new HashSet<>();
+            CategoryResponse current = categories.get(own.categoryId());
+            while (current != null && visited.add(current.getId())) {
+                current.setProductCount(current.getProductCount() + own.count());
+                current = current.getParentId() == null ? null : categories.get(current.getParentId());
+            }
+        }
     }
 
     @Transactional(readOnly = true)
@@ -188,8 +204,10 @@ public class CategoryService {
         // 1. Fetch all active categories
         List<Category> categories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
 
-        // 2. Map to response DTOs (flat list)
-        return categoryMapper.toResponseList(categories);
+        // 2. Map to response DTOs (flat list), each with the products it lists
+        List<CategoryResponse> responses = categoryMapper.toResponseList(categories);
+        addProductCounts(responses.stream().collect(Collectors.toMap(CategoryResponse::getId, response -> response)));
+        return responses;
     }
 
     @Transactional(readOnly = true)

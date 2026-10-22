@@ -11,6 +11,7 @@ import java.util.List;
 public interface CategoryMapper {
 
     @Mapping(target = "children", ignore = true)
+    @Mapping(target = "productCount", ignore = true)
     CategoryResponse toResponse(Category category);
 
     @Mapping(target = "hardwareType", ignore = true)
