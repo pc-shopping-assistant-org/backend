@@ -34,6 +34,18 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     boolean existsByParentIdAndStatusNot(UUID parentId, CatalogStatus status);
 
+    /** The category and its live ancestors, the root first; empty when the category does not exist. */
+    @Query(value = """
+            WITH RECURSIVE chain AS (
+                SELECT id, parent_id, 0 AS depth FROM categories WHERE id = :id AND status <> 'DELETED'
+                UNION ALL
+                SELECT c.id, c.parent_id, ch.depth + 1 FROM categories c JOIN chain ch ON c.id = ch.parent_id
+                WHERE c.status <> 'DELETED' AND ch.depth < 32
+            )
+            SELECT id FROM chain ORDER BY depth DESC
+            """, nativeQuery = true)
+    List<UUID> findSelfAndAncestorIds(@Param("id") UUID id);
+
     /** The category with the given id and all its live descendants; empty when the category does not exist. */
     @Query(value = """
             WITH RECURSIVE tree AS (

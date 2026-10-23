@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,6 +86,14 @@ class AttributeDefinitionServiceTest {
 
         assertEquals(CatalogErrorCode.INVALID_ATTRIBUTE_DEFINITION, enumEx.getErrorCode());
         assertEquals(CatalogErrorCode.INVALID_ATTRIBUTE_DEFINITION, numberEx.getErrorCode());
+    }
+
+    @Test
+    void createAcceptsListWithOrWithoutAllowedValues() {
+        service.create(create("sockets", AttributeDataType.LIST, List.of("AM4", "AM5"), null));
+        service.create(create("tags", AttributeDataType.LIST, null, null));
+
+        verify(attributeRepository, times(2)).save(any(AttributeDefinition.class));
     }
 
     @Test

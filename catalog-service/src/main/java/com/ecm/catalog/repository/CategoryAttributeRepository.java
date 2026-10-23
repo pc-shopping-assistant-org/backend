@@ -14,12 +14,13 @@ import java.util.UUID;
 @Repository
 public interface CategoryAttributeRepository extends JpaRepository<CategoryAttribute, UUID> {
 
-    List<CategoryAttribute> findByCategoryGroupIdInOrderByDisplayOrderAsc(Collection<UUID> categoryGroupIds);
+    List<CategoryAttribute> findByCategoryIdOrderByDisplayOrderAsc(UUID categoryId);
+
+    List<CategoryAttribute> findByCategoryIdIn(Collection<UUID> categoryIds);
 
     boolean existsByAttributeId(UUID attributeId);
 
     @Modifying
-    @Query("DELETE FROM CategoryAttribute ca WHERE ca.categoryGroupId IN "
-            + "(SELECT g.id FROM CategoryAttributeGroup g WHERE g.categoryId = :categoryId)")
+    @Query("DELETE FROM CategoryAttribute ca WHERE ca.categoryId = :categoryId")
     void deleteByCategoryId(@Param("categoryId") UUID categoryId);
 }

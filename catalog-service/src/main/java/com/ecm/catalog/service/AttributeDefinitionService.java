@@ -34,7 +34,7 @@ public class AttributeDefinitionService {
             throw new DuplicateResourceException(CatalogErrorCode.RESOURCE_CONFLICT, "AttributeDefinition", "key", request.key());
         }
 
-        // 2. An ENUM needs its allowed values; other types must not carry any
+        // 2. An ENUM needs its allowed values, a LIST may have them; other types must not carry any
         validateAllowedValues(request.dataType(), request.allowedValues());
 
         // 3. Persist
@@ -84,8 +84,8 @@ public class AttributeDefinitionService {
         if (dataType == AttributeDataType.ENUM && !hasValues) {
             throw new BusinessException(CatalogErrorCode.INVALID_ATTRIBUTE_DEFINITION, "ENUM attribute requires allowedValues");
         }
-        if (dataType != AttributeDataType.ENUM && hasValues) {
-            throw new BusinessException(CatalogErrorCode.INVALID_ATTRIBUTE_DEFINITION, "allowedValues is only valid for ENUM attributes");
+        if (dataType != AttributeDataType.ENUM && dataType != AttributeDataType.LIST && hasValues) {
+            throw new BusinessException(CatalogErrorCode.INVALID_ATTRIBUTE_DEFINITION, "allowedValues is only valid for ENUM and LIST attributes");
         }
     }
 }

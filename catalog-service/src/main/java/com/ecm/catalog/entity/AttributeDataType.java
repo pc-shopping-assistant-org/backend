@@ -4,5 +4,6 @@ public enum AttributeDataType {
     NUMBER,
     STRING,
     ENUM,
-    BOOLEAN
+    BOOLEAN,
+    LIST
 }
