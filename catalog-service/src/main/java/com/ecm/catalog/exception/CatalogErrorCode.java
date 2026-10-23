@@ -22,6 +22,8 @@ public enum CatalogErrorCode implements ErrorCode {
     INVALID_ATTRIBUTE_DEFINITION(HttpStatus.BAD_REQUEST, "Attribute definition is invalid"),
     ATTRIBUTE_IN_USE(HttpStatus.CONFLICT, "Attribute is used by a category template and cannot be deleted"),
     INVALID_CATEGORY_ATTRIBUTES(HttpStatus.BAD_REQUEST, "Category attribute template is invalid"),
+    ATTRIBUTE_ALREADY_INHERITED(HttpStatus.CONFLICT, "Attribute is already provided by a parent category"),
+    ATTRIBUTE_USED_BY_SUBCATEGORY(HttpStatus.CONFLICT, "Attribute is already used by a sub-category"),
     INVALID_MEDIA_FILE(HttpStatus.BAD_REQUEST, "Image file does not exist"),
     INVALID_GALLERY(HttpStatus.BAD_REQUEST, "Product gallery is invalid"),
     INVALID_VARIANT_OPTIONS(HttpStatus.BAD_REQUEST, "Variant options are invalid");

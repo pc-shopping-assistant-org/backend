@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +19,8 @@ import java.util.stream.Collectors;
 /**
  * Checks the specifications of a product against the attribute template of its category and returns the
  * normalized {@code attribute key -> value} map to store in {@code products.specifications}.
- * Required attributes must be present, every value must match the data type of its attribute, ENUM values must
- * come from the allowed list, and keys the category does not define are rejected.
+ * Required attributes must be present, every value must match the data type of its attribute, ENUM values and LIST
+ * items must come from the allowed list (when a LIST has one), and keys the category does not define are rejected.
  */
 @Component
 @RequiredArgsConstructor
@@ -30,8 +32,7 @@ public class ProductSpecificationValidator {
 
     public Map<String, Object> validate(UUID categoryId, Map<String, Object> specifications) {
         Map<String, Object> input = specifications == null ? Map.of() : specifications;
-        List<CategoryAttributeTemplateResponse.Item> template = categoryAttributeService.getTemplate(categoryId).groups().stream()
-                .flatMap(group -> group.attributes().stream()).toList();
+        List<CategoryAttributeTemplateResponse.Item> template = categoryAttributeService.getTemplate(categoryId).attributes();
 
         List<String> errors = new ArrayList<>();
         Map<String, Object> normalized = new LinkedHashMap<>();
@@ -89,11 +90,38 @@ public class ProductSpecificationValidator {
                 }
                 errors.add(attribute.key() + ": must be one of " + attribute.allowedValues());
             }
+            case LIST -> {
+                return coerceList(attribute, value, errors);
+            }
         }
         return null;
     }
 
+    /** A LIST is an array of non-blank strings; duplicates are dropped keeping the first, order is kept. */
+    private List<String> coerceList(CategoryAttributeTemplateResponse.Item attribute, Object value, List<String> errors) {
+        if (!(value instanceof Collection<?> items)) {
+            errors.add(attribute.key() + ": must be a list of strings");
+            return null;
+        }
+        Set<String> cleaned = new LinkedHashSet<>();
+        for (Object item : items) {
+            if (!(item instanceof String text) || text.isBlank()) {
+                errors.add(attribute.key() + ": must be a list of non-empty strings");
+                return null;
+            }
+            cleaned.add(text.trim());
+        }
+        List<String> allowed = attribute.allowedValues();
+        if (allowed != null && !allowed.containsAll(cleaned)) {
+            errors.add(attribute.key() + ": every item must be one of " + allowed);
+            return null;
+        }
+        return List.copyOf(cleaned);
+    }
+
     private boolean isBlank(Object value) {
-        return value == null || (value instanceof String text && text.isBlank());
+        return value == null
+                || (value instanceof String text && text.isBlank())
+                || (value instanceof Collection<?> items && items.isEmpty());
     }
 }

@@ -5,10 +5,11 @@ import com.ecm.catalog.entity.AttributeDataType;
 import java.util.List;
 import java.util.UUID;
 
-/** The specification form of a category: ordered groups of attributes a product in it must fill in. */
-public record CategoryAttributeTemplateResponse(UUID categoryId, List<Group> groups) {
-
-    public record Group(UUID id, String name, int displayOrder, List<Item> attributes) {}
+/**
+ * The specification form of a category: the ordered attributes a product in it must fill in. A category inherits the
+ * attributes of its ancestors, listed first (root down); {@code inherited} tells them apart from the ones it owns.
+ */
+public record CategoryAttributeTemplateResponse(UUID categoryId, List<Item> attributes) {
 
     public record Item(
             UUID attributeId,
@@ -18,6 +19,9 @@ public record CategoryAttributeTemplateResponse(UUID categoryId, List<Group> gro
             String unit,
             List<String> allowedValues,
             boolean required,
-            int displayOrder
+            int displayOrder,
+            boolean inherited,
+            UUID sourceCategoryId,
+            String sourceCategoryName
     ) {}
 }

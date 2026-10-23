@@ -23,8 +23,8 @@ public class CategoryAttribute {
     @Column(name = "id", insertable = false, updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "category_group_id", nullable = false)
-    private UUID categoryGroupId;
+    @Column(name = "category_id", nullable = false)
+    private UUID categoryId;
 
     @Column(name = "attribute_id", nullable = false)
     private UUID attributeId;
