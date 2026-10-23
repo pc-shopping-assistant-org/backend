@@ -28,6 +28,10 @@
     </scm>
     <dependencies>
         <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.ecm</groupId>
             <artifactId>common-lib</artifactId>
         </dependency>
@@ -150,6 +154,12 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource><directory>src/main/resources</directory></resource>
+            <resource><directory>../scripts/seed</directory><targetPath>seed</targetPath></resource>
+            <resource><directory>../identity-service/src/main/resources/db/migration</directory><targetPath>seed-migration/identity</targetPath></resource>
+            <resource><directory>../media-service/src/main/resources/db/migration</directory><targetPath>seed-migration/media</targetPath></resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -211,5 +221,18 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>seed-prod</id>
+            <build><plugins><plugin>
+                <groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>
+                <executions><execution>
+                    <id>seed-production-data</id><phase>package</phase><goals><goal>java</goal></goals>
+                    <configuration><mainClass>com.ecm.catalog.bootstrap.CatalogSeed</mainClass></configuration>
+                </execution></executions>
+            </plugin></plugins></build>
+        </profile>
+    </profiles>
 
 </project>

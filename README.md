@@ -44,13 +44,19 @@ merges when Maven verification fails.
 
 ## Production catalog seed
 
-From `../infra/`, run `./scripts/seed-prod.sh`; full `./scripts/deploy.sh` calls it
-automatically. The catalog image supports `java -jar /app/app.jar --seed-prod`:
-Flyway migrations, production hardware taxonomy UPSERT, then exit without starting
-the web server or message listeners. It requires `SPRING_DATASOURCE_URL`,
-`SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` at runtime.
-No demo products/stock are seeded. Hardware types are included in category/product
-detail responses so AI does not need a category UUID mapping in its environment.
+From this directory, `mvn -pl catalog-service -am -Pseed-prod -DskipTests package`
+packages and runs the Java seed CLI. The catalog image uses the same entrypoint:
+`java -jar /app/app.jar --seed-prod`. From `../infra/`, run `./scripts/seed-prod.sh`.
+No web server or message listener starts in this mode.
+
+The CLI applies the owning service's Flyway migrations, inserts missing taxonomy,
+identity/media/catalog records from `scripts/seed/catalog_seed.json`, and uploads
+missing source images to the pre-created S3 bucket. Existing rows, IDs, prices,
+stock, statuses and storage objects stay unchanged. New variants use the JSON's
+quantity/status (currently zero stock and INACTIVE), not generated inventory.
+See [scripts/README.md](scripts/README.md) for runtime env and retry semantics.
+First seed needs a manual bucket/key setup and may take time for 8,502 images;
+run it before the first infra release. Subsequent release jobs skip existing data.
 
 ## Quick Start
 

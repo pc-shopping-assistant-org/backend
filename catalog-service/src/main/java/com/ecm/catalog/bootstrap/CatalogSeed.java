@@ -1,7 +1,5 @@
 package com.ecm.catalog.bootstrap;
 
-import org.flywaydb.core.Flyway;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -14,17 +12,12 @@ public final class CatalogSeed {
 
     private CatalogSeed() {}
 
-    public static void run() throws SQLException, IOException {
-        Flyway flyway = Flyway.configure()
-                .dataSource(requiredEnvironment("SPRING_DATASOURCE_URL"),
-                        requiredEnvironment("SPRING_DATASOURCE_USERNAME"),
-                        requiredEnvironment("SPRING_DATASOURCE_PASSWORD"))
-                .load();
-        flyway.migrate();
-        try (Connection connection = flyway.getConfiguration().getDataSource().getConnection()) {
-            seed(connection);
-        }
-        System.out.println("Production catalog reference data seeded");
+    public static void main(String[] args) throws Exception {
+        run();
+    }
+
+    public static void run() throws Exception {
+        ProductionSeed.run(System.getenv());
     }
 
     static void seed(Connection connection) throws SQLException, IOException {
@@ -34,11 +27,4 @@ public final class CatalogSeed {
         }
     }
 
-    private static String requiredEnvironment(String name) {
-        String value = System.getenv(name);
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Missing seed configuration: " + name);
-        }
-        return value;
-    }
 }

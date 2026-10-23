@@ -31,8 +31,13 @@ public class ProductSpecificationValidator {
     private final CategoryAttributeService categoryAttributeService;
 
     public Map<String, Object> validate(UUID categoryId, Map<String, Object> specifications) {
-        Map<String, Object> input = specifications == null ? Map.of() : specifications;
         List<CategoryAttributeTemplateResponse.Item> template = categoryAttributeService.getTemplate(categoryId).attributes();
+        return validateTemplate(template, specifications);
+    }
+
+    public static Map<String, Object> validateTemplate(List<CategoryAttributeTemplateResponse.Item> template,
+                                                      Map<String, Object> specifications) {
+        Map<String, Object> input = specifications == null ? Map.of() : specifications;
 
         List<String> errors = new ArrayList<>();
         Map<String, Object> normalized = new LinkedHashMap<>();
@@ -63,7 +68,7 @@ public class ProductSpecificationValidator {
         return normalized;
     }
 
-    private Object coerce(CategoryAttributeTemplateResponse.Item attribute, Object value, List<String> errors) {
+    private static Object coerce(CategoryAttributeTemplateResponse.Item attribute, Object value, List<String> errors) {
         switch (attribute.dataType()) {
             case NUMBER -> {
                 if (value instanceof Number) {
@@ -98,7 +103,7 @@ public class ProductSpecificationValidator {
     }
 
     /** A LIST is an array of non-blank strings; duplicates are dropped keeping the first, order is kept. */
-    private List<String> coerceList(CategoryAttributeTemplateResponse.Item attribute, Object value, List<String> errors) {
+    private static List<String> coerceList(CategoryAttributeTemplateResponse.Item attribute, Object value, List<String> errors) {
         if (!(value instanceof Collection<?> items)) {
             errors.add(attribute.key() + ": must be a list of strings");
             return null;
@@ -119,7 +124,7 @@ public class ProductSpecificationValidator {
         return List.copyOf(cleaned);
     }
 
-    private boolean isBlank(Object value) {
+    private static boolean isBlank(Object value) {
         return value == null
                 || (value instanceof String text && text.isBlank())
                 || (value instanceof Collection<?> items && items.isEmpty());

@@ -27,4 +27,4 @@ WHERE existing.id IS NOT NULL OR NOT EXISTS (
       AND (retired.seo_name = seed.seo_name OR lower(retired.name) = lower(seed.name))
 )
 ON CONFLICT (seo_name) WHERE status <> 'DELETED'
-DO UPDATE SET hardware_type = EXCLUDED.hardware_type;
+DO NOTHING;
