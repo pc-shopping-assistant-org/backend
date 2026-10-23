@@ -2,88 +2,86 @@
 
 ## `import-catalog-seed.js`
 
-Imports `seed/catalog_seed.json` (brands, products, variants, images, media files and the attribute template) into the
-local databases.
+Nhập `seed/catalog_seed.json` (thương hiệu, sản phẩm, biến thể, ảnh, file media và template thuộc tính) vào các
+database local.
 
-### Requirements
+### Yêu cầu
 
-- Node.js 18+ (uses the built-in `fetch`).
-- PostgreSQL running with the service databases created (`docker compose up -d postgres`) and the Flyway migrations
-  of `identity-service`, `media-service` and `catalog-service` already applied, i.e. start those services once.
-  `catalog-service` must be at **V11** or later (the template uses the `LIST` attribute type).
-- Install the dependency once:
+- Node.js 18 trở lên (dùng `fetch` có sẵn).
+- PostgreSQL đang chạy, đã tạo các database của service (`docker compose up -d postgres`) và đã áp dụng migration Flyway
+  của `identity-service`, `media-service` và `catalog-service`, tức là phải khởi động các service này ít nhất một lần.
+  `catalog-service` phải ở **V11** trở lên (template dùng kiểu thuộc tính `LIST`).
+- Cài thư viện một lần:
 
 ```bash
 cd scripts
 npm install
 ```
 
-### Run
+### Cách chạy
 
-Run from the `backend` directory. The default mode is a **dry-run**: everything runs, then every transaction is rolled
-back, so nothing is written.
+Chạy từ thư mục `backend`. Chế độ mặc định là **dry-run**: chạy toàn bộ rồi rollback mọi transaction, không ghi gì.
 
 ```bash
 node scripts/import-catalog-seed.js            # dry-run
-node scripts/import-catalog-seed.js --apply    # commit
+node scripts/import-catalog-seed.js --apply    # ghi thật (commit)
 ```
 
-Each database (`identity_db`, `media_db`, `catalog_db`) has its own connection and transaction.
+Mỗi database (`identity_db`, `media_db`, `catalog_db`) có kết nối và transaction riêng.
 
-### Configuration
+### Cấu hình
 
-Environment variables, defaults match `docker-compose.yml`:
+Biến môi trường, giá trị mặc định khớp `docker-compose.yml`:
 
-| Variable | Default | Meaning |
+| Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `POSTGRES_HOST` | `localhost` | |
-| `POSTGRES_PORT` | `5433` | The host port docker-compose publishes. Use `5432` for a Postgres on its default port. |
+| `POSTGRES_PORT` | `5433` | Cổng host mà docker-compose mở. Dùng `5432` nếu Postgres chạy ở cổng mặc định. |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` | `postgres` / `postgres` | |
 | `IDENTITY_DB`, `MEDIA_DB`, `CATALOG_DB` | `identity_db`, `media_db`, `catalog_db` | |
-| `SYNC_URL` | unset | With `--apply`, `POST`s it to rebuild the search index, e.g. `http://localhost:8080/sync-service/products/sync`. |
-| `SYNC_TOKEN` | unset | Access token of an ADMIN account, sent as `Authorization: Bearer ...` to `SYNC_URL`. |
+| `SYNC_URL` | không đặt | Khi có `--apply`, script gọi `POST` tới URL này để dựng lại index search, ví dụ `http://localhost:8080/sync-service/products/sync`. |
+| `SYNC_TOKEN` | không đặt | Access token của tài khoản ADMIN, gửi dạng `Authorization: Bearer ...` tới `SYNC_URL`. |
 
-Example on Postgres port 5432 with the search index rebuilt afterwards:
+Ví dụ với Postgres ở cổng 5432 và dựng lại index search sau khi nhập:
 
 ```bash
-POSTGRES_PORT=5432 SYNC_URL=http://localhost:8080/sync-service/products/sync SYNC_TOKEN=<admin access token> \
+POSTGRES_PORT=5432 SYNC_URL=http://localhost:8080/sync-service/products/sync SYNC_TOKEN=<access token admin> \
   node scripts/import-catalog-seed.js --apply
 ```
 
-Without `SYNC_URL` the script only reminds you to call `POST /products/sync` of `sync-service` yourself.
+Nếu không đặt `SYNC_URL`, script chỉ nhắc bạn tự gọi `POST /products/sync` của `sync-service`.
 
-### What it does, in order
+### Script làm gì, theo thứ tự
 
-1. **identity_db**: makes sure the employee used as `created_by` (`catalog.seed@pcshop.local` unless the account id
-   already exists) exists. A passwordless account is created when missing; an existing account with another role stops
-   the import.
-2. **media_db**: inserts the files.
-3. **catalog_db**, in one transaction:
-   - Hardware categories: runs `hardware_categories.sql` if `storage` is missing, then maps seed categories by
-     `seo_name`. `ssd` and `hdd` are created under `storage`.
-   - Attribute template: `attribute_definitions` matched by `key`, `category_attributes` by (category `seo_name`,
-     attribute `key`). A definition whose data type differs from the seed stops the import.
-   - Brands, products, variants (set `ACTIVE`, quantity random 10 to 50) and images.
-   - **Check**: every seed product is validated against the template the way `ProductSpecificationValidator` does it
-     (inherited attributes from the parent category first, required keys, types, `ENUM`/`LIST` allowed values, unknown
-     keys). Any problem stops the import and rolls back, with the problems grouped by category. This runs in dry-run too.
-4. **search**: `POST` to `SYNC_URL` (with `--apply` only).
+1. **identity_db**: đảm bảo có nhân viên dùng làm `created_by`. Nếu chưa có thì tạo tài khoản không mật khẩu
+   (`catalog.seed@pcshop.local`); nếu id đó đã có nhưng role khác thì dừng, không tự sửa.
+2. **media_db**: nhập các file.
+3. **catalog_db**, trong một transaction:
+   - Danh mục phần cứng: chạy `hardware_categories.sql` nếu thiếu `storage`, rồi ánh xạ danh mục trong seed theo
+     `seo_name`. `ssd` và `hdd` được tạo làm con của `storage`.
+   - Template thuộc tính: `attribute_definitions` khớp theo `key`, `category_attributes` khớp theo (`seo_name` của
+     danh mục, `key` của thuộc tính). Nếu một định nghĩa có kiểu dữ liệu khác với seed thì dừng.
+   - Thương hiệu, sản phẩm, biến thể (đặt `ACTIVE`, số lượng ngẫu nhiên từ 10 đến 50) và ảnh.
+   - **Kiểm tra**: mỗi sản phẩm trong seed được kiểm tra với template giống cách `ProductSpecificationValidator` làm
+     (thuộc tính kế thừa từ danh mục cha trước, key bắt buộc, kiểu dữ liệu, giá trị cho phép của `ENUM`/`LIST`, key
+     lạ). Có lỗi là dừng và rollback, báo lỗi gom theo danh mục. Bước này chạy cả ở dry-run.
+4. **search**: gọi `POST` tới `SYNC_URL` (chỉ khi có `--apply`).
 
-Notes:
+Lưu ý:
 
-- The script is idempotent: rows that already exist (same id, `key` or unique name) are skipped, so a second run writes
-  nothing. Existing rows are never updated; to change data, edit the database or wipe it first.
-- The `brand` key of `specifications` is not stored: the brand lives in `products.brand_id`.
-- Attribute `required` flags, allowed values and display names live in the seed arrays `attribute_definitions` and
-  `category_attributes`, so editing the template means editing `seed/catalog_seed.json`.
+- Script chạy lại được nhiều lần: dòng nào đã có (cùng id, `key` hoặc tên unique) sẽ bị bỏ qua, nên lần chạy thứ hai
+  không ghi gì. Script không bao giờ cập nhật dòng đã có; muốn đổi dữ liệu thì sửa trực tiếp DB hoặc xóa trước.
+- Key `brand` trong `specifications` không được lưu: thương hiệu nằm ở `products.brand_id`.
+- Cờ `required`, giá trị cho phép và tên hiển thị của thuộc tính nằm trong hai mảng `attribute_definitions` và
+  `category_attributes` của seed, nên muốn sửa template thì sửa `seed/catalog_seed.json`.
 
-### Seed file format
+### Định dạng file seed
 
-`seed/catalog_seed.json` uses CRLF line endings and 2-space indentation. Keep both when rewriting it with a script, or
-the diff will touch every line.
+`seed/catalog_seed.json` dùng xuống dòng CRLF và thụt lề 2 dấu cách. Khi ghi lại file bằng script phải giữ cả hai,
+nếu không diff sẽ đổi toàn bộ các dòng.
 
-| Array | Purpose |
+| Mảng | Mục đích |
 |---|---|
-| `files`, `brands`, `categories`, `products`, `product_variants`, `product_images` | The catalog itself, ids kept as they are. |
+| `files`, `brands`, `categories`, `products`, `product_variants`, `product_images` | Bản thân catalog, giữ nguyên id. |
 | `attribute_definitions` | `key`, `display_name`, `data_type` (`NUMBER`, `STRING`, `ENUM`, `BOOLEAN`, `LIST`), `unit`, `allowed_values`, `filterable`, `comparable`. |
-| `category_attributes` | `category_seo_name`, `attribute_key`, `required`, `display_order`. Attributes shared by child categories sit on the parent (`storage` for `ssd` and `hdd`). |
+| `category_attributes` | `category_seo_name`, `attribute_key`, `required`, `display_order`. Thuộc tính chung của các danh mục con nằm ở danh mục cha (`storage` cho `ssd` và `hdd`). |
