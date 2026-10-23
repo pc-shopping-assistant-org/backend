@@ -112,8 +112,19 @@ public class CategoryAttributeService {
             categoryAttributeRepository.findByCategoryIdIn(ancestors).stream()
                     .map(CategoryAttribute::getAttributeId).filter(attributeIds::contains).findFirst()
                     .ifPresent(inherited -> {
-                        throw new BusinessException(CatalogErrorCode.INVALID_CATEGORY_ATTRIBUTES,
+                        throw new BusinessException(CatalogErrorCode.ATTRIBUTE_ALREADY_INHERITED,
                                 "Attribute already inherited from a parent category: " + inherited);
+                    });
+        }
+        // Handing one down that a sub-category already owns would hide its own entry, so it is refused instead
+        List<UUID> descendants = categoryRepository.findSelfAndDescendantIds(categoryId).stream()
+                .filter(id -> !id.equals(categoryId)).toList();
+        if (!descendants.isEmpty()) {
+            categoryAttributeRepository.findByCategoryIdIn(descendants).stream()
+                    .filter(link -> attributeIds.contains(link.getAttributeId())).findFirst()
+                    .ifPresent(link -> {
+                        throw new BusinessException(CatalogErrorCode.ATTRIBUTE_USED_BY_SUBCATEGORY,
+                                "Attribute " + link.getAttributeId() + " is already used by sub-category " + link.getCategoryId());
                     });
         }
     }

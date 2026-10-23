@@ -85023,186 +85023,34 @@
   ],
   "brands": [
     {
-      "id": "01a119fe-8dd7-707a-a256-800e99b55df4",
-      "name": "MSI",
-      "seo_name": "msi",
-      "description": "Thương hiệu linh kiện máy tính MSI",
+      "id": "01a119fe-8e2d-718f-a326-fd14c825a2cf",
+      "name": "Acer",
+      "seo_name": "acer",
+      "description": "Thương hiệu linh kiện máy tính Acer",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8ddd-7798-954c-1f4b0cda4c28",
-      "name": "Jginyue",
-      "seo_name": "jginyue",
-      "description": "Thương hiệu linh kiện máy tính Jginyue",
+      "id": "01a119fe-8e1f-7935-8a77-f99ba472a7d4",
+      "name": "ADATA",
+      "seo_name": "adata",
+      "description": "Thương hiệu linh kiện máy tính ADATA",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8ddd-7b74-8791-89e5ef2cc592",
-      "name": "Colorful",
-      "seo_name": "colorful",
-      "description": "Thương hiệu linh kiện máy tính Colorful",
+      "id": "01a119fe-8e24-7909-a1b5-7c40f50a6f9e",
+      "name": "AGI",
+      "seo_name": "agi",
+      "description": "Thương hiệu linh kiện máy tính AGI",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8ddd-7d10-b701-77c705f4d90e",
-      "name": "ZOTAC",
-      "seo_name": "zotac",
-      "description": "Thương hiệu linh kiện máy tính ZOTAC",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8dde-71a7-aec0-24231bece465",
-      "name": "ASUS",
-      "seo_name": "asus",
-      "description": "Thương hiệu linh kiện máy tính ASUS",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8dde-7e02-83e6-66367ea1c369",
-      "name": "INNO3D",
-      "seo_name": "inno3d",
-      "description": "Thương hiệu linh kiện máy tính INNO3D",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8ddf-730f-8987-1ae2e7a3689e",
-      "name": "Als",
-      "seo_name": "als",
-      "description": "Thương hiệu linh kiện máy tính Als",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8ddf-701c-80c9-4eb72871d235",
-      "name": "Neo Forza",
-      "seo_name": "neo-forza",
-      "description": "Thương hiệu linh kiện máy tính Neo Forza",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
-      "name": "Khác",
-      "seo_name": "khac",
-      "description": "Thương hiệu linh kiện máy tính Khác",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de0-70c4-8e69-3cbbf5a6f7f4",
-      "name": "GIGABYTE",
-      "seo_name": "gigabyte",
-      "description": "Thương hiệu linh kiện máy tính GIGABYTE",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de4-7636-97a5-9a9705881e74",
-      "name": "ASRock",
-      "seo_name": "asrock",
-      "description": "Thương hiệu linh kiện máy tính ASRock",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de4-7a23-a1df-fe0f6ee02417",
-      "name": "Sapphire",
-      "seo_name": "sapphire",
-      "description": "Thương hiệu linh kiện máy tính Sapphire",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de5-74dd-9388-1de5edb97819",
-      "name": "Amd Radeon™ Rx 9060 Xt",
-      "seo_name": "amd-radeontm-rx-9060-xt",
-      "description": "Thương hiệu linh kiện máy tính Amd Radeon™ Rx 9060 Xt",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de6-7ea9-804e-b931d6664a4d",
-      "name": "Powercolor",
-      "seo_name": "powercolor",
-      "description": "Thương hiệu linh kiện máy tính Powercolor",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de6-78f9-9aeb-acb5caaf1fbe",
-      "name": "Asl",
-      "seo_name": "asl",
-      "description": "Thương hiệu linh kiện máy tính Asl",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de6-7c56-8da5-7af40ec09bee",
-      "name": "Ocpc",
-      "seo_name": "ocpc",
-      "description": "Thương hiệu linh kiện máy tính Ocpc",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de6-7b97-8824-2f5332601017",
-      "name": "Giga",
-      "seo_name": "giga",
-      "description": "Thương hiệu linh kiện máy tính Giga",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8de7-7e07-9c8a-7c98d2d06164",
-      "name": "Pny",
-      "seo_name": "pny",
-      "description": "Thương hiệu linh kiện máy tính Pny",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8deb-701e-b82b-42a774cb932b",
-      "name": "Palit",
-      "seo_name": "palit",
-      "description": "Thương hiệu linh kiện máy tính Palit",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8dec-770d-ad6a-5352e47d1f77",
-      "name": "Vga Colorful",
-      "seo_name": "vga-colorful",
-      "description": "Thương hiệu linh kiện máy tính Vga Colorful",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8ded-75e5-8b5a-a1b8ebceb2e0",
-      "name": "Gainward",
-      "seo_name": "gainward",
-      "description": "Thương hiệu linh kiện máy tính Gainward",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8ded-7871-ad12-827277aad085",
-      "name": "Vga Gigabyte",
-      "seo_name": "vga-gigabyte",
-      "description": "Thương hiệu linh kiện máy tính Vga Gigabyte",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8def-7f5d-ba2b-0bb727d10bd5",
-      "name": "Vga Msi",
-      "seo_name": "vga-msi",
-      "description": "Thương hiệu linh kiện máy tính Vga Msi",
+      "id": "01a119fe-8e2c-7e64-992e-39d142ee5efd",
+      "name": "AIGO",
+      "seo_name": "aigo",
+      "description": "Thương hiệu linh kiện máy tính AIGO",
       "image_file_id": null,
       "status": "ACTIVE"
     },
@@ -85215,222 +85063,6 @@
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8df1-7d0e-9968-b20426288b0e",
-      "name": "Colorful Igame",
-      "seo_name": "colorful-igame",
-      "description": "Thương hiệu linh kiện máy tính Colorful Igame",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8df1-7f60-a9fb-5c7606729ece",
-      "name": "Vga Msi",
-      "seo_name": "vga-msi-25",
-      "description": "Thương hiệu linh kiện máy tính Vga Msi",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8df5-72d2-a083-0f44769b8676",
-      "name": "GALAX",
-      "seo_name": "galax",
-      "description": "Thương hiệu linh kiện máy tính GALAX",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8df8-722c-8c63-ce0f08f6181a",
-      "name": "Yeston",
-      "seo_name": "yeston",
-      "description": "Thương hiệu linh kiện máy tính Yeston",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8df9-7d92-aeb5-6a66efd7ea13",
-      "name": "Leadtek",
-      "seo_name": "leadtek",
-      "description": "Thương hiệu linh kiện máy tính Leadtek",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8dfa-7962-bf6c-2f215648c294",
-      "name": "Intel",
-      "seo_name": "intel",
-      "description": "Thương hiệu linh kiện máy tính Intel",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8dfa-7de3-8156-f4a6819692c2",
-      "name": "Cooler Master",
-      "seo_name": "cooler-master",
-      "description": "Thương hiệu linh kiện máy tính Cooler Master",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e00-76e3-869c-c534e81765a2",
-      "name": "Amd Ryzen™ Processors",
-      "seo_name": "amd-ryzentm-processors",
-      "description": "Thương hiệu linh kiện máy tính Amd Ryzen™ Processors",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e0d-782e-92e1-de39fa314fb4",
-      "name": "Sstc",
-      "seo_name": "sstc",
-      "description": "Thương hiệu linh kiện máy tính Sstc",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1e-7520-b192-ac3dd2a273ef",
-      "name": "Teamgroup",
-      "seo_name": "teamgroup",
-      "description": "Thương hiệu linh kiện máy tính Teamgroup",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1f-7935-8a77-f99ba472a7d4",
-      "name": "Adata",
-      "seo_name": "adata",
-      "description": "Thương hiệu linh kiện máy tính Adata",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1f-7b76-8685-919229016628",
-      "name": "Geil",
-      "seo_name": "geil",
-      "description": "Thương hiệu linh kiện máy tính Geil",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1f-7439-9009-3b80132e7c0a",
-      "name": "G.Skill",
-      "seo_name": "gskill",
-      "description": "Thương hiệu linh kiện máy tính G.Skill",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1f-70af-b1e7-38023ceb1344",
-      "name": "Corsair",
-      "seo_name": "corsair",
-      "description": "Thương hiệu linh kiện máy tính Corsair",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1f-7033-a706-c2e107063060",
-      "name": "Vsp",
-      "seo_name": "vsp",
-      "description": "Thương hiệu linh kiện máy tính Vsp",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e1f-7185-ad1c-6c4c98a6a5bc",
-      "name": "Kingston",
-      "seo_name": "kingston",
-      "description": "Thương hiệu linh kiện máy tính Kingston",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e20-7c21-8f67-850e8cf5bdeb",
-      "name": "Gskill",
-      "seo_name": "gskill-40",
-      "description": "Thương hiệu linh kiện máy tính Gskill",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e20-7ef5-b193-7fffea2fc6cb",
-      "name": "Crucial",
-      "seo_name": "crucial",
-      "description": "Thương hiệu linh kiện máy tính Crucial",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e21-7fbd-b1b5-87beaa7663ac",
-      "name": "Samsung",
-      "seo_name": "samsung",
-      "description": "Thương hiệu linh kiện máy tính Samsung",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e21-74fe-9edc-983a285b5f3f",
-      "name": "Patriot",
-      "seo_name": "patriot",
-      "description": "Thương hiệu linh kiện máy tính Patriot",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e23-7453-8439-9d4e61c82bd2",
-      "name": "Kioxia",
-      "seo_name": "kioxia",
-      "description": "Thương hiệu linh kiện máy tính Kioxia",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e23-7f22-8dd9-5186667505f9",
-      "name": "Western Digital",
-      "seo_name": "western-digital",
-      "description": "Thương hiệu linh kiện máy tính Western Digital",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e24-7cf7-ac40-b699bde8c2ec",
-      "name": "Hiksemi",
-      "seo_name": "hiksemi",
-      "description": "Thương hiệu linh kiện máy tính Hiksemi",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e24-7909-a1b5-7c40f50a6f9e",
-      "name": "Agi",
-      "seo_name": "agi",
-      "description": "Thương hiệu linh kiện máy tính Agi",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e25-7cfe-af80-e7d7da76dc50",
-      "name": "Wd",
-      "seo_name": "wd",
-      "description": "Thương hiệu linh kiện máy tính Wd",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e25-7d8d-9167-f76c56a718fe",
-      "name": "Silicon Power",
-      "seo_name": "silicon-power",
-      "description": "Thương hiệu linh kiện máy tính Silicon Power",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e26-7374-8493-bdea0266042a",
-      "name": "Seagate",
-      "seo_name": "seagate",
-      "description": "Thương hiệu linh kiện máy tính Seagate",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
       "id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "name": "Antec",
       "seo_name": "antec",
@@ -85439,194 +85071,18 @@
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e29-7472-a61c-749262a36f20",
-      "name": "Mik",
-      "seo_name": "mik",
-      "description": "Thương hiệu linh kiện máy tính Mik",
+      "id": "01a119fe-8e60-7efd-9f20-22fd55f22dab",
+      "name": "AOC",
+      "seo_name": "aoc",
+      "description": "Thương hiệu linh kiện máy tính AOC",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e29-76e8-9803-742810603fe8",
-      "name": "Gamdias",
-      "seo_name": "gamdias",
-      "description": "Thương hiệu linh kiện máy tính Gamdias",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e29-7983-b137-bacbb748888f",
-      "name": "Super Flower",
-      "seo_name": "super-flower",
-      "description": "Thương hiệu linh kiện máy tính Super Flower",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
-      "name": "Superflower",
-      "seo_name": "superflower",
-      "description": "Thương hiệu linh kiện máy tính Superflower",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2b-7c41-b369-f432f6991099",
-      "name": "THERMALRIGHT",
-      "seo_name": "thermalright",
-      "description": "Thương hiệu linh kiện máy tính THERMALRIGHT",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
-      "name": "Fsp",
-      "seo_name": "fsp",
-      "description": "Thương hiệu linh kiện máy tính Fsp",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2c-7e64-992e-39d142ee5efd",
-      "name": "Aigo",
-      "seo_name": "aigo",
-      "description": "Thương hiệu linh kiện máy tính Aigo",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
-      "name": "Thermaltake",
-      "seo_name": "thermaltake",
-      "description": "Thương hiệu linh kiện máy tính Thermaltake",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2d-734c-baa7-aa18c9ceea82",
-      "name": "Segotep",
-      "seo_name": "segotep",
-      "description": "Thương hiệu linh kiện máy tính Segotep",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2d-7c29-9a38-332e13e5b41a",
-      "name": "Darkflash",
-      "seo_name": "darkflash",
-      "description": "Thương hiệu linh kiện máy tính Darkflash",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2d-718f-a326-fd14c825a2cf",
-      "name": "Acer",
-      "seo_name": "acer",
-      "description": "Thương hiệu linh kiện máy tính Acer",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e2e-7b9c-82ae-f2dc21a556b0",
-      "name": "Jetek",
-      "seo_name": "jetek",
-      "description": "Thương hiệu linh kiện máy tính Jetek",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e30-73c4-b07c-d849c610deba",
-      "name": "Xigmatek",
-      "seo_name": "xigmatek",
-      "description": "Thương hiệu linh kiện máy tính Xigmatek",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
-      "name": "XIGMATEK",
-      "seo_name": "xigmatek-65",
-      "description": "Thương hiệu linh kiện máy tính XIGMATEK",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e35-713e-b173-77ae37f260b2",
-      "name": "JONSBO",
-      "seo_name": "jonsbo",
-      "description": "Thương hiệu linh kiện máy tính JONSBO",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
-      "name": "Thermalright",
-      "seo_name": "thermalright-67",
-      "description": "Thương hiệu linh kiện máy tính Thermalright",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
-      "name": "Jonsbo",
-      "seo_name": "jonsbo-68",
-      "description": "Thương hiệu linh kiện máy tính Jonsbo",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
-      "name": "LIAN LI",
-      "seo_name": "lian-li",
-      "description": "Thương hiệu linh kiện máy tính LIAN LI",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e36-732f-9c94-29e6201bc505",
-      "name": "Fractal Design",
-      "seo_name": "fractal-design",
-      "description": "Thương hiệu linh kiện máy tính Fractal Design",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e37-7ba6-988e-b7a7a0e94aae",
-      "name": "Magic",
-      "seo_name": "magic",
-      "description": "Thương hiệu linh kiện máy tính Magic",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
-      "name": "Deepcool",
-      "seo_name": "deepcool",
-      "description": "Thương hiệu linh kiện máy tính Deepcool",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e38-70f0-a701-3f50dcba674c",
-      "name": "Lian Li",
-      "seo_name": "lian-li-73",
-      "description": "Thương hiệu linh kiện máy tính Lian Li",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e38-7ac9-9037-4036a163d9a6",
-      "name": "MIK",
-      "seo_name": "mik-74",
-      "description": "Thương hiệu linh kiện máy tính MIK",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e38-7e8c-809f-fe98b3d95f8a",
-      "name": "Rog",
-      "seo_name": "rog",
-      "description": "Thương hiệu linh kiện máy tính Rog",
+      "id": "01a16997-8b99-772e-b15e-550673b522d4",
+      "name": "Apacer",
+      "seo_name": "apacer",
+      "description": "Thương hiệu linh kiện máy tính Apacer",
       "image_file_id": null,
       "status": "ACTIVE"
     },
@@ -85639,6 +85095,78 @@
       "status": "ACTIVE"
     },
     {
+      "id": "01a119fe-8ddf-730f-8987-1ae2e7a3689e",
+      "name": "ASL",
+      "seo_name": "asl",
+      "description": "Thương hiệu linh kiện máy tính ASL",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8de4-7636-97a5-9a9705881e74",
+      "name": "ASRock",
+      "seo_name": "asrock",
+      "description": "Thương hiệu linh kiện máy tính ASRock",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8dde-71a7-aec0-24231bece465",
+      "name": "ASUS",
+      "seo_name": "asus",
+      "description": "Thương hiệu linh kiện máy tính ASUS",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-5507b16a93df",
+      "name": "BenQ",
+      "seo_name": "benq",
+      "description": "Thương hiệu linh kiện máy tính BenQ",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8ddd-7b74-8791-89e5ef2cc592",
+      "name": "Colorful",
+      "seo_name": "colorful",
+      "description": "Thương hiệu linh kiện máy tính Colorful",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8dfa-7de3-8156-f4a6819692c2",
+      "name": "Cooler Master",
+      "seo_name": "cooler-master",
+      "description": "Thương hiệu linh kiện máy tính Cooler Master",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-5508150214fa",
+      "name": "Coolmoon",
+      "seo_name": "coolmoon",
+      "description": "Thương hiệu linh kiện máy tính Coolmoon",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e1f-70af-b1e7-38023ceb1344",
+      "name": "Corsair",
+      "seo_name": "corsair",
+      "description": "Thương hiệu linh kiện máy tính Corsair",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e20-7ef5-b193-7fffea2fc6cb",
+      "name": "Crucial",
+      "seo_name": "crucial",
+      "description": "Thương hiệu linh kiện máy tính Crucial",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
       "id": "01a119fe-8e3b-7486-acc7-f907940cc856",
       "name": "César",
       "seo_name": "cesar",
@@ -85647,74 +85175,138 @@
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e3d-75af-8df0-6c6ef76f0f0e",
-      "name": "Montech",
-      "seo_name": "montech",
-      "description": "Thương hiệu linh kiện máy tính Montech",
+      "id": "01a119fe-8e62-7432-bdd2-b203628749df",
+      "name": "DarkFlash",
+      "seo_name": "darkflash",
+      "description": "Thương hiệu linh kiện máy tính DarkFlash",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e40-79da-a4a6-d277e8caaa9a",
-      "name": "SAMA",
-      "seo_name": "sama",
-      "description": "Thương hiệu linh kiện máy tính SAMA",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e41-794d-8148-0f8c550e356b",
-      "name": "NZXT",
-      "seo_name": "nzxt",
-      "description": "Thương hiệu linh kiện máy tính NZXT",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "name": "DEEPCOOL",
-      "seo_name": "deepcool-81",
+      "seo_name": "deepcool",
       "description": "Thương hiệu linh kiện máy tính DEEPCOOL",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e45-7146-afad-24e2490496ce",
-      "name": "Kenoo Esport",
-      "seo_name": "kenoo-esport",
-      "description": "Thương hiệu linh kiện máy tính Kenoo Esport",
+      "id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
+      "name": "Dell",
+      "seo_name": "dell",
+      "description": "Thương hiệu linh kiện máy tính Dell",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e45-77a8-9af2-9ae385722ae0",
-      "name": "Kenoo",
-      "seo_name": "kenoo",
-      "description": "Thương hiệu linh kiện máy tính Kenoo",
+      "id": "01a16997-8b99-772e-b15e-550955d8be25",
+      "name": "DUAN",
+      "seo_name": "duan",
+      "description": "Thương hiệu linh kiện máy tính DUAN",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e49-7a08-8907-dd17ddf754f7",
-      "name": "Lian-Li",
-      "seo_name": "lian-li-84",
-      "description": "Thương hiệu linh kiện máy tính Lian-Li",
+      "id": "01a119fe-8e66-74d4-9e09-e3ed75cf3b6e",
+      "name": "E-DRA",
+      "seo_name": "e-dra",
+      "description": "Thương hiệu linh kiện máy tính E-DRA",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
       "id": "01a119fe-8e4e-7e9e-8311-c2834db87d9c",
-      "name": "Einarex",
+      "name": "EINAREX",
       "seo_name": "einarex",
-      "description": "Thương hiệu linh kiện máy tính Einarex",
+      "description": "Thương hiệu linh kiện máy tính EINAREX",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e4e-7282-836c-a8bb55c18489",
-      "name": "Coolermaster",
-      "seo_name": "coolermaster",
-      "description": "Thương hiệu linh kiện máy tính Coolermaster",
+      "id": "01a16997-8b99-772e-b15e-550aaa65c28e",
+      "name": "ES Gaming",
+      "seo_name": "es-gaming",
+      "description": "Thương hiệu linh kiện máy tính ES Gaming",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e36-732f-9c94-29e6201bc505",
+      "name": "Fractal Design",
+      "seo_name": "fractal-design",
+      "description": "Thương hiệu linh kiện máy tính Fractal Design",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
+      "name": "FSP",
+      "seo_name": "fsp",
+      "description": "Thương hiệu linh kiện máy tính FSP",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e1f-7439-9009-3b80132e7c0a",
+      "name": "G.SKILL",
+      "seo_name": "g-skill",
+      "description": "Thương hiệu linh kiện máy tính G.SKILL",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8ded-75e5-8b5a-a1b8ebceb2e0",
+      "name": "Gainward",
+      "seo_name": "gainward",
+      "description": "Thương hiệu linh kiện máy tính Gainward",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8df5-72d2-a083-0f44769b8676",
+      "name": "GALAX",
+      "seo_name": "galax",
+      "description": "Thương hiệu linh kiện máy tính GALAX",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e29-76e8-9803-742810603fe8",
+      "name": "Gamdias",
+      "seo_name": "gamdias",
+      "description": "Thương hiệu linh kiện máy tính Gamdias",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e1f-7b76-8685-919229016628",
+      "name": "GEIL",
+      "seo_name": "geil",
+      "description": "Thương hiệu linh kiện máy tính GEIL",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8de0-70c4-8e69-3cbbf5a6f7f4",
+      "name": "GIGABYTE",
+      "seo_name": "gigabyte",
+      "description": "Thương hiệu linh kiện máy tính GIGABYTE",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e24-7cf7-ac40-b699bde8c2ec",
+      "name": "HIKSEMI",
+      "seo_name": "hiksemi",
+      "description": "Thương hiệu linh kiện máy tính HIKSEMI",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-550b626c689b",
+      "name": "HYTE",
+      "seo_name": "hyte",
+      "description": "Thương hiệu linh kiện máy tính HYTE",
       "image_file_id": null,
       "status": "ACTIVE"
     },
@@ -85727,6 +85319,54 @@
       "status": "ACTIVE"
     },
     {
+      "id": "01a119fe-8dde-7e02-83e6-66367ea1c369",
+      "name": "INNO3D",
+      "seo_name": "inno3d",
+      "description": "Thương hiệu linh kiện máy tính INNO3D",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8dfa-7962-bf6c-2f215648c294",
+      "name": "Intel",
+      "seo_name": "intel",
+      "description": "Thương hiệu linh kiện máy tính Intel",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-550cd2c0e3d6",
+      "name": "InWin",
+      "seo_name": "inwin",
+      "description": "Thương hiệu linh kiện máy tính InWin",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e2e-7b9c-82ae-f2dc21a556b0",
+      "name": "JETEK",
+      "seo_name": "jetek",
+      "description": "Thương hiệu linh kiện máy tính JETEK",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8ddd-7798-954c-1f4b0cda4c28",
+      "name": "JGINYUE",
+      "seo_name": "jginyue",
+      "description": "Thương hiệu linh kiện máy tính JGINYUE",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e35-713e-b173-77ae37f260b2",
+      "name": "JONSBO",
+      "seo_name": "jonsbo",
+      "description": "Thương hiệu linh kiện máy tính JONSBO",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
       "id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "name": "Jungle Leopard",
       "seo_name": "jungle-leopard",
@@ -85735,26 +85375,114 @@
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e53-78c8-9ad9-e780620d2821",
-      "name": "Tryx",
-      "seo_name": "tryx",
-      "description": "Thương hiệu linh kiện máy tính Tryx",
+      "id": "01a119fe-8e45-7146-afad-24e2490496ce",
+      "name": "Kenoo",
+      "seo_name": "kenoo",
+      "description": "Thương hiệu linh kiện máy tính Kenoo",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e54-7ead-b943-946328e27970",
-      "name": "Id-Cooling",
-      "seo_name": "id-cooling-90",
-      "description": "Thương hiệu linh kiện máy tính Id-Cooling",
+      "id": "01a16997-8b99-772e-b15e-550dbd10744e",
+      "name": "Kingspec",
+      "seo_name": "kingspec",
+      "description": "Thương hiệu linh kiện máy tính Kingspec",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e54-7522-bbfa-6a8e409d6946",
-      "name": "Leopard",
-      "seo_name": "leopard",
-      "description": "Thương hiệu linh kiện máy tính Leopard",
+      "id": "01a119fe-8e1f-7185-ad1c-6c4c98a6a5bc",
+      "name": "Kingston",
+      "seo_name": "kingston",
+      "description": "Thương hiệu linh kiện máy tính Kingston",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e23-7453-8439-9d4e61c82bd2",
+      "name": "Kioxia",
+      "seo_name": "kioxia",
+      "description": "Thương hiệu linh kiện máy tính Kioxia",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8df9-7d92-aeb5-6a66efd7ea13",
+      "name": "Leadtek",
+      "seo_name": "leadtek",
+      "description": "Thương hiệu linh kiện máy tính Leadtek",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-550e6f2cb9dc",
+      "name": "Lenovo",
+      "seo_name": "lenovo",
+      "description": "Thương hiệu linh kiện máy tính Lenovo",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
+      "name": "LG",
+      "seo_name": "lg",
+      "description": "Thương hiệu linh kiện máy tính LG",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
+      "name": "LIAN LI",
+      "seo_name": "lian-li",
+      "description": "Thương hiệu linh kiện máy tính LIAN LI",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e37-7ba6-988e-b7a7a0e94aae",
+      "name": "Magic",
+      "seo_name": "magic",
+      "description": "Thương hiệu linh kiện máy tính Magic",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e38-7ac9-9037-4036a163d9a6",
+      "name": "MIK",
+      "seo_name": "mik",
+      "description": "Thương hiệu linh kiện máy tính MIK",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e3d-75af-8df0-6c6ef76f0f0e",
+      "name": "Montech",
+      "seo_name": "montech",
+      "description": "Thương hiệu linh kiện máy tính Montech",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8dd7-707a-a256-800e99b55df4",
+      "name": "MSI",
+      "seo_name": "msi",
+      "description": "Thương hiệu linh kiện máy tính MSI",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8ddf-701c-80c9-4eb72871d235",
+      "name": "Neo Forza",
+      "seo_name": "neo-forza",
+      "description": "Thương hiệu linh kiện máy tính Neo Forza",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-551018ae78dc",
+      "name": "Nexus",
+      "seo_name": "nexus",
+      "description": "Thương hiệu linh kiện máy tính Nexus",
       "image_file_id": null,
       "status": "ACTIVE"
     },
@@ -85767,202 +85495,50 @@
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e59-7bd7-adf0-a0dc22741729",
-      "name": "Idcooling",
-      "seo_name": "idcooling",
-      "description": "Thương hiệu linh kiện máy tính Idcooling",
+      "id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
+      "name": "NVIDIA",
+      "seo_name": "nvidia",
+      "description": "Thương hiệu linh kiện máy tính NVIDIA",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e59-79ad-83c5-44adcad7470a",
-      "name": "Id Cooling",
-      "seo_name": "id-cooling-94",
-      "description": "Thương hiệu linh kiện máy tính Id Cooling",
+      "id": "01a119fe-8e41-794d-8148-0f8c550e356b",
+      "name": "NZXT",
+      "seo_name": "nzxt",
+      "description": "Thương hiệu linh kiện máy tính NZXT",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e60-78a3-91d9-91f1a6457ed7",
-      "name": "Màn Hình Msi",
-      "seo_name": "man-hinh-msi",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Msi",
+      "id": "01a119fe-8de6-7c56-8da5-7af40ec09bee",
+      "name": "OCPC",
+      "seo_name": "ocpc",
+      "description": "Thương hiệu linh kiện máy tính OCPC",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e60-7efd-9f20-22fd55f22dab",
-      "name": "Màn Hình Aoc",
-      "seo_name": "man-hinh-aoc",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Aoc",
+      "id": "01a119fe-8deb-701e-b82b-42a774cb932b",
+      "name": "Palit",
+      "seo_name": "palit",
+      "description": "Thương hiệu linh kiện máy tính Palit",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e61-74a9-9d62-11a0a0ca8742",
-      "name": "Viewsonic",
-      "seo_name": "viewsonic",
-      "description": "Thương hiệu linh kiện máy tính Viewsonic",
+      "id": "01a119fe-8e21-74fe-9edc-983a285b5f3f",
+      "name": "Patriot",
+      "seo_name": "patriot",
+      "description": "Thương hiệu linh kiện máy tính Patriot",
       "image_file_id": null,
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e61-7a14-ab2c-9c062ba8d29c",
-      "name": "Màn Hình Lg",
-      "seo_name": "man-hinh-lg",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Lg",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
-      "name": "Lg",
-      "seo_name": "lg",
-      "description": "Thương hiệu linh kiện máy tính Lg",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e61-740f-ae5a-60798084e5bc",
-      "name": "Màn Hình Lg",
-      "seo_name": "man-hinh-lg-100",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Lg",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e61-721f-b17a-a59733088bba",
-      "name": "Màn Hình Gigabyte",
-      "seo_name": "man-hinh-gigabyte",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Gigabyte",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e61-7d2c-a14a-2ee89721642f",
-      "name": "Màn Hình Asus",
-      "seo_name": "man-hinh-asus",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Asus",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e62-7432-bdd2-b203628749df",
-      "name": "Dark Flash",
-      "seo_name": "dark-flash",
-      "description": "Thương hiệu linh kiện máy tính Dark Flash",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
-      "name": "Màn Hình Dell",
-      "seo_name": "man-hinh-dell",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Dell",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
-      "name": "Dell",
-      "seo_name": "dell",
-      "description": "Thương hiệu linh kiện máy tính Dell",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e63-7e33-a423-94f66a87d8d0",
-      "name": "Màn Hình Msi",
-      "seo_name": "man-hinh-msi-106",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Msi",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e64-7c52-aca9-23c3bbcd29c7",
-      "name": "LG",
-      "seo_name": "lg-107",
-      "description": "Thương hiệu linh kiện máy tính LG",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e64-7680-b3e2-7c879aa60964",
-      "name": "Màn Hình Samsung",
-      "seo_name": "man-hinh-samsung",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Samsung",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e66-7612-a037-e995faea3b9c",
-      "name": "Viox",
-      "seo_name": "viox",
-      "description": "Thương hiệu linh kiện máy tính Viox",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e66-7734-932f-f033ee711cdd",
-      "name": "Màn Hình Asus",
-      "seo_name": "man-hinh-asus-110",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Asus",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e66-74d4-9e09-e3ed75cf3b6e",
-      "name": "E-Dra",
-      "seo_name": "e-dra",
-      "description": "Thương hiệu linh kiện máy tính E-Dra",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e66-7a1d-b961-59fd92e7fed7",
-      "name": "Edra",
-      "seo_name": "edra",
-      "description": "Thương hiệu linh kiện máy tính Edra",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e67-773e-9d56-67a09574efdd",
-      "name": "DELL",
-      "seo_name": "dell-113",
-      "description": "Thương hiệu linh kiện máy tính DELL",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e68-72ff-aa7a-7349cf1407b9",
-      "name": "Màn Hình Dell",
-      "seo_name": "man-hinh-dell-114",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình Dell",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e69-7059-b1ed-505ceea31a77",
-      "name": "Màn Hình E Dra",
-      "seo_name": "man-hinh-e-dra",
-      "description": "Thương hiệu linh kiện máy tính Màn Hình E Dra",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e6a-712b-9fc6-c46f69fc4c64",
-      "name": "VIEWSONIC",
-      "seo_name": "viewsonic-116",
-      "description": "Thương hiệu linh kiện máy tính VIEWSONIC",
-      "image_file_id": null,
-      "status": "ACTIVE"
-    },
-    {
-      "id": "01a119fe-8e6b-7be5-9f40-f91522fb572e",
-      "name": "Aoc",
-      "seo_name": "aoc",
-      "description": "Thương hiệu linh kiện máy tính Aoc",
+      "id": "01a16997-8b99-772e-b15e-5511cf872959",
+      "name": "Phanteks",
+      "seo_name": "phanteks",
+      "description": "Thương hiệu linh kiện máy tính Phanteks",
       "image_file_id": null,
       "status": "ACTIVE"
     },
@@ -85975,10 +85551,194 @@
       "status": "ACTIVE"
     },
     {
-      "id": "01a119fe-8e6b-7b81-8904-fca341a7bd1e",
-      "name": "AOC",
-      "seo_name": "aoc-119",
-      "description": "Thương hiệu linh kiện máy tính AOC",
+      "id": "01a119fe-8de7-7e07-9c8a-7c98d2d06164",
+      "name": "PNY",
+      "seo_name": "pny",
+      "description": "Thương hiệu linh kiện máy tính PNY",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8de6-7ea9-804e-b931d6664a4d",
+      "name": "PowerColor",
+      "seo_name": "powercolor",
+      "description": "Thương hiệu linh kiện máy tính PowerColor",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e40-79da-a4a6-d277e8caaa9a",
+      "name": "SAMA",
+      "seo_name": "sama",
+      "description": "Thương hiệu linh kiện máy tính SAMA",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e21-7fbd-b1b5-87beaa7663ac",
+      "name": "Samsung",
+      "seo_name": "samsung",
+      "description": "Thương hiệu linh kiện máy tính Samsung",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8de4-7a23-a1df-fe0f6ee02417",
+      "name": "Sapphire",
+      "seo_name": "sapphire",
+      "description": "Thương hiệu linh kiện máy tính Sapphire",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e26-7374-8493-bdea0266042a",
+      "name": "Seagate",
+      "seo_name": "seagate",
+      "description": "Thương hiệu linh kiện máy tính Seagate",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e2d-734c-baa7-aa18c9ceea82",
+      "name": "Segotep",
+      "seo_name": "segotep",
+      "description": "Thương hiệu linh kiện máy tính Segotep",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e25-7d8d-9167-f76c56a718fe",
+      "name": "Silicon Power",
+      "seo_name": "silicon-power",
+      "description": "Thương hiệu linh kiện máy tính Silicon Power",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e0d-782e-92e1-de39fa314fb4",
+      "name": "SSTC",
+      "seo_name": "sstc",
+      "description": "Thương hiệu linh kiện máy tính SSTC",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e29-7983-b137-bacbb748888f",
+      "name": "Super Flower",
+      "seo_name": "super-flower",
+      "description": "Thương hiệu linh kiện máy tính Super Flower",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e1e-7520-b192-ac3dd2a273ef",
+      "name": "TEAMGROUP",
+      "seo_name": "teamgroup",
+      "description": "Thương hiệu linh kiện máy tính TEAMGROUP",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-5512cab824d9",
+      "name": "Techware",
+      "seo_name": "techware",
+      "description": "Thương hiệu linh kiện máy tính Techware",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
+      "name": "THERMALRIGHT",
+      "seo_name": "thermalright",
+      "description": "Thương hiệu linh kiện máy tính THERMALRIGHT",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
+      "name": "Thermaltake",
+      "seo_name": "thermaltake",
+      "description": "Thương hiệu linh kiện máy tính Thermaltake",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e53-78c8-9ad9-e780620d2821",
+      "name": "TRYX",
+      "seo_name": "tryx",
+      "description": "Thương hiệu linh kiện máy tính TRYX",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e61-74a9-9d62-11a0a0ca8742",
+      "name": "ViewSonic",
+      "seo_name": "viewsonic",
+      "description": "Thương hiệu linh kiện máy tính ViewSonic",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e66-7612-a037-e995faea3b9c",
+      "name": "VIOX",
+      "seo_name": "viox",
+      "description": "Thương hiệu linh kiện máy tính VIOX",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-55133cb6c612",
+      "name": "Vitra",
+      "seo_name": "vitra",
+      "description": "Thương hiệu linh kiện máy tính Vitra",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e1f-7033-a706-c2e107063060",
+      "name": "VSP",
+      "seo_name": "vsp",
+      "description": "Thương hiệu linh kiện máy tính VSP",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e23-7f22-8dd9-5186667505f9",
+      "name": "Western Digital",
+      "seo_name": "western-digital",
+      "description": "Thương hiệu linh kiện máy tính Western Digital",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
+      "name": "XIGMATEK",
+      "seo_name": "xigmatek",
+      "description": "Thương hiệu linh kiện máy tính XIGMATEK",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a16997-8b99-772e-b15e-5514fd38552b",
+      "name": "XiKii",
+      "seo_name": "xikii",
+      "description": "Thương hiệu linh kiện máy tính XiKii",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8df8-722c-8c63-ce0f08f6181a",
+      "name": "Yeston",
+      "seo_name": "yeston",
+      "description": "Thương hiệu linh kiện máy tính Yeston",
+      "image_file_id": null,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "01a119fe-8ddd-7d10-b701-77c705f4d90e",
+      "name": "ZOTAC",
+      "seo_name": "zotac",
+      "description": "Thương hiệu linh kiện máy tính ZOTAC",
       "image_file_id": null,
       "status": "ACTIVE"
     }
@@ -86495,7 +86255,7 @@
       "id": "01a119fe-8de0-7f73-a708-5616f894d838",
       "name": "Card màn hình ASL GeForce RTX 3050 DUAL OC 6GB",
       "seo_name": "card-man-hinh-asl-geforce-rtx-3050-dual-oc-6gb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8ddf-730f-8987-1ae2e7a3689e",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 3050",
@@ -86989,7 +86749,7 @@
       "id": "01a119fe-8de2-7bcd-913b-a092cbcccef5",
       "name": "Card Màn Hình ASUS ROG STRIX RTX 4080 O16G White",
       "seo_name": "card-man-hinh-asus-rog-strix-rtx-4080-o16g-white",
-      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
+      "brand_id": "01a119fe-8dde-71a7-aec0-24231bece465",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 4080",
@@ -87324,7 +87084,7 @@
       "id": "01a119fe-8de6-7f08-961a-3bee49dffcaa",
       "name": "Card màn hình ASRock AMD Radeon RX 9060 XT Challenger 16GB OC",
       "seo_name": "card-man-hinh-asrock-amd-radeon-rx-9060-xt-challenger-16gb-oc",
-      "brand_id": "01a119fe-8de5-74dd-9388-1de5edb97819",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RX 9060 XT",
@@ -87439,7 +87199,7 @@
       "id": "01a119fe-8de6-734b-a878-fe05aebd9093",
       "name": "Card Màn Hình ASL RTX 3060 LHR 12GB GDDR6",
       "seo_name": "card-man-hinh-asl-rtx-3060-lhr-12gb-gddr6",
-      "brand_id": "01a119fe-8de6-78f9-9aeb-acb5caaf1fbe",
+      "brand_id": "01a119fe-8ddf-730f-8987-1ae2e7a3689e",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 3060",
@@ -87523,7 +87283,7 @@
       "id": "01a119fe-8de6-7d49-95fd-146f0ab8de9a",
       "name": "Card màn hình Gigabyte RTX 3060 EAGLE OC 12G V2 (12GB GDDR6, 192-bit, HDMI +DP, 1x8-pin)",
       "seo_name": "card-man-hinh-gigabyte-rtx-3060-eagle-oc-12g-v2-12gb-gddr6-192-bit-hdmi-dp-1x8-pin",
-      "brand_id": "01a119fe-8de6-7b97-8824-2f5332601017",
+      "brand_id": "01a119fe-8de0-70c4-8e69-3cbbf5a6f7f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 3060",
@@ -88213,7 +87973,7 @@
       "id": "01a119fe-8de9-70e3-a05e-10cbabca8b7c",
       "name": "Card màn hình GAINWARD GEFORCE RTX 5080 PHOENIX V1 16GB GDDR7",
       "seo_name": "card-man-hinh-gainward-geforce-rtx-5080-phoenix-v1-16gb-gddr7",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8ded-75e5-8b5a-a1b8ebceb2e0",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5080",
@@ -89493,7 +89253,7 @@
       "id": "01a119fe-8dec-7a11-8dcd-2ad06b5d898b",
       "name": "Card màn hình Colorful iGame GeForce RTX 5060 Ti Ultra W OC 16GB-V GDDR7",
       "seo_name": "card-man-hinh-colorful-igame-geforce-rtx-5060-ti-ultra-w-oc-16gb-v-gddr7",
-      "brand_id": "01a119fe-8dec-770d-ad6a-5352e47d1f77",
+      "brand_id": "01a119fe-8ddd-7b74-8791-89e5ef2cc592",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5060 TI",
@@ -89944,7 +89704,7 @@
       "id": "01a119fe-8ded-70cf-b5ba-ab5128f79f02",
       "name": "Card màn hình Gigabyte RTX 5060 Ti 8GB Windforce Max OC (N506TWF2MAXOC_8GD)",
       "seo_name": "card-man-hinh-gigabyte-rtx-5060-ti-8gb-windforce-max-oc-n506twf2maxoc_8gd",
-      "brand_id": "01a119fe-8ded-7871-ad12-827277aad085",
+      "brand_id": "01a119fe-8de0-70c4-8e69-3cbbf5a6f7f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5060 TI",
@@ -90096,7 +89856,7 @@
       "id": "01a119fe-8dee-7340-bded-3efdf6e0a069",
       "name": "Card màn hình Gainward GeForce RTX 5060 Ti GHOST 8GB GDDR7",
       "seo_name": "card-man-hinh-gainward-geforce-rtx-5060-ti-ghost-8gb-gddr7",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8ded-75e5-8b5a-a1b8ebceb2e0",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5060 TI",
@@ -90491,7 +90251,7 @@
       "id": "01a119fe-8def-7a28-b93b-4662cf3db5ae",
       "name": "Card Màn Hình MSI GeForce RTX 5070 12G SHADOW 3X OC",
       "seo_name": "card-man-hinh-msi-geforce-rtx-5070-12g-shadow-3x-oc",
-      "brand_id": "01a119fe-8def-7f5d-ba2b-0bb727d10bd5",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5070",
@@ -91078,7 +90838,7 @@
       "id": "01a119fe-8df1-7ba8-9a66-bf1ae9dd67eb",
       "name": "Card màn hình ASRock Radeon RX 9070 XT Taichi White 16GB GDDR6 OC Edition",
       "seo_name": "card-man-hinh-asrock-radeon-rx-9070-xt-taichi-white-16gb-gddr6-oc-edition",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RX 9070 XT",
@@ -91165,7 +90925,7 @@
       "id": "01a119fe-8df1-70c7-8638-09c04d526eec",
       "name": "Card Màn Hình Colorful iGame GeForce RTX 5080 Advanced OC 16GB GDDR7",
       "seo_name": "card-man-hinh-colorful-igame-geforce-rtx-5080-advanced-oc-16gb-gddr7",
-      "brand_id": "01a119fe-8df1-7d0e-9968-b20426288b0e",
+      "brand_id": "01a119fe-8ddd-7b74-8791-89e5ef2cc592",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5080",
@@ -91209,7 +90969,7 @@
       "id": "01a119fe-8df1-70f2-8c50-4fee0decc4df",
       "name": "Card màn hình MSI RTX 5070 Ti 16GB VENTUS 3X OC",
       "seo_name": "card-man-hinh-msi-rtx-5070-ti-16gb-ventus-3x-oc",
-      "brand_id": "01a119fe-8df1-7f60-a9fb-5c7606729ece",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 5070 TI",
@@ -92484,7 +92244,7 @@
       "id": "01a119fe-8df5-73d7-af09-02e39255d860",
       "name": "Card màn hình ASRock Radeon RX 7600 Challenger 8GB GDDR6 OC",
       "seo_name": "card-man-hinh-asrock-radeon-rx-7600-challenger-8gb-gddr6-oc",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RX 7600",
@@ -93596,7 +93356,7 @@
       "id": "01a119fe-8df8-7ab0-954d-14c228886cd1",
       "name": "Card màn hình NEO FORZA GeForce RTX 3080 10GB LHR GDDR6X",
       "seo_name": "card-man-hinh-neo-forza-geforce-rtx-3080-10gb-lhr-gddr6x",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8ddf-701c-80c9-4eb72871d235",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX 3080",
@@ -94021,7 +93781,7 @@
       "id": "01a119fe-8df9-7cfd-9905-c62f8556bf0a",
       "name": "CARD MÀN HÌNH NVIDIA RTX A4000 (16GB GDDR6)",
       "seo_name": "card-man-hinh-nvidia-rtx-a4000-16gb-gddr6",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX A4000",
@@ -94052,7 +93812,7 @@
       "id": "01a119fe-8df9-73dd-8550-a2e8366ec543",
       "name": "CARD MÀN HÌNH NVIDIA RTX A4500 (20GB GDDR6)",
       "seo_name": "card-man-hinh-nvidia-rtx-a4500-20gb-gddr6",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX A4500",
@@ -94068,7 +93828,7 @@
       "id": "01a119fe-8dfa-7eeb-9658-81061ea538f5",
       "name": "CARD MÀN HÌNH NVIDIA RTX A2000 6GB GDDR6",
       "seo_name": "card-man-hinh-nvidia-rtx-a2000-6gb-gddr6",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX A2000",
@@ -94115,7 +93875,7 @@
       "id": "01a119fe-8dfa-74b0-8174-e90fec58a6d8",
       "name": "VGA Card nVidia Quadro P6000 24GB DDR5",
       "seo_name": "vga-card-nvidia-quadro-p6000-24gb-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "QUADRO P6000",
@@ -94131,7 +93891,7 @@
       "id": "01a119fe-8dfa-7e3d-b7ba-41fddd1caa9f",
       "name": "VGA Card  nVidia Quadro P5000 16GB DDR5",
       "seo_name": "vga-card-nvidia-quadro-p5000-16gb-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "QUADRO P5000",
@@ -94147,7 +93907,7 @@
       "id": "01a119fe-8dfa-7266-b838-fdf678a20bee",
       "name": "VGA Card  nVidia Quadro  P400 2GB GDDR5",
       "seo_name": "vga-card-nvidia-quadro-p400-2gb-gddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "vram_gb": 2,
@@ -94162,7 +93922,7 @@
       "id": "01a119fe-8dfa-7cf3-831f-a2204b937b01",
       "name": "VGA Card  nVidia Quadro P4000 8GB GDDR5",
       "seo_name": "vga-card-nvidia-quadro-p4000-8gb-gddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "QUADRO P4000",
@@ -94395,7 +94155,7 @@
       "id": "01a119fe-8dfb-7f44-a5e8-3d254b5627fe",
       "name": "Card Màn Hình Qleadtek NVIDIA RTX A2000 12 GB GDDR6",
       "seo_name": "card-man-hinh-qleadtek-nvidia-rtx-a2000-12-gb-gddr6",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8df9-7d92-aeb5-6a66efd7ea13",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "RTX A2000",
@@ -94432,7 +94192,7 @@
       "id": "01a119fe-8dfb-784b-8736-1e3279e1764f",
       "name": "VGA Card nVidia Quadro P620 2GB GDDR5",
       "seo_name": "vga-card-nvidia-quadro-p620-2gb-gddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550f6dd3e5f4",
       "category_id": "01a119fe-8dd1-7099-a21e-29f98ff6ae4c",
       "specifications": {
         "gpu_chip": "QUADRO P620",
@@ -95387,7 +95147,7 @@
       "id": "01a119fe-8e00-745e-bb4c-68b7fed28d01",
       "name": "CPU AMD Ryzen 5 5500 - Tray (3.6 GHz Upto 4.2GHz / 19MB / 6 Cores, 12 Threads / 65W / Socket AM4)",
       "seo_name": "cpu-amd-ryzen-5-5500-tray-36-ghz-upto-42ghz-19mb-6-cores-12-threads-65w-socket-am4",
-      "brand_id": "01a119fe-8e00-76e3-869c-c534e81765a2",
+      "brand_id": "01a119fe-8df1-7dab-875b-2db4e039040f",
       "category_id": "01a119fe-8dd1-7f75-b299-c9a4781f9627",
       "specifications": {
         "socket": "AM4",
@@ -97742,7 +97502,7 @@
       "id": "01a119fe-8e0b-7321-a11b-492b154069b9",
       "name": "Mainboard ASRock B760M Pro RS/D4",
       "seo_name": "mainboard-asrock-b760m-pro-rsd4",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B760",
@@ -98716,7 +98476,7 @@
       "id": "01a119fe-8e0e-72c2-bdb5-18122900cbe5",
       "name": "Mainboard DarkFlash H610M-VGD-V1",
       "seo_name": "mainboard-darkflash-h610m-vgd-v1",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e62-7432-bdd2-b203628749df",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "H610",
@@ -99227,7 +98987,7 @@
       "id": "01a119fe-8e0f-7568-8cbb-4e4d35cb48b9",
       "name": "Mainboard ASROCK Z890 STEEL LEGEND WIFI DDR5",
       "seo_name": "mainboard-asrock-z890-steel-legend-wifi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "Z890",
@@ -100135,7 +99895,7 @@
       "id": "01a119fe-8e14-7d30-b826-a517efcc1422",
       "name": "Mainboard Asrock B450M-HDV R4.0",
       "seo_name": "mainboard-asrock-b450m-hdv-r40",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B450",
@@ -100205,7 +99965,7 @@
       "id": "01a119fe-8e14-7979-b3fc-c31e78090ac2",
       "name": "Mainboard Asrock H610M-H2/M.2",
       "seo_name": "mainboard-asrock-h610m-h2m2",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "H610",
@@ -100281,7 +100041,7 @@
       "id": "01a119fe-8e14-7ec6-b56d-b6a5d7101b45",
       "name": "Mainboard Asrock X870 Pro RS DDR5",
       "seo_name": "mainboard-asrock-x870-pro-rs-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "X870",
@@ -100359,7 +100119,7 @@
       "id": "01a119fe-8e15-7b7a-9cb1-6f79e0f7fff6",
       "name": "Mainboard ASRock B650M Pro RS DDR5",
       "seo_name": "mainboard-asrock-b650m-pro-rs-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B650",
@@ -100513,7 +100273,7 @@
       "id": "01a119fe-8e16-7684-b245-c7534f03ff92",
       "name": "Mainboard ASROCK B650M Pro RS WIFI DDR5",
       "seo_name": "mainboard-asrock-b650m-pro-rs-wifi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B650",
@@ -100680,7 +100440,7 @@
       "id": "01a119fe-8e16-7e24-8639-3fb4195bbe22",
       "name": "Mainboard ASROCK Z890 TAICHI DDR5",
       "seo_name": "mainboard-asrock-z890-taichi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "Z890",
@@ -100853,7 +100613,7 @@
       "id": "01a119fe-8e17-7bd5-8a7a-64d3a0ba7cea",
       "name": "Mainboard ASROCK B550M PRO4",
       "seo_name": "mainboard-asrock-b550m-pro4",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B550",
@@ -101409,7 +101169,7 @@
       "id": "01a119fe-8e19-7e9f-a831-a05102926ca9",
       "name": "MAINBOARD ASROCK B760M PRO RS/D4 WIFI",
       "seo_name": "mainboard-asrock-b760m-pro-rsd4-wifi",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B760",
@@ -101427,7 +101187,7 @@
       "id": "01a119fe-8e19-7978-bc0c-42f180af0392",
       "name": "MAINBOARD ASROCK B760M STEEL LEGEND WIFI DDR5",
       "seo_name": "mainboard-asrock-b760m-steel-legend-wifi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "B760",
@@ -102336,7 +102096,7 @@
       "id": "01a119fe-8e1c-7276-9a75-b6a43c33eda8",
       "name": "MAINBOARD ASROCK Z790 STEEL LEGEND WIFI DDR5",
       "seo_name": "mainboard-asrock-z790-steel-legend-wifi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "Z790",
@@ -102355,7 +102115,7 @@
       "id": "01a119fe-8e1c-7aac-8370-95db048f9779",
       "name": "Mainboard ASROCK Z790 Taichi DDR5",
       "seo_name": "mainboard-asrock-z790-taichi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "Z790",
@@ -102372,7 +102132,7 @@
       "id": "01a119fe-8e1c-7539-ac77-d879ec56b7c3",
       "name": "Mainboard ASROCK Z790 PRO RS/D4",
       "seo_name": "mainboard-asrock-z790-pro-rsd4",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "Z790",
@@ -102864,7 +102624,7 @@
       "id": "01a119fe-8e1d-7ca2-ad8b-699a8f99cd9d",
       "name": "Mainboard Asrock Z790 PG Lightning Wifi DDR5",
       "seo_name": "mainboard-asrock-z790-pg-lightning-wifi-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "Z790",
@@ -102956,7 +102716,7 @@
       "id": "01a119fe-8e1d-770d-ae22-7b9aff03ddbd",
       "name": "Mainboard ASROCK H470M-HDV",
       "seo_name": "mainboard-asrock-h470m-hdv",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8de4-7636-97a5-9a9705881e74",
       "category_id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
       "specifications": {
         "chipset": "H470",
@@ -103064,7 +102824,7 @@
       "id": "01a119fe-8e1f-74ea-8aae-08e44f2f3b5f",
       "name": "RAM TeamGroup T-Create EXPERT 128GB (2x64GB) DDR5 6400Mhz Black",
       "seo_name": "ram-teamgroup-t-create-expert-128gb-2x64gb-ddr5-6400mhz-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1e-7520-b192-ac3dd2a273ef",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103192,7 +102952,7 @@
       "id": "01a119fe-8e1f-7a2c-87ea-9454a78e9861",
       "name": "RAM Kingspec 16GB Bus 3200MHz DDR4  Tản Nhiệt Đen",
       "seo_name": "ram-kingspec-16gb-bus-3200mhz-ddr4-tan-nhiet-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550dbd10744e",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR4",
@@ -103227,7 +102987,7 @@
       "id": "01a119fe-8e1f-77e8-9879-cbc30a508775",
       "name": "RAM DESKTOP COLORFUL JEDEC 16GB (1X16GB) DDR4 3200MHZ",
       "seo_name": "ram-desktop-colorful-jedec-16gb-1x16gb-ddr4-3200mhz",
-      "brand_id": "01a119fe-8e1f-7033-a706-c2e107063060",
+      "brand_id": "01a119fe-8ddd-7b74-8791-89e5ef2cc592",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR4",
@@ -103246,7 +103006,7 @@
       "id": "01a119fe-8e1f-719a-b563-93754cd128e0",
       "name": "RAM Adata XPG Lancer RGB 16GB Bus 6000Mhz DDR5",
       "seo_name": "ram-adata-xpg-lancer-rgb-16gb-bus-6000mhz-ddr5",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7935-8a77-f99ba472a7d4",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103283,7 +103043,7 @@
       "id": "01a119fe-8e1f-7903-bba6-eeac5b1f6993",
       "name": "RAM Patriot EP Viper Venom 16GB DDR5 6000MHz",
       "seo_name": "ram-patriot-ep-viper-venom-16gb-ddr5-6000mhz",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e21-74fe-9edc-983a285b5f3f",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103338,7 +103098,7 @@
       "id": "01a119fe-8e20-7cf8-b455-c14e54861558",
       "name": "RAM Apacer NOX 16GB DDR5 Bus 6000MHz",
       "seo_name": "ram-apacer-nox-16gb-ddr5-bus-6000mhz",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550673b522d4",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103356,7 +103116,7 @@
       "id": "01a119fe-8e20-768f-96aa-45b7486f936d",
       "name": "RAM Adata XPG Lancer Blade White 32GB (2x16GB) DDR5 5600MHz (AX5U5600C4616G-DTLABWH)",
       "seo_name": "ram-adata-xpg-lancer-blade-white-32gb-2x16gb-ddr5-5600mhz-ax5u5600c4616g-dtlabwh",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7935-8a77-f99ba472a7d4",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103375,7 +103135,7 @@
       "id": "01a119fe-8e20-751a-9a14-a79095fb80b2",
       "name": "RAM Adata XPG Lancer Blade Black 32GB (2x16GB) DDR5 5600MHz (AX5U5600C4616G-DTLABBK)",
       "seo_name": "ram-adata-xpg-lancer-blade-black-32gb-2x16gb-ddr5-5600mhz-ax5u5600c4616g-dtlabbk",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7935-8a77-f99ba472a7d4",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103394,7 +103154,7 @@
       "id": "01a119fe-8e20-7c3f-b135-5770226ef2a2",
       "name": "Ram Desktop Gskill Trident Z5 RGB 32G (2x16B) DDR5 6000Mhz  (F5-6000U4040E16GX2-TZ5RK)",
       "seo_name": "ram-desktop-gskill-trident-z5-rgb-32g-2x16b-ddr5-6000mhz-f5-6000u4040e16gx2-tz5rk",
-      "brand_id": "01a119fe-8e20-7c21-8f67-850e8cf5bdeb",
+      "brand_id": "01a119fe-8e1f-7439-9009-3b80132e7c0a",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103469,7 +103229,7 @@
       "id": "01a119fe-8e20-7505-8b98-93d646abf6dc",
       "name": "RAM G.Skill Ripjaws S5 32GB (2x16GB) DDR5 6000MHz (F5-6000J3636F16GX2-RS5K)",
       "seo_name": "ram-gskill-ripjaws-s5-32gb-2x16gb-ddr5-6000mhz-f5-6000j3636f16gx2-rs5k",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7439-9009-3b80132e7c0a",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103526,7 +103286,7 @@
       "id": "01a119fe-8e20-7d0d-92bd-78f999dd9c97",
       "name": "Ram AGI 16GB BUS 5600Mhz DDR5 (AGI560A16UD238-ST)",
       "seo_name": "ram-agi-16gb-bus-5600mhz-ddr5-agi560a16ud238-st",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e24-7909-a1b5-7c40f50a6f9e",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103619,7 +103379,7 @@
       "id": "01a119fe-8e20-759b-954c-0a8fe92c2166",
       "name": "RAM APACER NOX 16GB DDR5 bus 5200Mhz – Black",
       "seo_name": "ram-apacer-nox-16gb-ddr5-bus-5200mhz-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550673b522d4",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -103692,7 +103452,7 @@
       "id": "01a119fe-8e21-7c5f-911c-8b4318134786",
       "name": "Ram HIKSEMI ARMOR 16GB Bus  3200MHZ DDR4 U10 U-DIMM",
       "seo_name": "ram-hiksemi-armor-16gb-bus-3200mhz-ddr4-u10-u-dimm",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e24-7cf7-ac40-b699bde8c2ec",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR4",
@@ -103710,7 +103470,7 @@
       "id": "01a119fe-8e21-78ea-899c-0d72e434de01",
       "name": "RAM Geil EVO Potenza 8GB DDR4 3200MHz Black",
       "seo_name": "ram-geil-evo-potenza-8gb-ddr4-3200mhz-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7b76-8685-919229016628",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR4",
@@ -103820,7 +103580,7 @@
       "id": "01a119fe-8e21-7f00-99a1-1dc4eb63ce6e",
       "name": "RAM GEIL SPEAR V 16GB BUSS 5200MHZ DDR5 BLACK",
       "seo_name": "ram-geil-spear-v-16gb-buss-5200mhz-ddr5-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7b76-8685-919229016628",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR5",
@@ -104083,7 +103843,7 @@
       "id": "01a119fe-8e22-7292-8804-5c2a3c989f4e",
       "name": "RAM G.Skill TRIDENT Z Neo RGB 32GB (2x16GB) DDR4 3600MHz (F4-3600C18D-32GTZN)",
       "seo_name": "ram-gskill-trident-z-neo-rgb-32gb-2x16gb-ddr4-3600mhz-f4-3600c18d-32gtzn",
-      "brand_id": "01a119fe-8e20-7c21-8f67-850e8cf5bdeb",
+      "brand_id": "01a119fe-8e1f-7439-9009-3b80132e7c0a",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR4",
@@ -104102,7 +103862,7 @@
       "id": "01a119fe-8e22-7350-ad3a-e107a7b9d340",
       "name": "RAM GSKILL TRIDENT Z RGB 16GB(2x8GB) DDR4 Bus 3200MHz (F4-3200C16D-16GTZR)",
       "seo_name": "ram-gskill-trident-z-rgb-16gb2x8gb-ddr4-bus-3200mhz-f4-3200c16d-16gtzr",
-      "brand_id": "01a119fe-8e20-7c21-8f67-850e8cf5bdeb",
+      "brand_id": "01a119fe-8e1f-7439-9009-3b80132e7c0a",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "ram_type": "DDR4",
@@ -104121,7 +103881,7 @@
       "id": "01a119fe-8e22-799b-bf99-4d73cd53b62c",
       "name": "RAM TEAMGROUP T-Force Dark Z 16GB (1x16) 3200MHz CL16 RED",
       "seo_name": "ram-teamgroup-t-force-dark-z-16gb-1x16-3200mhz-cl16-red",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1e-7520-b192-ac3dd2a273ef",
       "category_id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
       "specifications": {
         "capacity_gb": 16,
@@ -104198,7 +103958,7 @@
       "id": "01a119fe-8e23-781b-80d1-66a2e9f26739",
       "name": "Ổ cứng SSD Silicon Power US70 M.2 NVME 2TB PCIe Gen4x4",
       "seo_name": "o-cung-ssd-silicon-power-us70-m2-nvme-2tb-pcie-gen4x4",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e25-7d8d-9167-f76c56a718fe",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 2000,
@@ -104272,7 +104032,7 @@
       "id": "01a119fe-8e23-7cc3-b659-35fafe3875c3",
       "name": "Ổ cứng SSD Kioxia EXCERIA PLUS G3 2TB NVMe Gen 4x4 LSD10Z002TG8",
       "seo_name": "o-cung-ssd-kioxia-exceria-plus-g3-2tb-nvme-gen-4x4-lsd10z002tg8",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e23-7453-8439-9d4e61c82bd2",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 2000,
@@ -104392,7 +104152,7 @@
       "id": "01a119fe-8e23-7d83-99ce-103693b16e51",
       "name": "Ổ cứng SSD HIKSEMI WAVE 1TB M.2 2280 PCIe 3.0x4 (Đọc 2450MB/s, Ghi 2450MB/s)",
       "seo_name": "o-cung-ssd-hiksemi-wave-1tb-m2-2280-pcie-30x4-doc-2450mbs-ghi-2450mbs",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e24-7cf7-ac40-b699bde8c2ec",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 1000,
@@ -104472,7 +104232,7 @@
       "id": "01a119fe-8e24-7365-a821-1631f69130b0",
       "name": "Ổ cứng SSD HIKSEMI HS-SSD-WAVE(S) 512G (SATA3/ 2.5Inch/ 530MB/s/ 450MB/s)",
       "seo_name": "o-cung-ssd-hiksemi-hs-ssd-waves-512g-sata3-25inch-530mbs-450mbs",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e24-7cf7-ac40-b699bde8c2ec",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 512,
@@ -104511,7 +104271,7 @@
       "id": "01a119fe-8e24-7fd4-a6fd-3efdb026686b",
       "name": "Ổ CỨNG NVME KIOXIA EXCERIA BASIC 1TB GEN 4X4 (6600 MB/s - 7200 MB/s)",
       "seo_name": "o-cung-nvme-kioxia-exceria-basic-1tb-gen-4x4-6600-mbs-7200-mbs",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e23-7453-8439-9d4e61c82bd2",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 1000,
@@ -104552,7 +104312,7 @@
       "id": "01a119fe-8e24-7239-b8ef-15229b8d6c2f",
       "name": "Ổ cứng SSD HIKSEMI HS-SSD-WAVE(S) 256G (SATA3/ 2.5Inch/ 530MB/s/ 400MB/s)",
       "seo_name": "o-cung-ssd-hiksemi-hs-ssd-waves-256g-sata3-25inch-530mbs-400mbs",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e24-7cf7-ac40-b699bde8c2ec",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 256,
@@ -104830,7 +104590,7 @@
       "id": "01a119fe-8e25-742f-ab4b-c92297746c64",
       "name": "Ổ Cứng SSD SSTC Oceanic Whitetip E130 512GB M.2 2280 PCIe NVMe (Gen 3x4)",
       "seo_name": "o-cung-ssd-sstc-oceanic-whitetip-e130-512gb-m2-2280-pcie-nvme-gen-3x4",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e0d-782e-92e1-de39fa314fb4",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 512,
@@ -104868,7 +104628,7 @@
       "id": "01a119fe-8e25-75f7-b36a-ad222c981701",
       "name": "Ổ cứng SSD WD GREEN SN3000 500GB M.2 2280 NVMe PCIe Gen 4x4",
       "seo_name": "o-cung-ssd-wd-green-sn3000-500gb-m2-2280-nvme-pcie-gen-4x4",
-      "brand_id": "01a119fe-8e25-7cfe-af80-e7d7da76dc50",
+      "brand_id": "01a119fe-8e23-7f22-8dd9-5186667505f9",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 500,
@@ -104887,7 +104647,7 @@
       "id": "01a119fe-8e25-77cb-a03c-f41893ad70b7",
       "name": "Ổ cứng SSD ADATA LEGEND 710 512GB PCIe Gen3x4",
       "seo_name": "o-cung-ssd-adata-legend-710-512gb-pcie-gen3x4",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e1f-7935-8a77-f99ba472a7d4",
       "category_id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
       "specifications": {
         "capacity_gb": 512,
@@ -105278,7 +105038,7 @@
       "id": "01a119fe-8e29-79f3-a3f5-e82a36aa531d",
       "name": "Nguồn Máy Tính MIK C750B 750W PLUS BRONZE",
       "seo_name": "nguon-may-tinh-mik-c750b-750w-plus-bronze",
-      "brand_id": "01a119fe-8e29-7472-a61c-749262a36f20",
+      "brand_id": "01a119fe-8e38-7ac9-9037-4036a163d9a6",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 750,
@@ -105363,7 +105123,7 @@
       "id": "01a119fe-8e29-728c-8cb3-2f8fb3dbf483",
       "name": "NGUỒN MIK C650B - 650W 80PLUS BRONZE",
       "seo_name": "nguon-mik-c650b-650w-80plus-bronze",
-      "brand_id": "01a119fe-8e29-7472-a61c-749262a36f20",
+      "brand_id": "01a119fe-8e38-7ac9-9037-4036a163d9a6",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 650,
@@ -105430,7 +105190,7 @@
       "id": "01a119fe-8e29-7565-a0b9-d019aad40aee",
       "name": "Nguồn máy tính SuperFlower LEADEX  2800W ATX 3.1| Cybenetics Titanium (SF-2800F14HP)",
       "seo_name": "nguon-may-tinh-superflower-leadex-2800w-atx-31-cybenetics-titanium-sf-2800f14hp",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 2800,
@@ -105470,7 +105230,7 @@
       "id": "01a119fe-8e29-7f30-ac44-a3a06bc92cb9",
       "name": "Nguồn Super Flower Leadex Platinum 1600W SF-1600F14HP",
       "seo_name": "nguon-super-flower-leadex-platinum-1600w-sf-1600f14hp",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1600,
@@ -105487,7 +105247,7 @@
       "id": "01a119fe-8e29-78d8-9b63-ce6ee92a09a4",
       "name": "Nguồn máy tính Super Flower LEADEX VIII Platinum PRO 1200W ATX 3.1 BLACK | Cybenetics Platinum (SF-1200F14SP(T))",
       "seo_name": "nguon-may-tinh-super-flower-leadex-viii-platinum-pro-1200w-atx-31-black-cybenetics-platinum-sf-1200f14spt",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1200,
@@ -105507,7 +105267,7 @@
       "id": "01a119fe-8e29-7b90-b6cc-4aa9644e6a20",
       "name": "Nguồn máy tính Super Flower LEADEX VIII Platinum PRO 1200W ATX 3.1 WHITE | Cybenetics Platinum (SF-1200F14SP(T) - WH)",
       "seo_name": "nguon-may-tinh-super-flower-leadex-viii-platinum-pro-1200w-atx-31-white-cybenetics-platinum-sf-1200f14spt-wh",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1200,
@@ -105527,7 +105287,7 @@
       "id": "01a119fe-8e2a-74a4-9a04-5275b9ac7620",
       "name": "Nguồn máy tính Super Flower LEADEX VIII Platinum PRO 1000W ATX 3.1 BLACK | Cybenetics Platinum (SF-1000F14SP(T))",
       "seo_name": "nguon-may-tinh-super-flower-leadex-viii-platinum-pro-1000w-atx-31-black-cybenetics-platinum-sf-1000f14spt",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1000,
@@ -105547,7 +105307,7 @@
       "id": "01a119fe-8e2a-7f35-8b85-4bf10b7e6b33",
       "name": "Nguồn máy tính Super Flower LEADEX VIII Platinum PRO 1000W ATX 3.1 WHITE | Cybenetics Platinum (SF-1000F14SP(T) - WH)",
       "seo_name": "nguon-may-tinh-super-flower-leadex-viii-platinum-pro-1000w-atx-31-white-cybenetics-platinum-sf-1000f14spt-wh",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1000,
@@ -105567,7 +105327,7 @@
       "id": "01a119fe-8e2a-7ffe-aa94-ae1b33eb8e88",
       "name": "Nguồn máy tính Super Flower LEADEX VII Platinum PRO 1200W ATX 3.1 WHITE | 80 Plus Platinum (SF-1200F14XP-WH)",
       "seo_name": "nguon-may-tinh-super-flower-leadex-vii-platinum-pro-1200w-atx-31-white-80-plus-platinum-sf-1200f14xp-wh",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1200,
@@ -105587,7 +105347,7 @@
       "id": "01a119fe-8e2a-7303-be0f-971c518c23b8",
       "name": "Nguồn máy tính Super Flower LEADEX VII Platinum PRO 1200W ATX 3.1 | 80 Plus Platinum (SF-1200F14XP)",
       "seo_name": "nguon-may-tinh-super-flower-leadex-vii-platinum-pro-1200w-atx-31-80-plus-platinum-sf-1200f14xp",
-      "brand_id": "01a119fe-8e29-7318-9099-61bc1eb737fb",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1200,
@@ -105767,7 +105527,7 @@
       "id": "01a119fe-8e2a-7696-9454-261c77d5d165",
       "name": "Nguồn Máy Tính Super Flower Zillion DB 750W 80Plus Bronze",
       "seo_name": "nguon-may-tinh-super-flower-zillion-db-750w-80plus-bronze",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 750,
@@ -105802,7 +105562,7 @@
       "id": "01a119fe-8e2b-7069-891d-ff5a4860faa7",
       "name": "Nguồn Máy Tính Super Flower Zillion DB 650W 80Plus Bronze",
       "seo_name": "nguon-may-tinh-super-flower-zillion-db-650w-80plus-bronze",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 650,
@@ -105837,7 +105597,7 @@
       "id": "01a119fe-8e2b-7e90-94ac-08c2d3bda036",
       "name": "Nguồn Antec GSK850 850W (80 Plus Gold / Full-Modular / ATX 3.1 - PCIE 5.1)",
       "seo_name": "nguon-antec-gsk850-850w-80-plus-gold-full-modular-atx-31-pcie-51",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -105856,7 +105616,7 @@
       "id": "01a119fe-8e2b-7443-94dd-76e3fbe1db80",
       "name": "Nguồn máy tính Einarex AXIS MASTER L1 650W 80 Plus Bronze Semi-Modular",
       "seo_name": "nguon-may-tinh-einarex-axis-master-l1-650w-80-plus-bronze-semi-modular",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e4e-7e9e-8311-c2834db87d9c",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 650,
@@ -105893,7 +105653,7 @@
       "id": "01a119fe-8e2b-71e9-9396-eef994ecf412",
       "name": "Nguồn máy tính Thermalright TR-KG850 850W 80 Plus Gold",
       "seo_name": "nguon-may-tinh-thermalright-tr-kg850-850w-80-plus-gold",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106012,7 +105772,7 @@
       "id": "01a119fe-8e2c-7ca8-8287-cb8f52a1d0a4",
       "name": "Nguồn máy tính Antec CSK750DC 750W 80 Plus Bronze",
       "seo_name": "nguon-may-tinh-antec-csk750dc-750w-80-plus-bronze",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 750,
@@ -106028,7 +105788,7 @@
       "id": "01a119fe-8e2c-7a6f-9975-02e5261a194f",
       "name": "Nguồn FSP HV PRO 85+ 650W WHITE (80 Plus Bronze/ATX 3.1/EU/TRẮNG)",
       "seo_name": "nguon-fsp-hv-pro-85-650w-white-80-plus-bronzeatx-31eutrang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 650,
@@ -106064,7 +105824,7 @@
       "id": "01a119fe-8e2c-767e-943d-7a5f284d6dd6",
       "name": "Nguồn FSP VITA 850BD -  850W PPA8504502 BRONZE/DÂY LIỀN/EU/ĐEN",
       "seo_name": "nguon-fsp-vita-850bd-850w-ppa8504502-bronzeday-lieneuden",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106080,7 +105840,7 @@
       "id": "01a119fe-8e2c-75fe-b1f3-bb1bcaddd2ff",
       "name": "Nguồn FSP HV PRO 650W  (80 Plus Bronze/DÂY LIỀN/EU/ĐEN (PPA6505403))",
       "seo_name": "nguon-fsp-hv-pro-650w-80-plus-bronzeday-lieneuden-ppa6505403",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 650,
@@ -106096,7 +105856,7 @@
       "id": "01a119fe-8e2c-7372-b9ca-14235ba276d1",
       "name": "Nguồn FSP VITA 750BD - 750W (PPA7508005 BRONZE/DÂY LIỀN/US/ĐEN)",
       "seo_name": "nguon-fsp-vita-750bd-750w-ppa7508005-bronzeday-lienusden",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 750,
@@ -106130,7 +105890,7 @@
       "id": "01a119fe-8e2c-7e42-a258-2d0db1c1803d",
       "name": "Nguồn FSP VITA 850GD PPA8504703 GOLD/DÂY LIỀN/US/ĐEN",
       "seo_name": "nguon-fsp-vita-850gd-ppa8504703-goldday-lienusden",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106163,7 +105923,7 @@
       "id": "01a119fe-8e2c-7a72-97b0-b30d52a4e691",
       "name": "Nguồn FSP VITA 850GM PPA8504205 GOLD/DÂY RỜI/EU/ĐEN",
       "seo_name": "nguon-fsp-vita-850gm-ppa8504205-goldday-roieuden",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2b-775f-883b-51a52cb923a8",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106270,7 +106030,7 @@
       "id": "01a119fe-8e2d-7741-853d-2aaef35417d1",
       "name": "Nguồn máy tính DARKFLASH PMT1050 GOLD - 1050W (80 Plus Gold /ATX3.1/PCI-e 5.1/Full Modular)",
       "seo_name": "nguon-may-tinh-darkflash-pmt1050-gold-1050w-80-plus-gold-atx31pci-e-51full-modular",
-      "brand_id": "01a119fe-8e2d-7c29-9a38-332e13e5b41a",
+      "brand_id": "01a119fe-8e62-7432-bdd2-b203628749df",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1050,
@@ -106290,7 +106050,7 @@
       "id": "01a119fe-8e2d-72d8-9c0e-742cb13c8c99",
       "name": "Nguồn ANTEC 1000W CSK PRO EC (ATX 3.1, PCIE 5.1)",
       "seo_name": "nguon-antec-1000w-csk-pro-ec-atx-31-pcie-51",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1000,
@@ -106308,7 +106068,7 @@
       "id": "01a119fe-8e2d-7e0e-9f6a-cf8ae0eba078",
       "name": "Nguồn máy tính Darkflash PMT850 850W ( ATX3.1 & PCIe 5.1,  80 Plus Gold, Full Modular )",
       "seo_name": "nguon-may-tinh-darkflash-pmt850-850w-atx31-pcie-51-80-plus-gold-full-modular",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e62-7432-bdd2-b203628749df",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106415,7 +106175,7 @@
       "id": "01a119fe-8e2d-7c13-af71-f15fa831b943",
       "name": "Nguồn máy tính Antec NeoECO NE1000G M ATX 3.0 1000W (Full Modular , 80 Plus Gold)",
       "seo_name": "nguon-may-tinh-antec-neoeco-ne1000g-m-atx-30-1000w-full-modular-80-plus-gold",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1000,
@@ -106466,7 +106226,7 @@
       "id": "01a119fe-8e2e-7ff0-8d43-474e11f19088",
       "name": "Nguồn máy tính Thermalright TB-850S 850W (80 Plus Bronze, ATX 3.0, PCIE 5.0 ,Full Modular)",
       "seo_name": "nguon-may-tinh-thermalright-tb-850s-850w-80-plus-bronze-atx-30-pcie-50-full-modular",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106557,7 +106317,7 @@
       "id": "01a119fe-8e2e-7b71-8582-d3f3690ec9b8",
       "name": "Nguồn máy tính Jetek MaxWatt MW750 750W",
       "seo_name": "nguon-may-tinh-jetek-maxwatt-mw750-750w",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2e-7b9c-82ae-f2dc21a556b0",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 750,
@@ -106587,7 +106347,7 @@
       "id": "01a119fe-8e2e-7f89-b19b-490f1e9ab5a7",
       "name": "Nguồn máy tính Jetek MaxWatt MW650 650W",
       "seo_name": "nguon-may-tinh-jetek-maxwatt-mw650-650w",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2e-7b9c-82ae-f2dc21a556b0",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 650,
@@ -106618,7 +106378,7 @@
       "id": "01a119fe-8e2e-70fd-a593-732f61c1b014",
       "name": "Nguồn Máy Tính Super Flower Leadex Platinum 1200W PCIe 5.0 ( 80 Plus Platium)",
       "seo_name": "nguon-may-tinh-super-flower-leadex-platinum-1200w-pcie-50-80-plus-platium",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1200,
@@ -106635,7 +106395,7 @@
       "id": "01a119fe-8e2e-789b-837a-fd8854758267",
       "name": "Nguồn Máy Tính Super Flower VI Platinum Pro 1000W PCIe 5.0 WHITE (80 Plus Platinum)",
       "seo_name": "nguon-may-tinh-super-flower-vi-platinum-pro-1000w-pcie-50-white-80-plus-platinum",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1000,
@@ -106652,7 +106412,7 @@
       "id": "01a119fe-8e2f-73b4-95a6-52045d4ecdb8",
       "name": "Nguồn Máy Tính Super Flower Leadex VI Platinum Pro 850W PCIe 5.0 Black (80 Plus Platinum)",
       "seo_name": "nguon-may-tinh-super-flower-leadex-vi-platinum-pro-850w-pcie-50-black-80-plus-platinum",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106669,7 +106429,7 @@
       "id": "01a119fe-8e2f-7801-ae27-af39d294500f",
       "name": "Nguồn Máy Tính 850W Super Flower Leadex III Gold ARGB Black (80 Plus Gold)",
       "seo_name": "nguon-may-tinh-850w-super-flower-leadex-iii-gold-argb-black-80-plus-gold",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106684,7 +106444,7 @@
       "id": "01a119fe-8e2f-74cb-ac35-05bad60a3350",
       "name": "Nguồn Máy Tính 750W Super Flower Leadex III Gold ARGB Black (80 Plus Gold)",
       "seo_name": "nguon-may-tinh-750w-super-flower-leadex-iii-gold-argb-black-80-plus-gold",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 750,
@@ -106699,7 +106459,7 @@
       "id": "01a119fe-8e2f-719f-a906-91600cc94ce2",
       "name": "Nguồn Máy Tính Super Flower LEADEX III GOLD 850W PCIe 5.0 WHITE",
       "seo_name": "nguon-may-tinh-super-flower-leadex-iii-gold-850w-pcie-50-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106716,7 +106476,7 @@
       "id": "01a119fe-8e2f-726e-8e0d-bd39b30ba3a6",
       "name": "Nguồn Máy Tính Super Flower Leadex III Gold 850W PCIe 5.0",
       "seo_name": "nguon-may-tinh-super-flower-leadex-iii-gold-850w-pcie-50",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7983-b137-bacbb748888f",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 850,
@@ -106751,7 +106511,7 @@
       "id": "01a119fe-8e2f-78ae-9113-53f6f6a3dc56",
       "name": "Nguồn máy tính Antec NeoECO NE1300G M ATX 3.0 1300W (Full Modular , 80 Plus Gold)",
       "seo_name": "nguon-may-tinh-antec-neoeco-ne1300g-m-atx-30-1300w-full-modular-80-plus-gold",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 1300,
@@ -106857,7 +106617,7 @@
       "id": "01a119fe-8e30-719b-bb8a-af8a638ac577",
       "name": "Nguồn máy tính Xigmatek X-POWER III 650 - 600W",
       "seo_name": "nguon-may-tinh-xigmatek-x-power-iii-650-600w",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 600,
@@ -107102,7 +106862,7 @@
       "id": "01a119fe-8e30-7133-8e32-5783eccc6716",
       "name": "Nguồn Antec CUPRUM STRIKE CSK 550W 80 Plus Bronze",
       "seo_name": "nguon-antec-cuprum-strike-csk-550w-80-plus-bronze",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-7410-a4e1-824752b08191",
       "specifications": {
         "wattage": 550,
@@ -107297,7 +107057,7 @@
       "id": "01a119fe-8e34-7856-8977-8d73234b9715",
       "name": "Vỏ case XIGMATEK DYNAMIC ML - EN91134",
       "seo_name": "vo-case-xigmatek-dynamic-ml-en91134",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -107362,7 +107122,7 @@
       "id": "01a119fe-8e34-76d4-8964-39e24bb5bbba",
       "name": "Vỏ case XIGMATEK DYNAMIC ML ARCTIC - EN91141",
       "seo_name": "vo-case-xigmatek-dynamic-ml-arctic-en91141",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -107563,7 +107323,7 @@
       "id": "01a119fe-8e35-7435-ab46-ebd2488ada0b",
       "name": "Vỏ máy tính JONSBO D33 WHITE (Mini Tower/ M-ATX/ Trắng)",
       "seo_name": "vo-may-tinh-jonsbo-d33-white-mini-tower-m-atx-trang",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -107586,7 +107346,7 @@
       "id": "01a119fe-8e36-79d0-a368-a7288bf5aa18",
       "name": "Vỏ máy tính JONSBO D33 BLACK (Mini Tower/ M-ATX/ Đen)",
       "seo_name": "vo-may-tinh-jonsbo-d33-black-mini-tower-m-atx-den",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -107629,7 +107389,7 @@
       "id": "01a119fe-8e36-738f-a0a4-f90a223c728a",
       "name": "Vỏ Case XIGMATEK AQUA MS BLACK",
       "seo_name": "vo-case-xigmatek-aqua-ms-black",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "case_type": "Mini Tower",
@@ -107646,7 +107406,7 @@
       "id": "01a119fe-8e36-7f19-bd67-b0c20f137662",
       "name": "Vỏ Case XIGMATEK AQUA MS White",
       "seo_name": "vo-case-xigmatek-aqua-ms-white",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "case_type": "Mini Tower",
@@ -107726,7 +107486,7 @@
       "id": "01a119fe-8e36-77a4-860c-0393bd097cb1",
       "name": "CASE MÁY TÍNH GAMDIAS ATHENA M4M BLACK ARGB",
       "seo_name": "case-may-tinh-gamdias-athena-m4m-black-argb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-76e8-9803-742810603fe8",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -107856,7 +107616,7 @@
       "id": "01a119fe-8e37-7550-81c8-d778f604df50",
       "name": "CASE XIGMATEK AQUA ML Arctic",
       "seo_name": "case-xigmatek-aqua-ml-arctic",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "side_glass": true,
@@ -107870,7 +107630,7 @@
       "id": "01a119fe-8e37-7289-90f7-b797cbb379d2",
       "name": "CASE XIGMATEK AQUA ML BLACK",
       "seo_name": "case-xigmatek-aqua-ml-black",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "color": "đen",
@@ -107947,7 +107707,7 @@
       "id": "01a119fe-8e37-72d7-ad12-345f2802169f",
       "name": "VỎ CASE JUNGLE LEOPARD AS-01 WHITE- No Fan (ATX/ Màu Trắng)",
       "seo_name": "vo-case-jungle-leopard-as-01-white-no-fan-atx-mau-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -107990,7 +107750,7 @@
       "id": "01a119fe-8e37-71b3-a9a0-9fe30b67ee2f",
       "name": "VỎ CASE JUNGLE LEOPARD AS-01 BLACK - No Fan (ATX/ Màu Đen)",
       "seo_name": "vo-case-jungle-leopard-as-01-black-no-fan-atx-mau-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108011,7 +107771,7 @@
       "id": "01a119fe-8e37-7428-9dc5-bad7516eb5b0",
       "name": "Vỏ Case ES Gaming Aircraft 007 Ultra-Cool Display Black (Sẵn 3 Fan + Hub ARGB)",
       "seo_name": "vo-case-es-gaming-aircraft-007-ultra-cool-display-black-san-3-fan-hub-argb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550aaa65c28e",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108032,7 +107792,7 @@
       "id": "01a119fe-8e37-77a6-8463-f76481fc7f46",
       "name": "VỎ CASE XIGMATEK PANO II ARCTIC",
       "seo_name": "vo-case-xigmatek-pano-ii-arctic",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108108,7 +107868,7 @@
       "id": "01a119fe-8e38-7e75-83e7-433554288a56",
       "name": "VỎ CASE XIGMATEK PANO II",
       "seo_name": "vo-case-xigmatek-pano-ii",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108151,7 +107911,7 @@
       "id": "01a119fe-8e38-7b03-92d1-c36f47054d89",
       "name": "Vỏ case Lian Li O11 VISION Compact - White (ATX/Mid Tower/Màu Trắng)",
       "seo_name": "vo-case-lian-li-o11-vision-compact-white-atxmid-towermau-trang",
-      "brand_id": "01a119fe-8e38-70f0-a701-3f50dcba674c",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108217,7 +107977,7 @@
       "id": "01a119fe-8e38-79ec-8d6f-25aa21792eb0",
       "name": "Vỏ case Lian Li O11 VISION Compact - Black (ATX/Mid Tower/Màu Đen)",
       "seo_name": "vo-case-lian-li-o11-vision-compact-black-atxmid-towermau-den",
-      "brand_id": "01a119fe-8e38-70f0-a701-3f50dcba674c",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108296,7 +108056,7 @@
       "id": "01a119fe-8e38-7ff9-a8bc-3a398dd7cbaf",
       "name": "Vỏ Case Darkflash Floatron F1 Black (M-ATX / Màu Đen)",
       "seo_name": "vo-case-darkflash-floatron-f1-black-m-atx-mau-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e62-7432-bdd2-b203628749df",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108337,7 +108097,7 @@
       "id": "01a119fe-8e38-7bb9-84d9-9d5ac12e6f1b",
       "name": "Vỏ case máy tính Mini ITX XiKii Industry FF07 ROG",
       "seo_name": "vo-case-may-tinh-mini-itx-xikii-industry-ff07-rog",
-      "brand_id": "01a119fe-8e38-7e8c-809f-fe98b3d95f8a",
+      "brand_id": "01a16997-8b99-772e-b15e-5514fd38552b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108354,7 +108114,7 @@
       "id": "01a119fe-8e38-765b-8779-e19ad3c089bc",
       "name": "Vỏ Case Montech Heritage PRO White",
       "seo_name": "vo-case-montech-heritage-pro-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e3d-75af-8df0-6c6ef76f0f0e",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "color": "trắng",
@@ -108369,7 +108129,7 @@
       "id": "01a119fe-8e39-7c02-b35e-5d2a0acc74e3",
       "name": "Vỏ case ANTEC C3 Basic (ATX/Màu đen)",
       "seo_name": "vo-case-antec-c3-basic-atxmau-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108389,7 +108149,7 @@
       "id": "01a119fe-8e39-7e37-bfaf-b1cea5646c7d",
       "name": "Vỏ Case Montech Heritage PRO Black",
       "seo_name": "vo-case-montech-heritage-pro-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e3d-75af-8df0-6c6ef76f0f0e",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "color": "đen",
@@ -108442,7 +108202,7 @@
       "id": "01a119fe-8e39-72d2-89b0-44be6331951a",
       "name": "VỎ CASE AIGO Q15 MATX USB 3.0",
       "seo_name": "vo-case-aigo-q15-matx-usb-30",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-7e64-992e-39d142ee5efd",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108494,7 +108254,7 @@
       "id": "01a119fe-8e39-781e-bd86-56d29ae0994c",
       "name": "Vỏ case JONSBO D300 BLACK (mATX/Mid Tower/Màu ĐEN /Kính Cong)",
       "seo_name": "vo-case-jonsbo-d300-black-matxmid-towermau-den-kinh-cong",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108516,7 +108276,7 @@
       "id": "01a119fe-8e39-7eca-8f23-3a2f9e91d7ca",
       "name": "Vỏ case JONSBO D300 WHITE (mATX/Mid Tower/Màu Trắng/Kính Cong)",
       "seo_name": "vo-case-jonsbo-d300-white-matxmid-towermau-trangkinh-cong",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108576,7 +108336,7 @@
       "id": "01a119fe-8e3a-77f6-b691-9648b3593f68",
       "name": "Vỏ Case XIGMATEK ALPHA - PANO M BLACK ( MATX, Màu Đen, Case Bể Cá)",
       "seo_name": "vo-case-xigmatek-alpha-pano-m-black-matx-mau-den-case-be-ca",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108739,7 +108499,7 @@
       "id": "01a119fe-8e3a-7feb-b6b3-385fe0651ac1",
       "name": "Vỏ Case Phanteks Evolv X2 Tempered Glass, DRGB, Matte White (ATX/Mid Tower)",
       "seo_name": "vo-case-phanteks-evolv-x2-tempered-glass-drgb-matte-white-atxmid-tower",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-5511cf872959",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108803,7 +108563,7 @@
       "id": "01a119fe-8e3b-7d60-9508-73503bdaab6b",
       "name": "Vỏ Case Phanteks Evolv X2 Tempered Glass, DRGB, Satin Black (ATX/Mid Tower)",
       "seo_name": "vo-case-phanteks-evolv-x2-tempered-glass-drgb-satin-black-atxmid-tower",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-5511cf872959",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108827,7 +108587,7 @@
       "id": "01a119fe-8e3b-780a-b193-183cca0fd5d9",
       "name": "Vỏ case AIGO C218M WHITE (mATX/màu trắng/không fan)",
       "seo_name": "vo-case-aigo-c218m-white-matxmau-trangkhong-fan",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-7e64-992e-39d142ee5efd",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -108847,7 +108607,7 @@
       "id": "01a119fe-8e3b-7a2f-8b8e-34b222b2a148",
       "name": "VỎ CASE AIGO C218M BLACK ( MATX, Màu Đen, Case Bể Cá)",
       "seo_name": "vo-case-aigo-c218m-black-matx-mau-den-case-be-ca",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-7e64-992e-39d142ee5efd",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109067,7 +108827,7 @@
       "id": "01a119fe-8e3c-71be-9131-0610b715f63a",
       "name": "Vỏ Case Xigmatek Alphard M 3GF ( (MATX/MID TOWER/MÀU ĐEN/3 FAN VÔ CỰC)",
       "seo_name": "vo-case-xigmatek-alphard-m-3gf-matxmid-towermau-den3-fan-vo-cuc",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109088,7 +108848,7 @@
       "id": "01a119fe-8e3c-784e-9b7c-9c4a1eca14cb",
       "name": "VỎ CASE XIGMATEK ALPHARD M ARTIC 3GF (MATX/MID TOWER/MÀU TRẮNG/3 FAN VÔ CỰC)",
       "seo_name": "vo-case-xigmatek-alphard-m-artic-3gf-matxmid-towermau-trang3-fan-vo-cuc",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109109,7 +108869,7 @@
       "id": "01a119fe-8e3c-7752-b36c-81d4eb146db7",
       "name": "VỎ CASE JONSBO C6 HANDLE WHITE ( MINI TOWER/MÀU TRẮNG)",
       "seo_name": "vo-case-jonsbo-c6-handle-white-mini-towermau-trang",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109128,7 +108888,7 @@
       "id": "01a119fe-8e3c-7d6e-a539-8ee9f4b8c31f",
       "name": "VỎ CASE JONSBO C6 HANDLE BLACK ( MINI TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-jonsbo-c6-handle-black-mini-towermau-den",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109147,7 +108907,7 @@
       "id": "01a119fe-8e3c-7efb-9a19-5ec60b766814",
       "name": "VỎ CASE JONSBO C6 WHITE ( MINI TOWER/MÀU TRẮNG)",
       "seo_name": "vo-case-jonsbo-c6-white-mini-towermau-trang",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109168,7 +108928,7 @@
       "id": "01a119fe-8e3c-7edb-8ef9-08d1864fe213",
       "name": "VỎ CASE JONSBO C6 BLACK ( MINI TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-jonsbo-c6-black-mini-towermau-den",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109189,7 +108949,7 @@
       "id": "01a119fe-8e3c-7909-839e-2b82fdfa496b",
       "name": "VỎ CASE JONSBO Z20 WHITE (MATX/MID TOWER/MÀU TRẮNG)",
       "seo_name": "vo-case-jonsbo-z20-white-matxmid-towermau-trang",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109246,7 +109006,7 @@
       "id": "01a119fe-8e3d-7e0a-b458-793b8cdbf0e7",
       "name": "VỎ CASE JONSBO Z20 BLACK (MATX/MID TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-jonsbo-z20-black-matxmid-towermau-den",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109464,7 +109224,7 @@
       "id": "01a119fe-8e3e-7eac-b901-ac303852f26d",
       "name": "VỎ CASE JONSBO TK-2 WHITE (ATX/MID TOWER/TRẮNG)",
       "seo_name": "vo-case-jonsbo-tk-2-white-atxmid-towertrang",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109487,7 +109247,7 @@
       "id": "01a119fe-8e3e-71ed-9f99-6165620e1bc5",
       "name": "VỎ CASE JONSBO TK-2 BLACK (ATX/MID TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-jonsbo-tk-2-black-atxmid-towermau-den",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109542,7 +109302,7 @@
       "id": "01a119fe-8e3e-7dcf-bf12-794ee2bce2d0",
       "name": "VỎ CASE XIGMATEK SKY 3F (ATX/MID TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-xigmatek-sky-3f-atxmid-towermau-den",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109584,7 +109344,7 @@
       "id": "01a119fe-8e3e-77f7-bd7f-03abd67f908a",
       "name": "VỎ CASE XIGMATEK ENDORPHIN M II ARCTIC 3F(MATX/MID TOWER/MÀU TRẮNG)",
       "seo_name": "vo-case-xigmatek-endorphin-m-ii-arctic-3fmatxmid-towermau-trang",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109606,7 +109366,7 @@
       "id": "01a119fe-8e3e-7d67-978f-5433b49169da",
       "name": "Vỏ Case Xigmatek Endorphin M II 3F(MATX/MID TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-xigmatek-endorphin-m-ii-3fmatxmid-towermau-den",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109704,7 +109464,7 @@
       "id": "01a119fe-8e3e-7469-b636-a1489be21821",
       "name": "VỎ CASE HYTE Y70 - WHITE WHITE (ATX/MID TOWER/MÀU TRẮNG)",
       "seo_name": "vo-case-hyte-y70-white-white-atxmid-towermau-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109722,7 +109482,7 @@
       "id": "01a119fe-8e3f-7216-b6fe-e1e4e6d1d508",
       "name": "Vỏ Case Lian-Li A4 H2O Black",
       "seo_name": "vo-case-lian-li-a4-h2o-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "case_type": "Mini Tower",
@@ -109738,7 +109498,7 @@
       "id": "01a119fe-8e3f-75dc-8d89-067dd2c7235e",
       "name": "VỎ CASE HYTE Y70 - BLACK (ATX/MID TOWER/MÀU ĐEN)",
       "seo_name": "vo-case-hyte-y70-black-atxmid-towermau-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109756,7 +109516,7 @@
       "id": "01a119fe-8e3f-73f5-9490-d7cb44ccec4b",
       "name": "Vỏ Case HYTE Y60 Mid-Tower (White)",
       "seo_name": "vo-case-hyte-y60-mid-tower-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109776,7 +109536,7 @@
       "id": "01a119fe-8e3f-7567-b308-d1853ad7613d",
       "name": "Vỏ Case ANTEC 1FT Performance",
       "seo_name": "vo-case-antec-1ft-performance",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109794,7 +109554,7 @@
       "id": "01a119fe-8e3f-772c-b44d-c8a3d2948e68",
       "name": "Vỏ Case HYTE Y60 Mid-Tower (Black)",
       "seo_name": "vo-case-hyte-y60-mid-tower-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109832,7 +109592,7 @@
       "id": "01a119fe-8e40-735f-9aa1-e77946ab1ffa",
       "name": "Vỏ Case HYTE Y40 Black White (ATX, 2 Fan, Cable PCIe 4.0)",
       "seo_name": "vo-case-hyte-y40-black-white-atx-2-fan-cable-pcie-40",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109849,7 +109609,7 @@
       "id": "01a119fe-8e40-7b0c-8846-f4d8a139bdd9",
       "name": "Vỏ Case HYTE Y40 Snow White (ATX, 2 Fan, Cable PCIe 4.0)",
       "seo_name": "vo-case-hyte-y40-snow-white-atx-2-fan-cable-pcie-40",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109868,7 +109628,7 @@
       "id": "01a119fe-8e40-7f04-b944-3beb61cf7dff",
       "name": "Vỏ Case Techware VXR TG",
       "seo_name": "vo-case-techware-vxr-tg",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-5512cab824d9",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109886,7 +109646,7 @@
       "id": "01a119fe-8e40-746a-81cc-028542c9cc23",
       "name": "Vỏ Case HYTE Y40 Black (ATX, 2 Fan, Cable PCIe 4.0)",
       "seo_name": "vo-case-hyte-y40-black-atx-2-fan-cable-pcie-40",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550b626c689b",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109923,7 +109683,7 @@
       "id": "01a119fe-8e40-74bc-b027-389392425857",
       "name": "Vỏ Case Antec AX20",
       "seo_name": "vo-case-antec-ax20",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109941,7 +109701,7 @@
       "id": "01a119fe-8e40-7757-8ada-883fe9a569da",
       "name": "Vỏ Case Antec NX291",
       "seo_name": "vo-case-antec-nx291",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -109959,7 +109719,7 @@
       "id": "01a119fe-8e40-7b71-a885-e9d05b44230a",
       "name": "Vỏ Case César Snow White",
       "seo_name": "vo-case-cesar-snow-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e3b-7486-acc7-f907940cc856",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110015,7 +109775,7 @@
       "id": "01a119fe-8e41-7de3-93cc-5601e24b4d16",
       "name": "Vỏ Case Segotep Slath Mini ITX (Mini Tower/Màu Bạc)",
       "seo_name": "vo-case-segotep-slath-mini-itx-mini-towermau-bac",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2d-734c-baa7-aa18c9ceea82",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110055,7 +109815,7 @@
       "id": "01a119fe-8e41-73db-a955-0ae2507a8ea2",
       "name": "Vỏ Case Inwin A1 Prime Black ( Mini Tower / Màu Đen/ Gắn sẵn bộ nguồn INWIN 750W 80plus GOLD và 2 Fan)",
       "seo_name": "vo-case-inwin-a1-prime-black-mini-tower-mau-den-gan-san-bo-nguon-inwin-750w-80plus-gold-va-2-fan",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550cd2c0e3d6",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110075,7 +109835,7 @@
       "id": "01a119fe-8e41-776c-b5e2-57e745a8a801",
       "name": "Vỏ Case Inwin A1 Prime White ( Mini Tower / Màu Trắng/ Gắn sẵn bộ nguồn INWIN 750W 80plus GOLD và 2 Fan)",
       "seo_name": "vo-case-inwin-a1-prime-white-mini-tower-mau-trang-gan-san-bo-nguon-inwin-750w-80plus-gold-va-2-fan",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550cd2c0e3d6",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110544,7 +110304,7 @@
       "id": "01a119fe-8e43-71b5-a620-92d2f16cd352",
       "name": "Vỏ case DEEPCOOL MATREXX 40 3FS (Matx/ Màu Đen/ 3 fan led)",
       "seo_name": "vo-case-deepcool-matrexx-40-3fs-matx-mau-den-3-fan-led",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110605,7 +110365,7 @@
       "id": "01a119fe-8e43-7619-8104-2dbca3a22ce8",
       "name": "Vỏ Case César Racing (Đen)",
       "seo_name": "vo-case-cesar-racing-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e3b-7486-acc7-f907940cc856",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110768,7 +110528,7 @@
       "id": "01a119fe-8e43-7fdd-a4d6-3bdf01630ce1",
       "name": "XIGMATEK X7 BLACK (EN46218) - PREMIUM GAMING E-ATX",
       "seo_name": "xigmatek-x7-black-en46218-premium-gaming-e-atx",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110788,7 +110548,7 @@
       "id": "01a119fe-8e43-79b2-b139-11b5b53b8f20",
       "name": "XIGMATEK VERA (EN45730) - PREMIUM GAMING E-ATX",
       "seo_name": "xigmatek-vera-en45730-premium-gaming-e-atx",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110809,7 +110569,7 @@
       "id": "01a119fe-8e43-74e6-bcfa-bc276387fd3b",
       "name": "XIGMATEK X7 WHITE (EN46225) - PREMIUM GAMING E-ATX",
       "seo_name": "xigmatek-x7-white-en46225-premium-gaming-e-atx",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110829,7 +110589,7 @@
       "id": "01a119fe-8e43-7bf5-a7aa-f356b135da86",
       "name": "XIGMATEK X BATTLESHIP (EN47635) - PREMIUM GAMING ATX, ARGB LIGHTING",
       "seo_name": "xigmatek-x-battleship-en47635-premium-gaming-atx-argb-lighting",
-      "brand_id": "01a119fe-8e30-73c4-b07c-d849c610deba",
+      "brand_id": "01a119fe-8e31-7d6e-ba6f-a610da5508ab",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110939,7 +110699,7 @@
       "id": "01a119fe-8e44-7488-837e-bb3a0bfbeee6",
       "name": "Vỏ máy tính KENOO T14 - MATX",
       "seo_name": "vo-may-tinh-kenoo-t14-matx",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e45-7146-afad-24e2490496ce",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -110957,7 +110717,7 @@
       "id": "01a119fe-8e44-7047-a58f-b6b707607647",
       "name": "Vỏ case KENOO ESPORT K300 3F - Màu Đen ( 3 fan led RGB rainbow)",
       "seo_name": "vo-case-kenoo-esport-k300-3f-mau-den-3-fan-led-rgb-rainbow",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e45-7146-afad-24e2490496ce",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111199,7 +110959,7 @@
       "id": "01a119fe-8e45-7398-99c4-55c3746c363e",
       "name": "Vỏ case KENOO ESPORT G362 3F - Mầu Đen ( 3 fan led RGB rainbow)",
       "seo_name": "vo-case-kenoo-esport-g362-3f-mau-den-3-fan-led-rgb-rainbow",
-      "brand_id": "01a119fe-8e45-77a8-9af2-9ae385722ae0",
+      "brand_id": "01a119fe-8e45-7146-afad-24e2490496ce",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111218,7 +110978,7 @@
       "id": "01a119fe-8e46-79e3-b069-f1075795be3d",
       "name": "Vỏ case KENOO ESPORT G362 - Màu Đen",
       "seo_name": "vo-case-kenoo-esport-g362-mau-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e45-7146-afad-24e2490496ce",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111236,7 +110996,7 @@
       "id": "01a119fe-8e46-7e02-b3a0-f4baee07e776",
       "name": "Vỏ Case Nexus M Black/White (Mid Tower/Màu Đen Trắng)",
       "seo_name": "vo-case-nexus-m-blackwhite-mid-towermau-den-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-551018ae78dc",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "case_type": "Mid Tower",
@@ -111251,7 +111011,7 @@
       "id": "01a119fe-8e46-756c-b887-5d105a099fc9",
       "name": "Vỏ Case Nexus M White (Mid Tower/Màu Trắng)",
       "seo_name": "vo-case-nexus-m-white-mid-towermau-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-551018ae78dc",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "case_type": "Mid Tower",
@@ -111279,7 +111039,7 @@
       "id": "01a119fe-8e46-7916-8cb6-87ba0c2abfb5",
       "name": "Vỏ Case Thermaltake AH T600  (Full Tower/Màu Đen )",
       "seo_name": "vo-case-thermaltake-ah-t600-full-towermau-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111298,7 +111058,7 @@
       "id": "01a119fe-8e46-7cda-a076-a8b84729dc32",
       "name": "Vỏ Case Thermaltake AH T600 Snow  (Full Tower/Màu Trắng )",
       "seo_name": "vo-case-thermaltake-ah-t600-snow-full-towermau-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111317,7 +111077,7 @@
       "id": "01a119fe-8e46-76e4-9c72-99d2dc3f8a35",
       "name": "Vỏ case Thermaltake V250 Black ARGB Tempered Glass (Mid +4 Fan)",
       "seo_name": "vo-case-thermaltake-v250-black-argb-tempered-glass-mid-4-fan",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "color": "đen",
@@ -111332,7 +111092,7 @@
       "id": "01a119fe-8e47-7f12-9c69-4f8e0a39ca57",
       "name": "Vỏ Case Thermaltake A700 Aluminum Tempered Glass Edition  (Full Tower)",
       "seo_name": "vo-case-thermaltake-a700-aluminum-tempered-glass-edition-full-tower",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "case_type": "Full Tower",
@@ -111414,7 +111174,7 @@
       "id": "01a119fe-8e47-73cd-be75-2a6be1f2eeaf",
       "name": "Case Vitra X1 Pro V2",
       "seo_name": "case-vitra-x1-pro-v2",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-55133cb6c612",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "brand": "Khác"
@@ -111774,7 +111534,7 @@
       "id": "01a119fe-8e49-758b-8e99-275d851b8d53",
       "name": "Antec NX300",
       "seo_name": "antec-nx300",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-7330-9bca-cef19813c782",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111864,7 +111624,7 @@
       "id": "01a119fe-8e49-70a3-a08d-db4b0be10b36",
       "name": "Case LIAN-LI PC-O11 DYNAMIC Black",
       "seo_name": "case-lian-li-pc-o11-dynamic-black",
-      "brand_id": "01a119fe-8e49-7a08-8907-dd17ddf754f7",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111884,7 +111644,7 @@
       "id": "01a119fe-8e49-7021-aab6-6e0ed78317f2",
       "name": "Case LIAN-LI Alpha PC-A550W",
       "seo_name": "case-lian-li-alpha-pc-a550w",
-      "brand_id": "01a119fe-8e38-70f0-a701-3f50dcba674c",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111926,7 +111686,7 @@
       "id": "01a119fe-8e49-7270-82dd-748dcfacadda",
       "name": "Vỏ case InWin A1 Plus Pink QI Charger - Full Side Tempered Glass Mini ITX ( Mini Tower/Màu Hồng)",
       "seo_name": "vo-case-inwin-a1-plus-pink-qi-charger-full-side-tempered-glass-mini-itx-mini-towermau-hong",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550cd2c0e3d6",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111945,7 +111705,7 @@
       "id": "01a119fe-8e49-7720-9b17-e739f574b8b0",
       "name": "Vỏ case InWin A1 Plus White QI Charger - Full Side Tempered Glass Mini ITX ( Mini Tower/Màu Trắng)",
       "seo_name": "vo-case-inwin-a1-plus-white-qi-charger-full-side-tempered-glass-mini-itx-mini-towermau-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550cd2c0e3d6",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -111964,7 +111724,7 @@
       "id": "01a119fe-8e49-77c2-982f-228cae7287d5",
       "name": "Vỏ case InWin A1 Plus Black QI Charger - Full Side Tempered Glass Mini ITX ( Mini Tower/Màu Đen/Kèm nguồn 650 Plus Gold)",
       "seo_name": "vo-case-inwin-a1-plus-black-qi-charger-full-side-tempered-glass-mini-itx-mini-towermau-denkem-nguon-650-plus-gold",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550cd2c0e3d6",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -112055,7 +111815,7 @@
       "id": "01a119fe-8e4a-7c5f-b504-c9b900361c0b",
       "name": "Vỏ case CoolerMaster MASTERBOX TD500 TG MESH BLACK ARGB",
       "seo_name": "vo-case-coolermaster-masterbox-td500-tg-mesh-black-argb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8dfa-7de3-8156-f4a6819692c2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -112109,7 +111869,7 @@
       "id": "01a119fe-8e4a-71c1-95a2-c071b85aacf4",
       "name": "Vỏ case CoolerMaster MASTERBOX TD500 TG MESH WHITE ARGB",
       "seo_name": "vo-case-coolermaster-masterbox-td500-tg-mesh-white-argb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8dfa-7de3-8156-f4a6819692c2",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -112145,7 +111905,7 @@
       "id": "01a119fe-8e4a-7713-b6aa-cbe8f367f71b",
       "name": "Vỏ case E-DRA Da Vinci LED RGB",
       "seo_name": "vo-case-e-dra-da-vinci-led-rgb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e66-74d4-9e09-e3ed75cf3b6e",
       "category_id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
       "specifications": {
         "supported_form_factors": [
@@ -112215,7 +111975,7 @@
       "id": "01a119fe-8e4d-7aed-a3f2-a4b260b6c1a7",
       "name": "TẢN NHIỆT NƯỚC SSTC AIO SHARK SOLUTION 240 (SSTC-WC240ARGB)",
       "seo_name": "tan-nhiet-nuoc-sstc-aio-shark-solution-240-sstc-wc240argb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e0d-782e-92e1-de39fa314fb4",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -112261,7 +112021,7 @@
       "id": "01a119fe-8e4e-7603-9905-81a2da658ee4",
       "name": "Tản nhiệt Cooler Master HYPER 620S ARGB",
       "seo_name": "tan-nhiet-cooler-master-hyper-620s-argb",
-      "brand_id": "01a119fe-8e4e-7282-836c-a8bb55c18489",
+      "brand_id": "01a119fe-8dfa-7de3-8156-f4a6819692c2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -112285,7 +112045,7 @@
       "id": "01a119fe-8e4e-7d4c-8fba-583f61e4498d",
       "name": "Tản Nhiệt Nước AIO Jungle Leopard Chill Arc 360 (Màu Đen, Màn Hình Cong)",
       "seo_name": "tan-nhiet-nuoc-aio-jungle-leopard-chill-arc-360-mau-den-man-hinh-cong",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -112302,7 +112062,7 @@
       "id": "01a119fe-8e4e-7792-bc9b-54cb76aca2d8",
       "name": "TẢN NHIỆT NƯỚC SSTC AIO SHARK SOLUTION 360 (SSTC-WC360ARGB)",
       "seo_name": "tan-nhiet-nuoc-sstc-aio-shark-solution-360-sstc-wc360argb",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e0d-782e-92e1-de39fa314fb4",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -112324,7 +112084,7 @@
       "id": "01a119fe-8e4e-7c70-bda2-8e932b764024",
       "name": "Tản nhiệt nước AIO EINAREX VERTEX Lite 240mm Black",
       "seo_name": "tan-nhiet-nuoc-aio-einarex-vertex-lite-240mm-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e4e-7e9e-8311-c2834db87d9c",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -112386,7 +112146,7 @@
       "id": "01a119fe-8e4e-79f4-9b2c-8a01d10d5425",
       "name": "Tản nhiệt khí CPU RGB Jonsbo CR-1000",
       "seo_name": "tan-nhiet-khi-cpu-rgb-jonsbo-cr-1000",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -112405,7 +112165,7 @@
       "id": "01a119fe-8e4e-7349-b20d-36eb6d2cf84e",
       "name": "Tản nhiệt nước AIO Lian Li HydroShift II OLED Curved 360TL White",
       "seo_name": "tan-nhiet-nuoc-aio-lian-li-hydroshift-ii-oled-curved-360tl-white",
-      "brand_id": "01a119fe-8e38-70f0-a701-3f50dcba674c",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -112444,7 +112204,7 @@
       "id": "01a119fe-8e4e-70f3-bc6a-0586f8d3e81a",
       "name": "Tản nhiệt nước AIO Lian Li HydroShift II OLED Curved 360TL Black",
       "seo_name": "tan-nhiet-nuoc-aio-lian-li-hydroshift-ii-oled-curved-360tl-black",
-      "brand_id": "01a119fe-8e38-70f0-a701-3f50dcba674c",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -112871,7 +112631,7 @@
       "id": "01a119fe-8e50-723e-bb45-3fb065447ab7",
       "name": "Tản nhiệt khí Deepcool AG400 G2 ARGB White",
       "seo_name": "tan-nhiet-khi-deepcool-ag400-g2-argb-white",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -112894,7 +112654,7 @@
       "id": "01a119fe-8e50-7fad-aac1-7b17278b114a",
       "name": "Tản nhiệt khí Deepcool AG400 G2 ARGB",
       "seo_name": "tan-nhiet-khi-deepcool-ag400-g2-argb",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -113040,7 +112800,7 @@
       "id": "01a119fe-8e51-7bd4-afdc-82064a644345",
       "name": "FAN JUNGLE LEOPARD TF-120 ARGB WHITE",
       "seo_name": "fan-jungle-leopard-tf-120-argb-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113071,7 +112831,7 @@
       "id": "01a119fe-8e51-7404-a382-d616e1ba150c",
       "name": "FAN JUNGLE LEOPARD TF-240 ARGB BLACK",
       "seo_name": "fan-jungle-leopard-tf-240-argb-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113086,7 +112846,7 @@
       "id": "01a119fe-8e51-7833-b55c-24496d6cf7ba",
       "name": "Tản nhiệt khí Deepcool AG620 ARGB Dual Tower WH",
       "seo_name": "tan-nhiet-khi-deepcool-ag620-argb-dual-tower-wh",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -113103,7 +112863,7 @@
       "id": "01a119fe-8e51-7edc-91a8-cdbd9e3d129f",
       "name": "FAN JUNGLE LEOPARD TF-120 ARGB BLACK",
       "seo_name": "fan-jungle-leopard-tf-120-argb-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113118,7 +112878,7 @@
       "id": "01a119fe-8e51-72ec-bbde-fa649b0cdd61",
       "name": "Tản nhiệt khí Deepcool AG620 ARGB Dual Tower",
       "seo_name": "tan-nhiet-khi-deepcool-ag620-argb-dual-tower",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -113135,7 +112895,7 @@
       "id": "01a119fe-8e51-7b26-85ab-a8dcd6c0cfd0",
       "name": "Tản nhiệt nước Deepcool LE240 V2",
       "seo_name": "tan-nhiet-nuoc-deepcool-le240-v2",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113155,7 +112915,7 @@
       "id": "01a119fe-8e51-7eb1-819f-74706b8f1220",
       "name": "Tản nhiệt nước Deepcool LE360 V2",
       "seo_name": "tan-nhiet-nuoc-deepcool-le360-v2",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113171,7 +112931,7 @@
       "id": "01a119fe-8e51-794a-882a-30c29258fae6",
       "name": "Tản nhiệt nước Deepcool LM240",
       "seo_name": "tan-nhiet-nuoc-deepcool-lm240",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113186,7 +112946,7 @@
       "id": "01a119fe-8e51-7852-95aa-422454813143",
       "name": "Tản nhiệt nước Deepcool LM360",
       "seo_name": "tan-nhiet-nuoc-deepcool-lm360",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113202,7 +112962,7 @@
       "id": "01a119fe-8e51-7f07-b94a-85cbe154dec8",
       "name": "Tản nhiệt nước Deepcool LT360 VISION ARGB",
       "seo_name": "tan-nhiet-nuoc-deepcool-lt360-vision-argb",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113225,7 +112985,7 @@
       "id": "01a119fe-8e51-796d-9fbc-7fed6f52c6cb",
       "name": "Tản nhiệt nước Deepcool Spartacus 360",
       "seo_name": "tan-nhiet-nuoc-deepcool-spartacus-360",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113282,7 +113042,7 @@
       "id": "01a119fe-8e52-7718-97bb-177fd6ac6cce",
       "name": "Tản Nhiệt Nước Thermalright Levita Vision 360 ARGB White",
       "seo_name": "tan-nhiet-nuoc-thermalright-levita-vision-360-argb-white",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113298,7 +113058,7 @@
       "id": "01a119fe-8e52-7a84-ab7b-518f09774b4a",
       "name": "Tản Nhiệt Nước Thermalright Levita Vision 360 ARGB Black",
       "seo_name": "tan-nhiet-nuoc-thermalright-levita-vision-360-argb-black",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113372,7 +113132,7 @@
       "id": "01a119fe-8e53-772d-b006-cc0b0f67079a",
       "name": "Quạt Tản Nhiệt Jungle Leopard TF360 Trắng",
       "seo_name": "quat-tan-nhiet-jungle-leopard-tf360-trang",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -113386,7 +113146,7 @@
       "id": "01a119fe-8e53-7d07-88de-e5f734ba51f9",
       "name": "Quạt Tản Nhiệt Jungle Leopard TF360 Đen",
       "seo_name": "quat-tan-nhiet-jungle-leopard-tf360-den",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -113444,7 +113204,7 @@
       "id": "01a119fe-8e53-7f2e-95d9-34407cf49cfd",
       "name": "Fan Case LIAN-LI TL LCD Reverse Wireless Black - 12RTLLCD1W3B (Pack 3c)",
       "seo_name": "fan-case-lian-li-tl-lcd-reverse-wireless-black-12rtllcd1w3b-pack-3c",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113458,7 +113218,7 @@
       "id": "01a119fe-8e53-7f0d-8733-4467065a8dbe",
       "name": "Fan Case LIAN-LI TL LCD Wireless Black - 12TLLCD1W3B (Pack 3c)",
       "seo_name": "fan-case-lian-li-tl-lcd-wireless-black-12tllcd1w3b-pack-3c",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113472,7 +113232,7 @@
       "id": "01a119fe-8e53-7670-b1b9-f316263d833c",
       "name": "Fan Case LIAN-LI UNI FAN SL-INF Wireless Reverse 120 White (Pack 3c)",
       "seo_name": "fan-case-lian-li-uni-fan-sl-inf-wireless-reverse-120-white-pack-3c",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113487,7 +113247,7 @@
       "id": "01a119fe-8e53-763e-9f7d-62ea8d3cc545",
       "name": "Fan Case LIAN-LI UNI FAN SL-INF Wireless Reverse 120 Black (Pack 3c)",
       "seo_name": "fan-case-lian-li-uni-fan-sl-inf-wireless-reverse-120-black-pack-3c",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113502,7 +113262,7 @@
       "id": "01a119fe-8e53-746f-b6ab-32e26f674483",
       "name": "Fan Case LIAN-LI UNI FAN SL-INF Wireless 120 White (Pack 3c)",
       "seo_name": "fan-case-lian-li-uni-fan-sl-inf-wireless-120-white-pack-3c",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113517,7 +113277,7 @@
       "id": "01a119fe-8e53-74cc-8a8b-9f451a6d4fe6",
       "name": "Fan Case LIAN-LI UNI FAN SL-INF Wireless 120 Black (Pack 3c)",
       "seo_name": "fan-case-lian-li-uni-fan-sl-inf-wireless-120-black-pack-3c",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -113698,7 +113458,7 @@
       "id": "01a119fe-8e54-7381-ad6e-b19c61f592f3",
       "name": "Tản nhiệt nước AIO ID-Cooling FX360 LCD ARGB Black",
       "seo_name": "tan-nhiet-nuoc-aio-id-cooling-fx360-lcd-argb-black",
-      "brand_id": "01a119fe-8e54-7ead-b943-946328e27970",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113743,7 +113503,7 @@
       "id": "01a119fe-8e54-74e2-b531-23cc687998c2",
       "name": "Tản nhiệt nước AIO JONSBO TF3-360SCW WHITE",
       "seo_name": "tan-nhiet-nuoc-aio-jonsbo-tf3-360scw-white",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113766,7 +113526,7 @@
       "id": "01a119fe-8e54-787d-872f-c9716c369bea",
       "name": "Tản nhiệt nước Leopard Stellar RealM 360 ARGB Digital",
       "seo_name": "tan-nhiet-nuoc-leopard-stellar-realm-360-argb-digital",
-      "brand_id": "01a119fe-8e54-7522-bbfa-6a8e409d6946",
+      "brand_id": "01a119fe-8e50-7fdf-bf4b-8166abb115e7",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113786,7 +113546,7 @@
       "id": "01a119fe-8e54-7bce-836d-728093d3b70c",
       "name": "Tản nhiệt nước AIO JONSBO TF3-360SCB Black",
       "seo_name": "tan-nhiet-nuoc-aio-jonsbo-tf3-360scb-black",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113833,7 +113593,7 @@
       "id": "01a119fe-8e55-781b-9fa9-2987efbc938b",
       "name": "Tản nhiệt AIO Thermalright Wonder Vision 360 UB ARGB WHITE",
       "seo_name": "tan-nhiet-aio-thermalright-wonder-vision-360-ub-argb-white",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113858,7 +113618,7 @@
       "id": "01a119fe-8e55-7fb4-9b20-388c23354682",
       "name": "Tản nhiệt AIO Thermalright Wonder Vision 360 UB ARGB BLACK",
       "seo_name": "tan-nhiet-aio-thermalright-wonder-vision-360-ub-argb-black",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -113971,7 +113731,7 @@
       "id": "01a119fe-8e55-71bd-8568-f81fe07908d3",
       "name": "Fan case Jonsbo ZA-240B/BR Black",
       "seo_name": "fan-case-jonsbo-za-240bbr-black",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -114007,7 +113767,7 @@
       "id": "01a119fe-8e55-74c9-84af-836839dcb45f",
       "name": "Fan case Jonsbo ZA-240W/WR White",
       "seo_name": "fan-case-jonsbo-za-240wwr-white",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -114021,7 +113781,7 @@
       "id": "01a119fe-8e55-7a1d-b4f1-c971674ad620",
       "name": "Fan case Jonsbo ZA-360B/BR Black",
       "seo_name": "fan-case-jonsbo-za-360bbr-black",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -114035,7 +113795,7 @@
       "id": "01a119fe-8e55-71d7-8e16-6c3466c6e415",
       "name": "Fan case Jonsbo ZA-360W/WR White",
       "seo_name": "fan-case-jonsbo-za-360wwr-white",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -114129,7 +113889,7 @@
       "id": "01a119fe-8e56-7fbf-8013-1d79de67a2cc",
       "name": "TẢN NHIỆT NƯỚC JONSBO TF2-360SC BLACK  ARGB",
       "seo_name": "tan-nhiet-nuoc-jonsbo-tf2-360sc-black-argb",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114168,7 +113928,7 @@
       "id": "01a119fe-8e56-7d5b-9d75-28c8460d3c6d",
       "name": "TẢN NHIỆT NƯỚC JONSBO TF2-360SC White ARGB",
       "seo_name": "tan-nhiet-nuoc-jonsbo-tf2-360sc-white-argb",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114269,7 +114029,7 @@
       "id": "01a119fe-8e56-78e0-bf20-f60c4cd13719",
       "name": "Tản nhiệt nước AIO Gamdias AURA GL360 V2 ARGB WHITE",
       "seo_name": "tan-nhiet-nuoc-aio-gamdias-aura-gl360-v2-argb-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-76e8-9803-742810603fe8",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114293,7 +114053,7 @@
       "id": "01a119fe-8e57-7be8-9891-16d910de63cd",
       "name": "Tản nhiệt nước AIO Gamdias AURA GL360 V2 ARGB BLACK",
       "seo_name": "tan-nhiet-nuoc-aio-gamdias-aura-gl360-v2-argb-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e29-76e8-9803-742810603fe8",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114317,7 +114077,7 @@
       "id": "01a119fe-8e57-701b-b86e-bf5f92c315a0",
       "name": "Tản nhiệt nước AIO Deepcool Mystique 360 (Black)",
       "seo_name": "tan-nhiet-nuoc-aio-deepcool-mystique-360-black",
-      "brand_id": "01a119fe-8e43-7658-ba6c-ccff781822c1",
+      "brand_id": "01a119fe-8e38-7239-91f5-c849c49cf5f0",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114332,7 +114092,7 @@
       "id": "01a119fe-8e57-7318-902a-f2817a161b5e",
       "name": "TẢN NHIỆT NƯỚC AIO JONSBO TG-240 ARGB BLACK",
       "seo_name": "tan-nhiet-nuoc-aio-jonsbo-tg-240-argb-black",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114348,7 +114108,7 @@
       "id": "01a119fe-8e57-7891-bfac-b0dd26ee33e1",
       "name": "TẢN NHIỆT NƯỚC AIO JONSBO TG-240 ARGB WHITE",
       "seo_name": "tan-nhiet-nuoc-aio-jonsbo-tg-240-argb-white",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114364,7 +114124,7 @@
       "id": "01a119fe-8e57-7384-b762-e63b638b2939",
       "name": "TẢN NHIỆT NƯỚC AIO JONSBO TG-360 ARGB WHITE",
       "seo_name": "tan-nhiet-nuoc-aio-jonsbo-tg-360-argb-white",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114380,7 +114140,7 @@
       "id": "01a119fe-8e57-7168-a155-20874002c424",
       "name": "TẢN NHIỆT NƯỚC AIO JONSBO TG-360 ARGB BLACK",
       "seo_name": "tan-nhiet-nuoc-aio-jonsbo-tg-360-argb-black",
-      "brand_id": "01a119fe-8e35-7d88-8494-4bed7fbfbffc",
+      "brand_id": "01a119fe-8e35-713e-b173-77ae37f260b2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114767,7 +114527,7 @@
       "id": "01a119fe-8e58-799d-b122-b141279ace29",
       "name": "Tản nhiệt nước CPU Cooler Master MasterLiQuid ML360L V2 ARGB",
       "seo_name": "tan-nhiet-nuoc-cpu-cooler-master-masterliquid-ml360l-v2-argb",
-      "brand_id": "01a119fe-8e4e-7282-836c-a8bb55c18489",
+      "brand_id": "01a119fe-8dfa-7de3-8156-f4a6819692c2",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114788,7 +114548,7 @@
       "id": "01a119fe-8e58-7e49-b889-0c07efab7f1b",
       "name": "Tản nhiệt CPU ID Cooling Icekimo Circle Pure White",
       "seo_name": "tan-nhiet-cpu-id-cooling-icekimo-circle-pure-white",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -114920,7 +114680,7 @@
       "id": "01a119fe-8e59-7e89-ae73-3a15aac954fd",
       "name": "Tản nhiệt nước ID-Cooling ZOOMFLOW 240-XT SNOW ARGB",
       "seo_name": "tan-nhiet-nuoc-id-cooling-zoomflow-240-xt-snow-argb",
-      "brand_id": "01a119fe-8e59-7bd7-adf0-a0dc22741729",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114943,7 +114703,7 @@
       "id": "01a119fe-8e59-7fe0-a3a9-0d7fcc0c552a",
       "name": "Tản Nhiệt  Khí  CPU Noctua NH-U14S",
       "seo_name": "tan-nhiet-khi-cpu-noctua-nh-u14s",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e56-7939-88b9-28f9fffa6251",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -114957,7 +114717,7 @@
       "id": "01a119fe-8e59-7826-822f-43ab8e0c387f",
       "name": "TẢN NHIỆT NƯỚC ID-COOLING ZOOMFLOW 240-XT ARGB",
       "seo_name": "tan-nhiet-nuoc-id-cooling-zoomflow-240-xt-argb",
-      "brand_id": "01a119fe-8e59-7bd7-adf0-a0dc22741729",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -114980,7 +114740,7 @@
       "id": "01a119fe-8e59-7024-a5a0-c8cdf47c29dd",
       "name": "Tản Nhiệt Khí CPU Noctua NH-U12A",
       "seo_name": "tan-nhiet-khi-cpu-noctua-nh-u12a",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e56-7939-88b9-28f9fffa6251",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -114994,7 +114754,7 @@
       "id": "01a119fe-8e59-79b1-a0d8-1e303be33eae",
       "name": "Tản Nhiệt Khí Noctua NH-U12S",
       "seo_name": "tan-nhiet-khi-noctua-nh-u12s",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e56-7939-88b9-28f9fffa6251",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -115029,7 +114789,7 @@
       "id": "01a119fe-8e59-7553-9a9d-e325cd52334e",
       "name": "TẢN NHIỆT NƯỚC ID-COOLING AURAFLOW X 240 RGB",
       "seo_name": "tan-nhiet-nuoc-id-cooling-auraflow-x-240-rgb",
-      "brand_id": "01a119fe-8e59-79ad-83c5-44adcad7470a",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -115049,7 +114809,7 @@
       "id": "01a119fe-8e59-701c-ae3f-4f86426aee43",
       "name": "Tản nhiệt khí ID-Cooling CPU SE-207-XT BLACK",
       "seo_name": "tan-nhiet-khi-id-cooling-cpu-se-207-xt-black",
-      "brand_id": "01a119fe-8e54-7ead-b943-946328e27970",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -115113,7 +114873,7 @@
       "id": "01a119fe-8e59-778d-bd2e-cb65c0fcd22e",
       "name": "Tản nhiệt khí ID-Cooling CPU SE-224-XT ARGB V3",
       "seo_name": "tan-nhiet-khi-id-cooling-cpu-se-224-xt-argb-v3",
-      "brand_id": "01a119fe-8e54-7ead-b943-946328e27970",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -115350,7 +115110,7 @@
       "id": "01a119fe-8e5a-7724-98da-0ea0e7163249",
       "name": "Tản nhiệt khí CPU Noctua NH-D15",
       "seo_name": "tan-nhiet-khi-cpu-noctua-nh-d15",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e56-7939-88b9-28f9fffa6251",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -115386,7 +115146,7 @@
       "id": "01a119fe-8e5a-73c8-a858-b13f3c22d0ec",
       "name": "Tản nhiệt CPU ThermalRight Frost Commander 140 (FC140)",
       "seo_name": "tan-nhiet-cpu-thermalright-frost-commander-140-fc140",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -115424,7 +115184,7 @@
       "id": "01a119fe-8e5a-70f9-9df3-70710edf2d14",
       "name": "Fan Case LIAN-LI UNI Fan SL INFINITY 120 Triple Black",
       "seo_name": "fan-case-lian-li-uni-fan-sl-infinity-120-triple-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e36-7fe8-8f53-e6089d9dcd36",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -115561,7 +115321,7 @@
       "id": "01a119fe-8e5b-78ce-92b1-2804f97fa3f8",
       "name": "TẢN NHIỆT NƯỚC ID-COOLING SPACE SL360 ARGB (Màn Hình LCD Hiển Thị Thông Số)",
       "seo_name": "tan-nhiet-nuoc-id-cooling-space-sl360-argb-man-hinh-lcd-hien-thi-thong-so",
-      "brand_id": "01a119fe-8e59-7bd7-adf0-a0dc22741729",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -115605,7 +115365,7 @@
       "id": "01a119fe-8e5b-71e9-a179-37dfaa0bc4f2",
       "name": "TẢN NHIỆT NƯỚC ID-COOLING SPACE SL360 WHITE ARGB (Màn Hình LCD Hiển Thị Thông Số)",
       "seo_name": "tan-nhiet-nuoc-id-cooling-space-sl360-white-argb-man-hinh-lcd-hien-thi-thong-so",
-      "brand_id": "01a119fe-8e59-7bd7-adf0-a0dc22741729",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "aio",
@@ -115666,7 +115426,7 @@
       "id": "01a119fe-8e5b-75a8-90c1-9af580acb238",
       "name": "Fan Case ID Cooling DF-12025-ARGB TRIO 3pcs Pack",
       "seo_name": "fan-case-id-cooling-df-12025-argb-trio-3pcs-pack",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e50-7853-8eec-829e374ff1be",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -115696,7 +115456,7 @@
       "id": "01a119fe-8e5b-759b-b140-dd99a9d47f25",
       "name": "Tản Nhiệt Khí CPU Thermalright Phantom Spirit 120 SE",
       "seo_name": "tan-nhiet-khi-cpu-thermalright-phantom-spirit-120-se",
-      "brand_id": "01a119fe-8e2b-7c41-b369-f432f6991099",
+      "brand_id": "01a119fe-8e35-783c-8be7-56e9ccab1c43",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "air",
@@ -115827,7 +115587,7 @@
       "id": "01a119fe-8e5c-7e49-bf21-237ccf99f32f",
       "name": "Thermaltake Pure Duo 12 ARGB Sync Radiator Fan (2-Fan Pack) - Black",
       "seo_name": "thermaltake-pure-duo-12-argb-sync-radiator-fan-2-fan-pack-black",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e2c-70d0-834c-99a18d043e19",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -115932,7 +115692,7 @@
       "id": "01a119fe-8e5c-7394-ab55-053ed5dc629e",
       "name": "Fan Coolmoon K2",
       "seo_name": "fan-coolmoon-k2",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-5508150214fa",
       "category_id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
       "specifications": {
         "cooler_type": "case_fan",
@@ -115960,7 +115720,7 @@
       "id": "01a119fe-8e60-7211-a0a5-5b9d5956b472",
       "name": "Màn hình Gaming SSTC S2720G 27 inch FHD 200Hz 1ms IPS",
       "seo_name": "man-hinh-gaming-sstc-s2720g-27-inch-fhd-200hz-1ms-ips",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a119fe-8e0d-782e-92e1-de39fa314fb4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -115979,7 +115739,7 @@
       "id": "01a119fe-8e60-731f-b66b-3196bbc8adda",
       "name": "Màn Hình MSI MAG 245F X24 (23.8 inch - IPS - FHD - 240Hz - 0.5ms)",
       "seo_name": "man-hinh-msi-mag-245f-x24-238-inch-ips-fhd-240hz-05ms",
-      "brand_id": "01a119fe-8e60-78a3-91d9-91f1a6457ed7",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -116058,7 +115818,7 @@
       "id": "01a119fe-8e61-715a-b9e5-51e321b8b873",
       "name": "Màn Hình Gaming LG UltraGear 27G64NA-B (27 Inch/ QHD/ IPS/ 300Hz/ 1ms)",
       "seo_name": "man-hinh-gaming-lg-ultragear-27g64na-b-27-inch-qhd-ips-300hz-1ms",
-      "brand_id": "01a119fe-8e61-7a14-ab2c-9c062ba8d29c",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116139,7 +115899,7 @@
       "id": "01a119fe-8e61-7f7b-a2f7-bac93f819d79",
       "name": "Màn Hình LG UltraGear G6 27G610A-B (27 inch - IPS - 2K - 200Hz - 1ms)",
       "seo_name": "man-hinh-lg-ultragear-g6-27g610a-b-27-inch-ips-2k-200hz-1ms",
-      "brand_id": "01a119fe-8e61-740f-ae5a-60798084e5bc",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116160,7 +115920,7 @@
       "id": "01a119fe-8e61-7e39-8ac1-7a01f78c2994",
       "name": "Màn Hình MSI MAG 272F X24 (27 inch - IPS - FHD - 240Hz - 0.5ms)",
       "seo_name": "man-hinh-msi-mag-272f-x24-27-inch-ips-fhd-240hz-05ms",
-      "brand_id": "01a119fe-8e60-78a3-91d9-91f1a6457ed7",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116181,7 +115941,7 @@
       "id": "01a119fe-8e61-7806-b5b2-01e118ebd193",
       "name": "MÀN HÌNH GAMING GIGABYTE GS25F2 (24.5 INCH / FHD / IPS/ 200Hz / 1MS )",
       "seo_name": "man-hinh-gaming-gigabyte-gs25f2-245-inch-fhd-ips-200hz-1ms",
-      "brand_id": "01a119fe-8e61-721f-b17a-a59733088bba",
+      "brand_id": "01a119fe-8de0-70c4-8e69-3cbbf5a6f7f4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 24.5,
@@ -116266,7 +116026,7 @@
       "id": "01a119fe-8e61-7aa3-9241-6cc09794846a",
       "name": "MÀN HÌNH GAMING ASUS TUF VG249Q3A (23.8 INCH/FHD/FAST IPS/180HZ/1MS)",
       "seo_name": "man-hinh-gaming-asus-tuf-vg249q3a-238-inchfhdfast-ips180hz1ms",
-      "brand_id": "01a119fe-8e61-7d2c-a14a-2ee89721642f",
+      "brand_id": "01a119fe-8dde-71a7-aec0-24231bece465",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -116444,7 +116204,7 @@
       "id": "01a119fe-8e62-7589-97ce-33c1d42b2e55",
       "name": "MÀN HÌNH DELL G2723H 27 INCH - 280HZ- FULL HD - FAST IPS LED GAMING MONITOR",
       "seo_name": "man-hinh-dell-g2723h-27-inch-280hz-full-hd-fast-ips-led-gaming-monitor",
-      "brand_id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116526,7 +116286,7 @@
       "id": "01a119fe-8e62-7273-a7bf-482cd0236b64",
       "name": "MÀN HÌNH DUAN IP25F180 25 INCH IPS - 180HZ - 1MS",
       "seo_name": "man-hinh-duan-ip25f180-25-inch-ips-180hz-1ms",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550955d8be25",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 25.0,
@@ -116802,7 +116562,7 @@
       "id": "01a119fe-8e63-7ae4-9aba-9a3b3bfd55ba",
       "name": "Màn Hình MSI MPG 274URDFW E16M (27 inch - IPS - 4K - Dual Mode UHD 160Hz và FHD 320Hz - 0.5ms)",
       "seo_name": "man-hinh-msi-mpg-274urdfw-e16m-27-inch-ips-4k-dual-mode-uhd-160hz-va-fhd-320hz-05ms",
-      "brand_id": "01a119fe-8e60-78a3-91d9-91f1a6457ed7",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116824,7 +116584,7 @@
       "id": "01a119fe-8e63-725a-b0f1-10e6760ec31f",
       "name": "Màn Hình MSI PRO MP275 E14L (27 inch - IPS - FHD - 144Hz - 1ms - Speaker)",
       "seo_name": "man-hinh-msi-pro-mp275-e14l-27-inch-ips-fhd-144hz-1ms-speaker",
-      "brand_id": "01a119fe-8e63-7e33-a423-94f66a87d8d0",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116882,7 +116642,7 @@
       "id": "01a119fe-8e63-79d7-8d21-2ffbef944e9d",
       "name": "Màn Hình MSI PRO MP242 E14A (23.8 inch - IPS - FHD - 144Hz - 1ms)",
       "seo_name": "man-hinh-msi-pro-mp242-e14a-238-inch-ips-fhd-144hz-1ms",
-      "brand_id": "01a119fe-8e63-7e33-a423-94f66a87d8d0",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -116903,7 +116663,7 @@
       "id": "01a119fe-8e63-7ace-b817-040a38b04042",
       "name": "Màn Hình MSI MAG 272URDF E16 (26.5 inch - Rapid IPS - 4K - 160Hz (FHD - 320Hz)- 0.5ms)",
       "seo_name": "man-hinh-msi-mag-272urdf-e16-265-inch-rapid-ips-4k-160hz-fhd-320hz-05ms",
-      "brand_id": "01a119fe-8e60-78a3-91d9-91f1a6457ed7",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 26.5,
@@ -116924,7 +116684,7 @@
       "id": "01a119fe-8e63-701a-a6e7-690eff3cebcf",
       "name": "Màn Hình MSI PRO MP225 E12VL (21.45 inch - VA - FHD - 120Hz - 1ms)",
       "seo_name": "man-hinh-msi-pro-mp225-e12vl-2145-inch-va-fhd-120hz-1ms",
-      "brand_id": "01a119fe-8e63-7e33-a423-94f66a87d8d0",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 45.0,
@@ -116965,7 +116725,7 @@
       "id": "01a119fe-8e63-7fb3-b1c2-19d021db449a",
       "name": "Màn Hình MSI PRO MP273 E14A (27 inch - IPS - FHD - 144Hz - 1ms - SPEAKER)",
       "seo_name": "man-hinh-msi-pro-mp273-e14a-27-inch-ips-fhd-144hz-1ms-speaker",
-      "brand_id": "01a119fe-8e63-7e33-a423-94f66a87d8d0",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -116986,7 +116746,7 @@
       "id": "01a119fe-8e63-7067-a251-c8a175d0da79",
       "name": "Màn Hình Gaming MSI MAG 275QF E21 (27 inch - Rapid IPS - 210Hz - 0.5ms - 2K)",
       "seo_name": "man-hinh-gaming-msi-mag-275qf-e21-27-inch-rapid-ips-210hz-05ms-2k",
-      "brand_id": "01a119fe-8e60-78a3-91d9-91f1a6457ed7",
+      "brand_id": "01a119fe-8dd7-707a-a256-800e99b55df4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -117069,7 +116829,7 @@
       "id": "01a119fe-8e64-7610-8f2e-863e75b48d47",
       "name": "Màn Hình Gaming LG UltraGear 39GX90SA-W (39 inch - OLED - WQHD - 240Hz - 0.03ms - Speaker)",
       "seo_name": "man-hinh-gaming-lg-ultragear-39gx90sa-w-39-inch-oled-wqhd-240hz-003ms-speaker",
-      "brand_id": "01a119fe-8e61-7a14-ab2c-9c062ba8d29c",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 39.0,
@@ -117107,7 +116867,7 @@
       "id": "01a119fe-8e64-7360-a6b3-2aedc5fe8b0f",
       "name": "Màn Hình Gaming LG UltraGear 34GX90SA-W (34 Inch/ OLED/ WQHD/ 240Hz/ 0.03ms/webOS/cong)",
       "seo_name": "man-hinh-gaming-lg-ultragear-34gx90sa-w-34-inch-oled-wqhd-240hz-003msweboscong",
-      "brand_id": "01a119fe-8e64-7c52-aca9-23c3bbcd29c7",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 34.0,
@@ -117128,7 +116888,7 @@
       "id": "01a119fe-8e64-7699-bc7f-f384edf9d645",
       "name": "Màn Hình LG UltraGear 27G640A-B (27 inch/ IPS/ 2K/ 300Hz/ 1ms)",
       "seo_name": "man-hinh-lg-ultragear-27g640a-b-27-inch-ips-2k-300hz-1ms",
-      "brand_id": "01a119fe-8e61-740f-ae5a-60798084e5bc",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -117211,7 +116971,7 @@
       "id": "01a119fe-8e64-711c-a0cd-845b56c09f2f",
       "name": "Màn Hình Gaming SAMSUNG Odyssey OLED G8 G80SH LS27HG802SEXXV (27 inch - OLED - 4K - 240Hz - 0.03ms)",
       "seo_name": "man-hinh-gaming-samsung-odyssey-oled-g8-g80sh-ls27hg802sexxv-27-inch-oled-4k-240hz-003ms",
-      "brand_id": "01a119fe-8e64-7680-b3e2-7c879aa60964",
+      "brand_id": "01a119fe-8e21-7fbd-b1b5-87beaa7663ac",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -117458,7 +117218,7 @@
       "id": "01a119fe-8e66-76b1-b4c5-3e6e5c5ee078",
       "name": "Màn Hình Gaming Asus ROG Swift OLED PG32UCDM (32 Inch/ 4K/ QD-OLED/ 240Hz/ 0.03ms)",
       "seo_name": "man-hinh-gaming-asus-rog-swift-oled-pg32ucdm-32-inch-4k-qd-oled-240hz-003ms",
-      "brand_id": "01a119fe-8e66-7734-932f-f033ee711cdd",
+      "brand_id": "01a119fe-8dde-71a7-aec0-24231bece465",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 32.0,
@@ -117519,7 +117279,7 @@
       "id": "01a119fe-8e66-77ac-ae06-1b47de46ba78",
       "name": "Màn Hình Gaming LG UltraGear 27GX790A-B (26.5 inch - OLED - 2K - 480Hz - 0.03ms)",
       "seo_name": "man-hinh-gaming-lg-ultragear-27gx790a-b-265-inch-oled-2k-480hz-003ms",
-      "brand_id": "01a119fe-8e64-7c52-aca9-23c3bbcd29c7",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 26.5,
@@ -117667,7 +117427,7 @@
       "id": "01a119fe-8e66-7e3b-bc3d-1673acda60bc",
       "name": "Màn Hình EDRA EGM27F120H (27 inch - IPS - FHD - 120Hz - 1ms)",
       "seo_name": "man-hinh-edra-egm27f120h-27-inch-ips-fhd-120hz-1ms",
-      "brand_id": "01a119fe-8e66-7a1d-b961-59fd92e7fed7",
+      "brand_id": "01a119fe-8e66-74d4-9e09-e3ed75cf3b6e",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -117815,7 +117575,7 @@
       "id": "01a119fe-8e67-7a61-9576-3f3f4aad20bc",
       "name": "Màn Hình LG 27U411B-B (27 inch - FHD - IPS - 144Hz - HDR10)",
       "seo_name": "man-hinh-lg-27u411b-b-27-inch-fhd-ips-144hz-hdr10",
-      "brand_id": "01a119fe-8e64-7c52-aca9-23c3bbcd29c7",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -117836,7 +117596,7 @@
       "id": "01a119fe-8e67-72ba-9998-cc88b805d114",
       "name": "Màn Hình LG UltraFine 27U711B-B (27 inch - IPS - 4K - 60Hz - 5ms)",
       "seo_name": "man-hinh-lg-ultrafine-27u711b-b-27-inch-ips-4k-60hz-5ms",
-      "brand_id": "01a119fe-8e64-7c52-aca9-23c3bbcd29c7",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -117855,7 +117615,7 @@
       "id": "01a119fe-8e67-73ec-b8d2-8b770f5b3a1b",
       "name": "Màn Hình LG UltraGear G4 24G411A-B (23,8 inch - IPS - FHD - 144Hz - 5ms)",
       "seo_name": "man-hinh-lg-ultragear-g4-24g411a-b-238-inch-ips-fhd-144hz-5ms",
-      "brand_id": "01a119fe-8e64-7c52-aca9-23c3bbcd29c7",
+      "brand_id": "01a119fe-8e61-7f51-990d-fbbb883db1c8",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -117959,7 +117719,7 @@
       "id": "01a119fe-8e67-74db-9cbc-9316dc15d76d",
       "name": "Màn Hình Dell Pro E2726HS (27.0 inch - IPS - FHD - 100Hz - 5ms -speaker)",
       "seo_name": "man-hinh-dell-pro-e2726hs-270-inch-ips-fhd-100hz-5ms-speaker",
-      "brand_id": "01a119fe-8e67-773e-9d56-67a09574efdd",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -118022,7 +117782,7 @@
       "id": "01a119fe-8e67-7a89-9b2a-bd865274ca12",
       "name": "Màn Hình Dell Pro E2425HSM (23.8 inch - IPS - FHD - 100Hz - 5ms - speaker)",
       "seo_name": "man-hinh-dell-pro-e2425hsm-238-inch-ips-fhd-100hz-5ms-speaker",
-      "brand_id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -118043,7 +117803,7 @@
       "id": "01a119fe-8e67-7919-b519-55523218e585",
       "name": "Màn Hình Dell 27 SE2725HM (27 inch - IPS - FHD - 100Hz - 5ms)",
       "seo_name": "man-hinh-dell-27-se2725hm-27-inch-ips-fhd-100hz-5ms",
-      "brand_id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -118063,7 +117823,7 @@
       "id": "01a119fe-8e68-709e-9db9-4393a6bb349c",
       "name": "Màn Hình Dell Pro 24 Plus P2425D (23.8 inch - IPS - 2K - 100Hz - 5ms)",
       "seo_name": "man-hinh-dell-pro-24-plus-p2425d-238-inch-ips-2k-100hz-5ms",
-      "brand_id": "01a119fe-8e68-72ff-aa7a-7349cf1407b9",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -118107,7 +117867,7 @@
       "id": "01a119fe-8e68-73c6-ac21-d38f663d8a94",
       "name": "Màn hình Dell Plus P2725H (27 inch/FHD/IPS/100Hz/5ms/USB-C 15W)",
       "seo_name": "man-hinh-dell-plus-p2725h-27-inchfhdips100hz5msusb-c-15w",
-      "brand_id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -118167,7 +117927,7 @@
       "id": "01a119fe-8e68-7210-a75b-970300aefaca",
       "name": "Màn Hình Dell P2425H (23.8 inch - FHD - IPS - 100Hz - 5ms - USB TypeC)",
       "seo_name": "man-hinh-dell-p2425h-238-inch-fhd-ips-100hz-5ms-usb-typec",
-      "brand_id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -118190,7 +117950,7 @@
       "id": "01a119fe-8e68-73f0-b975-dec5dcc43cd7",
       "name": "Màn Hình Dell UltraSharp U3425WE (34.14 inch - IPS - QHD - 5ms - 120Hz)",
       "seo_name": "man-hinh-dell-ultrasharp-u3425we-3414-inch-ips-qhd-5ms-120hz",
-      "brand_id": "01a119fe-8e62-71bf-b5b8-ee338d036ed8",
+      "brand_id": "01a119fe-8e62-7770-9ca8-b7d4bf1e9e85",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 14.0,
@@ -118656,7 +118416,7 @@
       "id": "01a119fe-8e69-736a-9ac5-3a5e748dbdef",
       "name": "Màn Hình Gaming EDRA EGM24F120S (23.8 inch - IPS - FHD - 120Hz - 1ms)",
       "seo_name": "man-hinh-gaming-edra-egm24f120s-238-inch-ips-fhd-120hz-1ms",
-      "brand_id": "01a119fe-8e69-7059-b1ed-505ceea31a77",
+      "brand_id": "01a119fe-8e66-74d4-9e09-e3ed75cf3b6e",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -118676,7 +118436,7 @@
       "id": "01a119fe-8e6a-7e80-b02f-462a2b3de8e3",
       "name": "Màn Hình ViewSonic VA2432-H-W-2 (23.8 inch - FHD - IPS - 100Hz - 1ms)",
       "seo_name": "man-hinh-viewsonic-va2432-h-w-2-238-inch-fhd-ips-100hz-1ms",
-      "brand_id": "01a119fe-8e6a-712b-9fc6-c46f69fc4c64",
+      "brand_id": "01a119fe-8e61-74a9-9d62-11a0a0ca8742",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -118777,7 +118537,7 @@
       "id": "01a119fe-8e6a-75b7-9986-b004dde1bdfb",
       "name": "Màn Hình EDRA EGM24F144S (23.8 inch - IPS - FHD - 144Hz - 5ms)",
       "seo_name": "man-hinh-edra-egm24f144s-238-inch-ips-fhd-144hz-5ms",
-      "brand_id": "01a119fe-8e69-7059-b1ed-505ceea31a77",
+      "brand_id": "01a119fe-8e66-74d4-9e09-e3ed75cf3b6e",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -118798,7 +118558,7 @@
       "id": "01a119fe-8e6a-7203-9c13-fbb5d9fc87df",
       "name": "Màn Hình Lenovo L27q-4A 67BFGAC6VN (27 inch - IPS - 2K - 100Hz - 4ms)",
       "seo_name": "man-hinh-lenovo-l27q-4a-67bfgac6vn-27-inch-ips-2k-100hz-4ms",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-550e6f2cb9dc",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -118923,7 +118683,7 @@
       "id": "01a119fe-8e6a-7792-8b11-0a82d6857ae8",
       "name": "MÀN HÌNH SAMSUNG ODYSSEY OLED G9 G95SC LS49CG954SEXXV (49 INCH/DQHD/OLED/240HZ/0.03MS/CONG)",
       "seo_name": "man-hinh-samsung-odyssey-oled-g9-g95sc-ls49cg954sexxv-49-inchdqhdoled240hz003mscong",
-      "brand_id": "01a119fe-8e64-7680-b3e2-7c879aa60964",
+      "brand_id": "01a119fe-8e21-7fbd-b1b5-87beaa7663ac",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 49.0,
@@ -118966,7 +118726,7 @@
       "id": "01a119fe-8e6a-7c0e-b4d0-eccf5827a17b",
       "name": "Màn hình BenQ ZOWIE XL2586X+ New Fast TN 600Hz DyAc 2",
       "seo_name": "man-hinh-benq-zowie-xl2586x-new-fast-tn-600hz-dyac-2",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-5507b16a93df",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "resolution": "FHD",
@@ -119005,7 +118765,7 @@
       "id": "01a119fe-8e6b-76cd-9056-5199c8c55aed",
       "name": "Màn Hình Gaming AOC 24G11ZE (23.8 inch - IPS - FHD - 240Hz - 0.3ms)",
       "seo_name": "man-hinh-gaming-aoc-24g11ze-238-inch-ips-fhd-240hz-03ms",
-      "brand_id": "01a119fe-8e6b-7be5-9f40-f91522fb572e",
+      "brand_id": "01a119fe-8e60-7efd-9f20-22fd55f22dab",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -119049,7 +118809,7 @@
       "id": "01a119fe-8e6b-7c03-bc82-f233944f7dba",
       "name": "MÀN HÌNH GAMING GIGABYTE GS27FC (27INCH/FHD/VA/180HZ/1MS/250NITS/HDMI+DP)",
       "seo_name": "man-hinh-gaming-gigabyte-gs27fc-27inchfhdva180hz1ms250nitshdmidp",
-      "brand_id": "01a119fe-8e61-721f-b17a-a59733088bba",
+      "brand_id": "01a119fe-8de0-70c4-8e69-3cbbf5a6f7f4",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 27.0,
@@ -119068,7 +118828,7 @@
       "id": "01a119fe-8e6b-79fb-8c0f-23a755806fe9",
       "name": "MÀN HÌNH AOC 24G4E (23.8 INCH/FHD/FAST IPS/180HZ/0.5MS)",
       "seo_name": "man-hinh-aoc-24g4e-238-inchfhdfast-ips180hz05ms",
-      "brand_id": "01a119fe-8e6b-7b81-8904-fca341a7bd1e",
+      "brand_id": "01a119fe-8e60-7efd-9f20-22fd55f22dab",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 23.8,
@@ -119151,7 +118911,7 @@
       "id": "01a119fe-8e6b-7619-afd6-aa307064be3a",
       "name": "Màn Hình Gaming Esports ZOWIE XL2566X+ 24 Inch/ TN/ FHD/ 400Hz",
       "seo_name": "man-hinh-gaming-esports-zowie-xl2566x-24-inch-tn-fhd-400hz",
-      "brand_id": "01a119fe-8de0-776f-8ab0-d55d2ef3dd67",
+      "brand_id": "01a16997-8b99-772e-b15e-5507b16a93df",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 24.0,
@@ -119474,7 +119234,7 @@
       "id": "01a119fe-8e6c-7ceb-9050-c8353148ecc2",
       "name": "Màn hình máy tính Samsung Odyssey G5 LC34G55TWWEXXV 34 inch WQHD 165Hz VA Cong",
       "seo_name": "man-hinh-may-tinh-samsung-odyssey-g5-lc34g55twwexxv-34-inch-wqhd-165hz-va-cong",
-      "brand_id": "01a119fe-8e64-7680-b3e2-7c879aa60964",
+      "brand_id": "01a119fe-8e21-7fbd-b1b5-87beaa7663ac",
       "category_id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
       "specifications": {
         "screen_inch": 34.0,

@@ -194,7 +194,22 @@ class CategoryAttributeServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> service.replaceTemplate(CATEGORY_ID,
                 new ReplaceCategoryAttributesRequest(List.of(new Item(RAM_ID, true, null)))));
 
-        assertEquals(CatalogErrorCode.INVALID_CATEGORY_ATTRIBUTES, ex.getErrorCode());
+        assertEquals(CatalogErrorCode.ATTRIBUTE_ALREADY_INHERITED, ex.getErrorCode());
+        verify(linkRepository, never()).deleteByCategoryId(any());
+    }
+
+    @Test
+    void replaceRejectsAnAttributeASubCategoryAlreadyOwns() {
+        UUID child = UUID.fromString("00000000-0000-0000-0000-0000000000e9");
+        knownAttributes();
+        when(categoryRepository.findSelfAndDescendantIds(CATEGORY_ID)).thenReturn(List.of(CATEGORY_ID, child));
+        when(linkRepository.findByCategoryIdIn(List.of(child))).thenReturn(List.of(
+                CategoryAttribute.builder().categoryId(child).attributeId(RAM_ID).displayOrder(0).build()));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.replaceTemplate(CATEGORY_ID,
+                new ReplaceCategoryAttributesRequest(List.of(new Item(RAM_ID, true, null)))));
+
+        assertEquals(CatalogErrorCode.ATTRIBUTE_USED_BY_SUBCATEGORY, ex.getErrorCode());
         verify(linkRepository, never()).deleteByCategoryId(any());
     }
 }
