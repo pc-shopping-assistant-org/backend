@@ -3,6 +3,17 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY:}
   api-secret: ${CLOUDINARY_API_SECRET:}
 
+media:
+  storage:
+    provider: ${MEDIA_STORAGE_PROVIDER:S3}
+    s3:
+      endpoint: ${S3_ENDPOINT:http://localhost:8333}
+      bucket: ${S3_BUCKET:pcshop-media}
+      region: ${S3_REGION:us-east-1}
+      public-base-url: ${S3_PUBLIC_BASE_URL:}
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
 spring:
   application:
     name: media-service

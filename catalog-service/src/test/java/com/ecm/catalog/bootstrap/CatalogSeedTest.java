@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CatalogSeedTest {
 
     @Test
-    void upsertIsRepeatablePreservesExistingDataAndEnforcesHardwareCodes() throws Exception {
+    void insertIsRepeatablePreservesExistingDataAndEnforcesHardwareCodes() throws Exception {
         try (var connection = DriverManager.getConnection(System.getenv("CATALOG_TEST_JDBC_URL"),
                 System.getenv("CATALOG_TEST_DB_USER"), System.getenv("CATALOG_TEST_DB_PASSWORD"))) {
             connection.setAutoCommit(false);
@@ -63,7 +64,7 @@ class CatalogSeedTest {
                     assertEquals("Edited CPU name", rows.getString(1));
                     assertEquals("INACTIVE", rows.getString(2));
                     assertEquals("Keep admin edits", rows.getString(3));
-                    assertEquals("CPU", rows.getString(4));
+                    assertNull(rows.getString(4));
                 }
                 try (var rows = statement.executeQuery("SELECT count(*) FROM categories WHERE seo_name = 'headset' AND status <> 'DELETED'")) {
                     rows.next();
