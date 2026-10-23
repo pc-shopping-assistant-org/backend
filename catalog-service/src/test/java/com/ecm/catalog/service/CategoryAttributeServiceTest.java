@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 class CategoryAttributeServiceTest {
 
     private static final UUID CATEGORY_ID = UUID.fromString("00000000-0000-0000-0000-0000000000e1");
+    private static final UUID PARENT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000e0");
     private static final UUID RAM_ID = UUID.fromString("00000000-0000-0000-0000-0000000000e3");
     private static final UUID TYPE_ID = UUID.fromString("00000000-0000-0000-0000-0000000000e4");
 
@@ -50,6 +51,14 @@ class CategoryAttributeServiceTest {
         service = new CategoryAttributeService(categoryRepository, linkRepository, attributeRepository);
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(
                 Category.builder().id(CATEGORY_ID).name("RAM").status(CatalogStatus.ACTIVE).build()));
+        when(categoryRepository.findSelfAndAncestorIds(CATEGORY_ID)).thenReturn(List.of(CATEGORY_ID));
+        when(categoryRepository.findAllById(anyCollection())).thenAnswer(invocation -> {
+            java.util.Collection<UUID> ids = invocation.getArgument(0);
+            return java.util.stream.Stream.of(
+                    Category.builder().id(PARENT_ID).name("Memory").status(CatalogStatus.ACTIVE).build(),
+                    Category.builder().id(CATEGORY_ID).name("RAM").status(CatalogStatus.ACTIVE).build())
+                    .filter(category -> ids.contains(category.getId())).toList();
+        });
     }
 
     private static AttributeDefinition definition(UUID id, String key, AttributeDataType type) {
@@ -76,14 +85,14 @@ class CategoryAttributeServiceTest {
 
     @Test
     void getTemplateWithoutAttributesIsEmpty() {
-        when(linkRepository.findByCategoryIdOrderByDisplayOrderAsc(CATEGORY_ID)).thenReturn(List.of());
+        when(linkRepository.findByCategoryIdIn(List.of(CATEGORY_ID))).thenReturn(List.of());
 
         assertTrue(service.getTemplate(CATEGORY_ID).attributes().isEmpty());
     }
 
     @Test
     void getTemplateJoinsLinksAndDefinitions() {
-        when(linkRepository.findByCategoryIdOrderByDisplayOrderAsc(CATEGORY_ID)).thenReturn(List.of(
+        when(linkRepository.findByCategoryIdIn(List.of(CATEGORY_ID))).thenReturn(List.of(
                 CategoryAttribute.builder().categoryId(CATEGORY_ID).attributeId(RAM_ID).required(true).displayOrder(0).build()));
         knownAttributes();
 
@@ -96,7 +105,7 @@ class CategoryAttributeServiceTest {
     @Test
     void replaceDeletesOldTemplateThenWritesLinksWithPositionAsDefaultOrder() {
         knownAttributes();
-        when(linkRepository.findByCategoryIdOrderByDisplayOrderAsc(CATEGORY_ID)).thenReturn(List.of());
+        when(linkRepository.findByCategoryIdIn(List.of(CATEGORY_ID))).thenReturn(List.of());
 
         service.replaceTemplate(CATEGORY_ID, new ReplaceCategoryAttributesRequest(List.of(
                 new Item(RAM_ID, true, null), new Item(TYPE_ID, null, 5))));
@@ -135,11 +144,57 @@ class CategoryAttributeServiceTest {
 
     @Test
     void replaceWithNoAttributesClearsTheTemplate() {
-        when(linkRepository.findByCategoryIdOrderByDisplayOrderAsc(CATEGORY_ID)).thenReturn(List.of());
+        when(linkRepository.findByCategoryIdIn(List.of(CATEGORY_ID))).thenReturn(List.of());
 
         var template = service.replaceTemplate(CATEGORY_ID, new ReplaceCategoryAttributesRequest(List.of()));
 
         verify(linkRepository).deleteByCategoryId(CATEGORY_ID);
         assertTrue(template.attributes().isEmpty());
+    }
+
+    @Test
+    void getTemplateListsInheritedAttributesBeforeTheOwnOnes() {
+        when(categoryRepository.findSelfAndAncestorIds(CATEGORY_ID)).thenReturn(List.of(PARENT_ID, CATEGORY_ID));
+        when(linkRepository.findByCategoryIdIn(List.of(PARENT_ID, CATEGORY_ID))).thenReturn(List.of(
+                CategoryAttribute.builder().categoryId(CATEGORY_ID).attributeId(TYPE_ID).displayOrder(0).build(),
+                CategoryAttribute.builder().categoryId(PARENT_ID).attributeId(RAM_ID).required(true).displayOrder(0).build()));
+        knownAttributes();
+
+        var items = service.getTemplate(CATEGORY_ID).attributes();
+
+        assertEquals(List.of("capacity_gb", "ram_type"), items.stream().map(item -> item.key()).toList());
+        assertTrue(items.get(0).inherited());
+        assertEquals(PARENT_ID, items.get(0).sourceCategoryId());
+        assertEquals("Memory", items.get(0).sourceCategoryName());
+        assertEquals(false, items.get(1).inherited());
+        assertEquals(CATEGORY_ID, items.get(1).sourceCategoryId());
+    }
+
+    @Test
+    void getTemplateDoesNotRepeatAnAttributeAnAncestorAlreadyProvides() {
+        when(categoryRepository.findSelfAndAncestorIds(CATEGORY_ID)).thenReturn(List.of(PARENT_ID, CATEGORY_ID));
+        when(linkRepository.findByCategoryIdIn(List.of(PARENT_ID, CATEGORY_ID))).thenReturn(List.of(
+                CategoryAttribute.builder().categoryId(PARENT_ID).attributeId(RAM_ID).displayOrder(0).build(),
+                CategoryAttribute.builder().categoryId(CATEGORY_ID).attributeId(RAM_ID).displayOrder(0).build()));
+        knownAttributes();
+
+        var items = service.getTemplate(CATEGORY_ID).attributes();
+
+        assertEquals(1, items.size());
+        assertTrue(items.get(0).inherited());
+    }
+
+    @Test
+    void replaceRejectsAnAttributeInheritedFromAParent() {
+        knownAttributes();
+        when(categoryRepository.findSelfAndAncestorIds(CATEGORY_ID)).thenReturn(List.of(PARENT_ID, CATEGORY_ID));
+        when(linkRepository.findByCategoryIdIn(List.of(PARENT_ID))).thenReturn(List.of(
+                CategoryAttribute.builder().categoryId(PARENT_ID).attributeId(RAM_ID).displayOrder(0).build()));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.replaceTemplate(CATEGORY_ID,
+                new ReplaceCategoryAttributesRequest(List.of(new Item(RAM_ID, true, null)))));
+
+        assertEquals(CatalogErrorCode.INVALID_CATEGORY_ATTRIBUTES, ex.getErrorCode());
+        verify(linkRepository, never()).deleteByCategoryId(any());
     }
 }

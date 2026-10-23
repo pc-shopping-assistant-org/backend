@@ -32,13 +32,15 @@ class ProductSpecificationValidatorTest {
                 item("capacity_gb", AttributeDataType.NUMBER, null, true, 0),
                 item("ram_type", AttributeDataType.ENUM, List.of("DDR4", "DDR5"), true, 1),
                 item("brand_line", AttributeDataType.STRING, null, false, 2),
-                item("rgb", AttributeDataType.BOOLEAN, null, false, 3));
+                item("rgb", AttributeDataType.BOOLEAN, null, false, 3),
+                item("sockets", AttributeDataType.LIST, List.of("AM4", "AM5"), false, 4),
+                item("tags", AttributeDataType.LIST, null, false, 5));
         when(templates.getTemplate(CATEGORY_ID)).thenReturn(new CategoryAttributeTemplateResponse(CATEGORY_ID, items));
         validator = new ProductSpecificationValidator(templates);
     }
 
     private static Item item(String key, AttributeDataType type, List<String> allowed, boolean required, int order) {
-        return new Item(UUID.randomUUID(), key, key, type, null, allowed, required, order);
+        return new Item(UUID.randomUUID(), key, key, type, null, allowed, required, order, false, CATEGORY_ID, "Memory");
     }
 
     private static Map<String, Object> specs(Object... keyValues) {
@@ -100,6 +102,39 @@ class ProductSpecificationValidatorTest {
     @Test
     void rejectsEnumValueOutsideAllowedList() {
         assertTrue(errorOf(specs("capacity_gb", 8, "ram_type", "DDR3")).contains("ram_type: must be one of [DDR4, DDR5]"));
+    }
+
+    @Test
+    void listKeepsOrderTrimsAndDropsDuplicates() {
+        Map<String, Object> result = validator.validate(CATEGORY_ID,
+                specs("capacity_gb", 8, "ram_type", "DDR4", "sockets", List.of("AM5", " AM4 ", "AM5"), "tags", List.of("a", "b")));
+
+        assertEquals(List.of("AM5", "AM4"), result.get("sockets"));
+        assertEquals(List.of("a", "b"), result.get("tags"));
+    }
+
+    @Test
+    void emptyListCountsAsNotEntered() {
+        Map<String, Object> result = validator.validate(CATEGORY_ID,
+                specs("capacity_gb", 8, "ram_type", "DDR4", "sockets", List.of()));
+
+        assertEquals(Map.of("capacity_gb", 8, "ram_type", "DDR4"), result);
+    }
+
+    @Test
+    void rejectsListThatIsNotAnArrayOfNonEmptyStrings() {
+        assertTrue(errorOf(specs("capacity_gb", 8, "ram_type", "DDR4", "tags", "a"))
+                .contains("tags: must be a list of strings"));
+        assertTrue(errorOf(specs("capacity_gb", 8, "ram_type", "DDR4", "tags", List.of("a", 5)))
+                .contains("tags: must be a list of non-empty strings"));
+        assertTrue(errorOf(specs("capacity_gb", 8, "ram_type", "DDR4", "tags", List.of("a", " ")))
+                .contains("tags: must be a list of non-empty strings"));
+    }
+
+    @Test
+    void rejectsListItemOutsideAllowedList() {
+        assertTrue(errorOf(specs("capacity_gb", 8, "ram_type", "DDR4", "sockets", List.of("AM5", "LGA1700")))
+                .contains("sockets: every item must be one of [AM4, AM5]"));
     }
 
     @Test
