@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 public enum MediaErrorCode implements ErrorCode {
     INVALID_FILE(HttpStatus.BAD_REQUEST, "File must be a non-empty image"),
+    STORAGE_UPLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "Image upload failed"),
     CLOUDINARY_UPLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "Image upload failed");
 
     private final HttpStatus httpStatus;
