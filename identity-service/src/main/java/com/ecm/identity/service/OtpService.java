@@ -3,14 +3,21 @@ package com.ecm.identity.service;
 import com.ecm.identity.dto.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * One-time codes and the data waiting on them (a registration or a password change), kept in Redis so they expire on
+ * their own. A code lives {@code OTP_TTL}; what it unlocks lives a little longer, so a user who types the code in
+ * the last minute still finds their data.
+ */
 @Service
 @RequiredArgsConstructor
 public class OtpService {
@@ -23,8 +30,12 @@ public class OtpService {
     private static final String OTP_KEY_PREFIX = "otp:";
     private static final String REG_DATA_KEY_PREFIX = "reg_data:";
     private static final String PWD_CHANGE_KEY_PREFIX = "pwd_change:";
-    private static final String OTP_CONSUME_SCRIPT =
-            "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
+    /*
+     * Compare and delete in one Redis step. Done as a GET then a DEL from here, two requests carrying the same code
+     * could both pass the compare before either deleted it, and one code would then work twice.
+     */
+    private static final DefaultRedisScript<Long> OTP_CONSUME_SCRIPT = new DefaultRedisScript<>(
+            "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end", Long.class);
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
@@ -32,22 +43,24 @@ public class OtpService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     public void generateAndSendOtp(String email, String purpose) {
+        // 1. Six digits that never start with 0, from a secure source: a guessable code defeats the whole check
         String otp = String.valueOf(OTP_MIN_VALUE + secureRandom.nextInt(OTP_BOUND));
+
+        // 2. Replace any earlier code for the same purpose, then mail the new one
         redisTemplate.opsForValue().set(buildOtpKey(email, purpose), otp, OTP_TTL);
         emailService.sendOtpEmail(email, otp, purpose);
     }
 
+    /** Checks the code but leaves it valid, for a flow that has more to check before it spends the code. */
     public boolean verifyOtp(String email, String purpose, String otp) {
         String cachedOtp = redisTemplate.opsForValue().get(buildOtpKey(email, purpose));
         return cachedOtp != null && cachedOtp.equals(otp);
     }
 
+    /** Checks the code and spends it in the same step, so it can be used once. */
     public boolean verifyAndConsumeOtp(String email, String purpose, String otp) {
         String key = buildOtpKey(email, purpose);
-        Long result = redisTemplate.execute(
-                new org.springframework.data.redis.core.script.DefaultRedisScript<>(OTP_CONSUME_SCRIPT, Long.class),
-                List.of(key),
-                otp);
+        Long result = redisTemplate.execute(OTP_CONSUME_SCRIPT, List.of(key), otp);
         return Long.valueOf(1).equals(result);
     }
 
@@ -82,11 +95,11 @@ public class OtpService {
     }
 
     private String buildOtpKey(String email, String purpose) {
-        return OTP_KEY_PREFIX + purpose.toUpperCase() + ":" + email.toLowerCase();
+        return OTP_KEY_PREFIX + purpose.toUpperCase(Locale.ROOT) + ":" + email.toLowerCase(Locale.ROOT);
     }
 
     private String buildRegDataKey(String email) {
-        return REG_DATA_KEY_PREFIX + email.toLowerCase();
+        return REG_DATA_KEY_PREFIX + email.toLowerCase(Locale.ROOT);
     }
 
     private String buildPwdChangeKey(UUID accountId) {
