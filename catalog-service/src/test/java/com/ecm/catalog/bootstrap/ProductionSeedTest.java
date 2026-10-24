@@ -24,6 +24,7 @@ class ProductionSeedTest {
     void bundledDatasetLoadsTypedContractsAndIncludesReferencedImages() throws Exception {
         SeedData data = SeedData.load(null);
         assertFalse(data.products().isEmpty());
+        assertTrue(data.productVariants().stream().allMatch(variant -> variant.status() == CatalogStatus.ACTIVE && variant.quantity() == 0));
         var files = data.files().stream().map(SeedData.Media::id).collect(java.util.stream.Collectors.toSet());
         assertTrue(data.productImages().stream().allMatch(image -> files.contains(image.imageFileId())));
         assertTrue(data.productVariants().stream().allMatch(variant -> variant.imageFileId() == null || files.contains(variant.imageFileId())));

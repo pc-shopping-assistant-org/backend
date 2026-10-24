@@ -18,7 +18,18 @@ CLI chỉ INSERT bản ghi còn thiếu, bỏ qua bản ghi đã có. Nó migrat
 chuẩn bị taxonomy/template và kiểm tra sản phẩm bằng validator của catalog,
 tải ảnh nguồn lên S3, rồi commit identity → media → catalog. UUID được ánh xạ theo
 natural key để liên kết đúng dữ liệu đã tồn tại. ID, metadata, giá, tồn kho và trạng
-thái cũ được giữ. Tồn kho/trạng thái mới lấy từ JSON (hiện `0` / `INACTIVE`).
+thái cũ được giữ. Biến thể mới trong JSON là `ACTIVE` với tồn kho `0`: sản phẩm
+hiện công khai là “Hết hàng” và không thể mua. Seed không đổi trạng thái biến thể
+đã tồn tại. Với DB đã seed từ bản JSON cũ, chạy đúng một lần
+`scripts/publish-seeded-catalog.sql` trên `catalog_db`:
+
+```sh
+psql "$CATALOG_DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/publish-seeded-catalog.sql
+```
+
+Script chỉ công bố 1.625 biến thể của tài khoản seed và có thể chạy lại mà
+không ghi đè trạng thái đã công bố. Sau đó gọi
+`POST /sync-service/products/sync` bằng token ADMIN để rebuild Elasticsearch.
 
 | Env | Giá trị / mục đích |
 | --- | --- |
