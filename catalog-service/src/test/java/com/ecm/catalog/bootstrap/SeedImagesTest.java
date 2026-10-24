@@ -40,6 +40,35 @@ class SeedImagesTest {
     }
 
     @Test
+    void detectsImageBytesWhenSourceUsesOctetStream() throws Exception {
+        SeedDatabase media = emptyMedia();
+        try (var server = new StorageServer()) {
+            server.sourceContentType = "application/octet-stream";
+            var file = file(server);
+
+            new SeedImages(media, List.of(file)).insert(server.environment());
+
+            assertEquals("image/png", server.putContentType);
+            assertEquals("image/png", insertedRecords(media).getFirst()[4]);
+        }
+    }
+
+    @Test
+    void detectsExtensionlessJpegSourceFromImageBytes() throws Exception {
+        SeedDatabase media = emptyMedia();
+        try (var server = new StorageServer()) {
+            server.sourceContentType = "application/octet-stream";
+            server.sourceImage = new byte[] {(byte) 0xff, (byte) 0xd8, (byte) 0xff, 0x00};
+            var file = new SeedData.Media(UUID.randomUUID(), "11271_", "11271_", "image/jpeg", server.endpoint() + "/source.png");
+
+            new SeedImages(media, List.of(file)).insert(server.environment());
+
+            assertEquals("image/jpeg", server.putContentType);
+            assertEquals("image/jpeg", insertedRecords(media).getFirst()[4]);
+        }
+    }
+
+    @Test
     void reusesUploadedObjectAfterDatabaseRollbackWithoutDownloadingOrOverwriting() throws Exception {
         SeedDatabase media = emptyMedia();
         try (var server = new StorageServer()) {
@@ -100,9 +129,13 @@ class SeedImagesTest {
     static final class StorageServer implements AutoCloseable {
         static final byte[] IMAGE = {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
         final Map<String, byte[]> objects = new ConcurrentHashMap<>();
+        final Map<String, String> contentTypes = new ConcurrentHashMap<>();
         final AtomicInteger sourceRequests = new AtomicInteger();
         final AtomicInteger putRequests = new AtomicInteger();
         int sourceStatus = 200;
+        String sourceContentType = "image/png";
+        byte[] sourceImage = IMAGE;
+        String putContentType;
         private final HttpServer server;
 
         StorageServer() throws IOException {
@@ -129,23 +162,25 @@ class SeedImagesTest {
                 String path = exchange.getRequestURI().getPath();
                 if (path.equals("/source.png")) {
                     sourceRequests.incrementAndGet();
-                    exchange.getResponseHeaders().set("Content-Type", "image/png");
-                    exchange.sendResponseHeaders(sourceStatus, IMAGE.length);
-                    exchange.getResponseBody().write(IMAGE);
+                    exchange.getResponseHeaders().set("Content-Type", sourceContentType);
+                    exchange.sendResponseHeaders(sourceStatus, sourceImage.length);
+                    exchange.getResponseBody().write(sourceImage);
                 } else if (exchange.getRequestMethod().equals("HEAD") && (path.equals("/pcshop-media") || path.equals("/pcshop-media/"))) {
                     exchange.sendResponseHeaders(200, -1);
                 } else if (exchange.getRequestMethod().equals("HEAD")) {
                     byte[] object = objects.get(path);
                     if (object != null) {
-                        exchange.getResponseHeaders().set("Content-Type", "image/png");
+                        exchange.getResponseHeaders().set("Content-Type", contentTypes.getOrDefault(path, "image/png"));
                         exchange.getResponseHeaders().set("Content-Length", String.valueOf(object.length));
                     }
                     exchange.sendResponseHeaders(object == null ? 404 : 200, -1);
                 } else if (exchange.getRequestMethod().equals("PUT")) {
                     putRequests.incrementAndGet();
+                    putContentType = exchange.getRequestHeaders().getFirst("Content-Type");
                     byte[] body = exchange.getRequestBody().readAllBytes();
                     if (objects.putIfAbsent(path, body) != null) exchange.sendResponseHeaders(412, -1);
                     else {
+                        contentTypes.put(path, putContentType);
                         exchange.getResponseHeaders().set("ETag", "\"seed-test-only\"");
                         exchange.sendResponseHeaders(200, -1);
                     }
