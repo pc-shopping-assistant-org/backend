@@ -113,8 +113,24 @@ class ProductionSeedTest {
                 }
 
                 SeedData.JSON.writeValue(seedFile.toFile(), fixture.data(8));
+                server.sourceContentType = "text/html";
+                server.sourceImage = "<html>source image no longer exists</html>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
                 ProductionSeed.run(environment);
                 assertEquals(1, server.sourceRequests.get());
+                assertEquals(0, server.putRequests.get());
+                try (var catalog = DriverManager.getConnection(catalogUrl, user, password)) {
+                    assertEquals(2, scalar(catalog, "SELECT count(*) FROM products"));
+                    assertEquals(1, scalar(catalog, "SELECT count(*) FROM product_images"));
+                    assertEquals(1, scalar(catalog, "SELECT count(*) FROM product_variants WHERE id = '" + fixture.newVariant + "' AND image_file_id IS NULL"));
+                }
+                try (var media = DriverManager.getConnection(ProductionSeed.databaseUrl(environment, "MEDIA_DB", "media_db"), user, password)) {
+                    assertEquals(0, scalar(media, "SELECT count(*) FROM files"));
+                }
+
+                server.sourceContentType = "image/png";
+                server.sourceImage = SeedImagesTest.StorageServer.IMAGE;
+                ProductionSeed.run(environment);
+                assertEquals(2, server.sourceRequests.get());
                 assertEquals(1, server.putRequests.get());
                 try (var catalog = DriverManager.getConnection(catalogUrl, user, password)) {
                     assertEquals(2, scalar(catalog, "SELECT count(*) FROM products"));
@@ -132,7 +148,7 @@ class ProductionSeedTest {
                 environment.remove("AWS_ACCESS_KEY_ID");
                 environment.remove("AWS_SECRET_ACCESS_KEY");
                 ProductionSeed.run(environment);
-                assertEquals(1, server.sourceRequests.get());
+                assertEquals(2, server.sourceRequests.get());
                 assertEquals(1, server.putRequests.get());
                 try (var catalog = DriverManager.getConnection(catalogUrl, user, password)) {
                     assertEquals(2, scalar(catalog, "SELECT count(*) FROM products"));

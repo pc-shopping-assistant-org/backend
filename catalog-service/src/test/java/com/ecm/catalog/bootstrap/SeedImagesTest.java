@@ -94,16 +94,18 @@ class SeedImagesTest {
     }
 
     @Test
-    void missingSourceImageFailsBeforeInsertingMetadata() throws Exception {
+    void missingSourceImageSkipsMetadata() throws Exception {
         SeedDatabase media = emptyMedia();
         try (var server = new StorageServer()) {
             server.sourceStatus = 404;
-            var images = new SeedImages(media, List.of(file(server)));
+            var file = file(server);
+            var images = new SeedImages(media, List.of(file));
 
-            assertThrows(Exception.class, () -> images.insert(server.environment()));
+            images.insert(server.environment());
 
             assertEquals(0, server.putRequests.get());
-            verify(media, never()).insert(anyString(), anyList());
+            assertFalse(images.ids.containsKey(file.id()));
+            assertTrue(insertedRecords(media).isEmpty());
         }
     }
 

@@ -30,9 +30,11 @@ final class ProductionSeed {
              var catalog = new SeedDatabase("catalog", databaseUrl(environment, "CATALOG_DB", "catalog_db"), user, password)) {
             // Stage and validate catalog before making any object-storage writes or seed commits.
             UUID employeeId = employee(identity, dataset);
+            var catalogSeed = new CatalogDatasetSeed(catalog);
+            var prepared = catalogSeed.prepare(dataset);
             var images = new SeedImages(media, dataset.files());
-            new CatalogDatasetSeed(catalog).insert(dataset, employeeId, images.ids);
             images.insert(environment);
+            catalogSeed.insert(dataset, employeeId, images.ids, prepared);
             for (var database : List.of(identity, media, catalog)) {
                 database.connection.commit();
                 committed.add(database.name);
