@@ -97,14 +97,17 @@ final class SeedImages {
             byte[] bytes;
             String mime = response.headers().firstValue("Content-Type").orElse("").split(";")[0].trim();
             try (var input = response.body()) {
-                if (response.statusCode() != 200 || !mime.startsWith("image/")) {
+                if (response.statusCode() != 200) {
                     throw new IllegalStateException("Source image " + file.id() + ": HTTP " + response.statusCode() + ", MIME " + mime);
                 }
                 bytes = input.readNBytes(MAX_IMAGE_BYTES + 1);
             }
             if (bytes.length == 0 || bytes.length > MAX_IMAGE_BYTES) throw new IllegalStateException("Invalid image size: " + file.id());
+            if (!mime.startsWith("image/")) mime = imageMime(bytes);
+            if (mime == null) throw new IllegalStateException("Source image " + file.id() + ": unrecognized image bytes");
+            String contentType = mime;
             try {
-                s3.putObject(request -> request.bucket(bucket).key(key).contentType(mime).ifNoneMatch("*"), RequestBody.fromBytes(bytes));
+                s3.putObject(request -> request.bucket(bucket).key(key).contentType(contentType).ifNoneMatch("*"), RequestBody.fromBytes(bytes));
             } catch (S3Exception concurrentUpload) {
                 if (concurrentUpload.statusCode() != 412) throw concurrentUpload;
             }
@@ -120,6 +123,14 @@ final class SeedImages {
     }
 
     static String objectKey(SeedData.Media file) { return "seed/catalog/" + file.id() + "/" + file.originalName(); }
+    private static String imageMime(byte[] bytes) {
+        if (bytes.length >= 8 && (bytes[0] & 0xff) == 0x89 && bytes[1] == 'P' && bytes[2] == 'N'
+                && bytes[3] == 'G' && bytes[4] == 13 && bytes[5] == 10 && bytes[6] == 26 && bytes[7] == 10) return "image/png";
+        if (bytes.length >= 3 && (bytes[0] & 0xff) == 0xff && (bytes[1] & 0xff) == 0xd8 && (bytes[2] & 0xff) == 0xff) return "image/jpeg";
+        if (bytes.length >= 12 && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
+                && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') return "image/webp";
+        return null;
+    }
     private static String encode(String value) { return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20"); }
     static String required(Map<String, String> environment, String key) {
         String value = environment.get(key);
