@@ -17,6 +17,10 @@ com.ecm.<service>/
 │   └── UserController.java
 ├── service/
 │   └── UserService.java              # concrete class — no interface, see Rule 1
+├── helper/                           # collaborators split out of a service, see Rule 5
+│   └── UserSummaryResolver.java
+├── util/                             # stateless static functions, see Rule 5
+│   └── PhoneNumbers.java
 ├── repository/
 │   └── UserRepository.java           # Spring Data JPA interface
 ├── entity/
@@ -133,12 +137,44 @@ To manage the resulting drift risk:
 - A lightweight contract test (schema or Pact-style) between producer and consumer is
   worth adding later, but is not required to start.
 
+## Rule 5: keep services short — split helpers out instead of piling them in
+
+A `@Service` holds the **flows** a controller calls, in the order the controller lists
+them, and reads like a table of contents. Anything that is not a flow is split out as soon
+as it can stand on its own — do not wait for the class to get long.
+
+Order inside a service: the public methods the controller calls first (in the controller's
+order), then the private helpers they use, in the order they are first used.
+
+Where a split-out piece goes:
+
+| It is... | Put it in | Example |
+|---|---|---|
+| A pure function: no Spring bean, no repository, no state (formatting, parsing, normalizing, string/number/date rules) | `util/` — a `final` class with a private constructor and `static` methods, named for what it handles (`PhoneNumbers`, `Slugs`), never `Utils` or `Helper` | `Slugs.of(name)` |
+| A rule about one record's or entity's **own fields** | A method on that record/entity, not a util | `request.normalized()`, `identity.firstName()` |
+| A piece of work that needs repositories, mappers, encoders or clients (a step of a flow reused by several flows, or a self-contained sub-flow) | `helper/` — a `@Component`, injected like a service, with its own test | `UserSummaryResolver`, `TokenIssuer`, `GoogleAccountLinker` |
+
+Split it out when any of these is true:
+
+- the method does not read the service's own state, or uses only one or two of its
+  dependencies;
+- two or more public methods share it (it is a step, not a flow);
+- it is a sub-flow with its own error handling (a retry, a race, a fallback) that makes the
+  caller hard to follow;
+- the service now has more than ~12 injected dependencies or well over ~300 lines.
+
+A helper never calls the service that uses it (no cycles), and a `util` never throws a
+business exception the caller has to know about unless its name says it validates
+(`ensureXxx`).
+
 ## What not to do
 
 - Do not create a `UserService` interface with a single `UserServiceImpl` — see Rule 1.
 - Do not package by feature (`user/controller`, `user/service`, `order/controller`,
   `order/service`, ...) — this is a single bounded context per service, not a monolith
   that needs feature-level isolation.
+- Do not leave pure functions, shared steps or a self-contained sub-flow as private
+  methods of a large service — split them into `util/` or `helper/` (Rule 5).
 - Do not add `client/` or `messaging/` packages to a service that doesn't call another
   service or use a message broker — empty ceremony packages add noise.
 - Do not share event payload classes between producer and consumer services via
