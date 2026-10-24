@@ -9,6 +9,7 @@ import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.helper.AvatarResolver;
+import com.ecm.identity.helper.UserSummaryResolver;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.CustomerRepository;
@@ -43,6 +44,7 @@ class ProfileServiceTest {
     @Mock private RoleRepository roleRepository;
     @Mock private CustomerMapper customerMapper;
     @Mock private AvatarResolver avatarResolver;
+    @Mock private UserSummaryResolver userSummaryResolver;
     @InjectMocks private ProfileService profileService;
 
     private Account account;
@@ -73,7 +75,7 @@ class ProfileServiceTest {
         assertEquals("Binh", customer.getFirstName());
         assertEquals("Nguyen", customer.getLastName());
         assertEquals("0987654321", account.getPhone());
-        verify(accountRepository).save(account);
+        verify(accountRepository).saveAndFlush(account);
         verify(customerRepository).save(customer);
     }
 
@@ -85,7 +87,20 @@ class ProfileServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> profileService.updateProfile(ACCOUNT_ID,
                 new UpdateProfileRequest("An", "Test", null, null, "0987654321", null)));
 
-        assertEquals(IdentityErrorCode.PHONE_ALREADY_IN_USE, ex.getErrorCode());
+        assertEquals(IdentityErrorCode.PHONE_ALREADY_EXISTS, ex.getErrorCode());
+        verify(customerRepository, never()).save(any());
+    }
+
+    @Test
+    void updateProfileReportsAPhoneTakenBetweenTheCheckAndTheSave() {
+        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
+        when(accountRepository.existsByPhone("0987654321")).thenReturn(false);
+        when(accountRepository.saveAndFlush(account)).thenThrow(new org.springframework.dao.DataIntegrityViolationException("duplicate"));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> profileService.updateProfile(ACCOUNT_ID,
+                new UpdateProfileRequest("An", "Test", null, null, "0987654321", null)));
+
+        assertEquals(IdentityErrorCode.PHONE_ALREADY_EXISTS, ex.getErrorCode());
         verify(customerRepository, never()).save(any());
     }
 
@@ -101,11 +116,20 @@ class ProfileServiceTest {
 
     @Test
     void getProfileRejectsInactiveAccount() {
-        account.setStatus(AccountStatus.LOCKED);
+        account.setStatus(AccountStatus.INACTIVE);
 
         BusinessException ex = assertThrows(BusinessException.class, () -> profileService.getProfile(ACCOUNT_ID));
 
         assertEquals(IdentityErrorCode.ACCOUNT_INACTIVE, ex.getErrorCode());
+    }
+
+    @Test
+    void getProfileReportsALockedAccountAsLocked() {
+        account.setStatus(AccountStatus.LOCKED);
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> profileService.getProfile(ACCOUNT_ID));
+
+        assertEquals(IdentityErrorCode.ACCOUNT_LOCKED, ex.getErrorCode());
     }
 
     @Test
@@ -180,9 +204,8 @@ class ProfileServiceTest {
         Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
         UserSummaryResponse summary = new UserSummaryResponse(ACCOUNT_ID, "u@example.com", "0912345678", "ROLE_CUSTOMER",
                 "An", "Test", null, null, null, null, true);
-        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
-        when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
+        when(userSummaryResolver.resolve(account, role)).thenReturn(summary);
 
         assertEquals(summary, profileService.getProfile(ACCOUNT_ID));
         org.mockito.Mockito.verifyNoInteractions(avatarResolver);

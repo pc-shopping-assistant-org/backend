@@ -6,20 +6,18 @@ import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.identity.dto.request.UpdateProfileRequest;
 import com.ecm.identity.dto.response.UserSummaryResponse;
 import com.ecm.identity.entity.Account;
-import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.helper.AvatarResolver;
-import com.ecm.identity.mapper.AdminMapper;
+import com.ecm.identity.helper.UserSummaryResolver;
 import com.ecm.identity.mapper.CustomerMapper;
-import com.ecm.identity.mapper.EmployeeMapper;
 import com.ecm.identity.repository.AccountRepository;
-import com.ecm.identity.repository.AdminRepository;
 import com.ecm.identity.repository.CustomerRepository;
-import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.repository.RoleRepository;
+import com.ecm.identity.util.AccountChecks;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,92 +40,20 @@ public class ProfileService {
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
-    private final EmployeeRepository employeeRepository;
-    private final AdminRepository adminRepository;
     private final RoleRepository roleRepository;
     private final CustomerMapper customerMapper;
-    private final EmployeeMapper employeeMapper;
-    private final AdminMapper adminMapper;
     private final AvatarResolver avatarResolver;
+    private final UserSummaryResolver userSummaryResolver;
 
     @Transactional(readOnly = true)
     public UserSummaryResponse getProfile(UUID accountId) {
         // 1. Retrieve account and role
         Account account = findAccount(accountId);
-        ensureActive(account);
+        AccountChecks.ensureUsable(account);
         Role role = findRole(account);
 
         // 2. Map the existing customer, employee or admin profile
-        UserSummaryResponse summary = customerRepository.findById(accountId)
-                .map(customer -> customerMapper.toSummary(account, role, customer))
-                .or(() -> employeeRepository.findById(accountId)
-                        .map(employee -> employeeMapper.toSummary(account, role, employee)))
-                .or(() -> adminRepository.findById(accountId)
-                        .map(admin -> adminMapper.toSummary(account, role, admin)))
-                .orElseThrow(() -> new ResourceNotFoundException("UserProfile", accountId));
-        return withAvatarUrl(summary);
-    }
-
-    private UserSummaryResponse withAvatarUrl(UserSummaryResponse summary) {
-        UUID fileId = summary.avatarFileId();
-        if (fileId == null) {
-            return summary;
-        }
-        return summary.withAvatarUrl(avatarResolver.resolveUrls(List.of(fileId)).get(fileId));
-    }
-
-    @Transactional
-    public UserSummaryResponse updateProfile(UUID accountId, UpdateProfileRequest request) {
-        // 1. Retrieve account and customer profile
-        Account account = findAccount(accountId);
-        ensureActive(account);
-        Customer customer = customerRepository.findById(accountId)
-                .orElseThrow(() -> new BusinessException(IdentityErrorCode.CUSTOMER_PROFILE_REQUIRED));
-
-        // 2. Validate and update phone if changed
-        if (request.phone() != null && !request.phone().equals(account.getPhone())) {
-            if (accountRepository.existsByPhone(request.phone())) {
-                throw new BusinessException(IdentityErrorCode.PHONE_ALREADY_IN_USE);
-            }
-            account.setPhone(request.phone());
-        }
-
-        // 3. The avatar has to be a file the Media Service knows
-        avatarResolver.requireExisting(request.avatarFileId());
-
-        // 4. Update customer profile fields
-        customer.setFirstName(request.firstName().trim());
-        customer.setLastName(request.lastName().trim());
-        if (request.gender() != null) {
-            customer.setGender(request.gender());
-        }
-        if (request.birthday() != null) {
-            customer.setBirthday(request.birthday());
-        }
-        if (request.avatarFileId() != null) {
-            customer.setAvatarFileId(request.avatarFileId());
-        }
-        accountRepository.save(account);
-        customerRepository.save(customer);
-
-        // 5. Map the updated profile
-        return withAvatarUrl(customerMapper.toSummary(account, findRole(account), customer));
-    }
-
-    private Account findAccount(UUID accountId) {
-        return accountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
-    }
-
-    private void ensureActive(Account account) {
-        if (account.getStatus() != AccountStatus.ACTIVE) {
-            throw new BusinessException(IdentityErrorCode.ACCOUNT_INACTIVE);
-        }
-    }
-
-    private Role findRole(Account account) {
-        return roleRepository.findById(account.getRoleId())
-                .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
+        return withAvatarUrl(userSummaryResolver.resolve(account, role));
     }
 
     /** The accounts of the customers whose name contains the text, for a service that holds only account ids and has to search by name. */
@@ -147,5 +73,66 @@ public class ProfileService {
         }
         return customerRepository.findAllById(accountIds).stream()
                 .collect(Collectors.toMap(Customer::getAccountId, customer -> customer.getLastName() + " " + customer.getFirstName()));
+    }
+
+    @Transactional
+    public UserSummaryResponse updateProfile(UUID accountId, UpdateProfileRequest request) {
+        // 1. Retrieve account and customer profile
+        Account account = findAccount(accountId);
+        AccountChecks.ensureUsable(account);
+        Customer customer = customerRepository.findById(accountId)
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.CUSTOMER_PROFILE_REQUIRED));
+
+        // 2. Validate and update phone if changed
+        if (request.phone() != null && !request.phone().equals(account.getPhone())) {
+            if (accountRepository.existsByPhone(request.phone())) {
+                throw new BusinessException(IdentityErrorCode.PHONE_ALREADY_EXISTS);
+            }
+            account.setPhone(request.phone());
+        }
+
+        // 3. The avatar has to be a file the Media Service knows
+        avatarResolver.requireExisting(request.avatarFileId());
+
+        // 4. Update customer profile fields
+        customer.setFirstName(request.firstName().trim());
+        customer.setLastName(request.lastName().trim());
+        if (request.gender() != null) {
+            customer.setGender(request.gender());
+        }
+        if (request.birthday() != null) {
+            customer.setBirthday(request.birthday());
+        }
+        if (request.avatarFileId() != null) {
+            customer.setAvatarFileId(request.avatarFileId());
+        }
+        try {
+            accountRepository.saveAndFlush(account);
+        } catch (DataIntegrityViolationException ex) {
+            // Someone took the number between the check above and this save
+            throw new BusinessException(IdentityErrorCode.PHONE_ALREADY_EXISTS);
+        }
+        customerRepository.save(customer);
+
+        // 5. Map the updated profile
+        return withAvatarUrl(customerMapper.toSummary(account, findRole(account), customer));
+    }
+
+    private UserSummaryResponse withAvatarUrl(UserSummaryResponse summary) {
+        UUID fileId = summary.avatarFileId();
+        if (fileId == null) {
+            return summary;
+        }
+        return summary.withAvatarUrl(avatarResolver.resolveUrls(List.of(fileId)).get(fileId));
+    }
+
+    private Account findAccount(UUID accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
+    }
+
+    private Role findRole(Account account) {
+        return roleRepository.findById(account.getRoleId())
+                .orElseThrow(() -> new BusinessException(IdentityErrorCode.ROLE_NOT_CONFIGURED));
     }
 }
