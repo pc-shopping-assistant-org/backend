@@ -1,17 +1,16 @@
 package com.ecm.identity.helper;
 
-import com.ecm.common.exception.DuplicateResourceException;
 import com.ecm.identity.dto.request.RegisterRequest;
 import com.ecm.identity.entity.Account;
 import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.CustomerAddress;
 import com.ecm.identity.entity.Role;
-import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.CustomerAddressRepository;
 import com.ecm.identity.repository.CustomerRepository;
+import com.ecm.identity.util.AccountDuplicates;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +41,7 @@ public class CustomerRegistrar {
         try {
             account = accountRepository.save(account);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateResourceException(IdentityErrorCode.EMAIL_ALREADY_EXISTS, "Account", "email", pending.email());
+            throw AccountDuplicates.from(ex, pending.email(), pending.phone());
         }
 
         Customer customer = customerMapper.toEntity(pending);

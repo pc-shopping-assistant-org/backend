@@ -8,6 +8,7 @@ import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
+import com.ecm.identity.helper.AvatarResolver;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.CustomerRepository;

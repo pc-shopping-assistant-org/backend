@@ -1,4 +1,4 @@
-package com.ecm.identity.service;
+package com.ecm.identity.helper;
 
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.ExternalServiceException;

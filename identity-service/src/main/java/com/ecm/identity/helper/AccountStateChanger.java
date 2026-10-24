@@ -1,10 +1,11 @@
-package com.ecm.identity.service;
+package com.ecm.identity.helper;
 
 import com.ecm.common.exception.InvalidStateException;
 import com.ecm.identity.config.JwtProperties;
 import com.ecm.identity.entity.Account;
 import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.repository.AccountRepository;
+import com.ecm.identity.service.TokenRevocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
