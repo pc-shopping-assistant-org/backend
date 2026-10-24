@@ -39,8 +39,12 @@ object; public-read bucket/object phục vụ URL ảnh. CLI không tạo bucket
 URL dạng `<public-origin>/<bucket>/<key>`. Dung lượng/MIME lấy từ object thật.
 
 Ảnh upload dở được giữ và tái sử dụng qua HEAD khi chạy lại; không ghi đè object.
+URL nguồn không còn trả ảnh (404/HTML/timeout) được ghi trong log rồi bỏ qua cùng
+liên kết ảnh đó; sản phẩm vẫn được seed. Chạy lại sẽ thử ảnh còn thiếu. Lỗi S3
+hoặc database vẫn làm seed thất bại. Ảnh JPEG/PNG/WebP có MIME nguồn sai được
+nhận diện từ bytes trước khi upload.
 Metadata `EXTERNAL`/Cloudinary đã tồn tại cũng được giữ nguyên, không tự migrate.
-Ba DB có transaction riêng: validation/upload lỗi rollback seed rows chưa commit;
+Ba DB có transaction riêng: validation/S3 lỗi rollback seed rows chưa commit;
 lỗi giữa các lần commit được báo rõ DB đã commit để chạy lại an toàn. Flyway
 migrations vẫn commit độc lập. Search lỗi làm CLI exit lỗi nhưng không rollback
 data đã commit; chỉ chạy lại sync nếu cần.

@@ -19,6 +19,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,18 +71,27 @@ final class SeedImages {
              var executor = Executors.newFixedThreadPool(workers)) {
             client.headBucket(request -> request.bucket(bucket));
             List<Object[]> records = new ArrayList<>();
+            int skipped = 0;
             for (int start = 0; start < missing.size(); start += workers) {
-                List<Callable<Object[]>> uploads = missing.subList(start, Math.min(start + workers, missing.size())).stream()
+                var batch = missing.subList(start, Math.min(start + workers, missing.size()));
+                List<Callable<Object[]>> uploads = batch.stream()
                         .<Callable<Object[]>>map(file -> () -> upload(file, http, client, bucket, publicBase)).toList();
-                for (var future : executor.invokeAll(uploads)) records.add(future.get());
-                if (start % 100 < workers) System.out.println("media: prepared " + records.size() + "/" + missing.size());
+                var futures = executor.invokeAll(uploads);
+                for (int index = 0; index < futures.size(); index++) {
+                    Object[] record = futures.get(index).get();
+                    if (record == null) {
+                        ids.remove(batch.get(index).id());
+                        skipped++;
+                    } else records.add(record);
+                }
+                if (start % 100 < workers) System.out.println("media: prepared " + (start + batch.size()) + "/" + missing.size());
             }
             int inserted = media.insert("""
                     INSERT INTO files (id, storage_provider, storage_key, original_name, mime_type, size_bytes, public_url, status)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
                     """, records);
             media.requireIds("files", ids.values());
-            System.out.println("media: inserted " + inserted + " S3 file records");
+            System.out.println("media: inserted " + inserted + " S3 file records; skipped " + skipped + " unavailable source images");
         }
     }
 
@@ -92,19 +102,25 @@ final class SeedImages {
             metadata = s3.headObject(request -> request.bucket(bucket).key(key));
         } catch (S3Exception missingObject) {
             if (missingObject.statusCode() != 404) throw missingObject;
-            var response = http.send(HttpRequest.newBuilder(URI.create(file.publicUrl())).timeout(REQUEST_TIMEOUT).GET().build(),
-                    HttpResponse.BodyHandlers.ofInputStream());
             byte[] bytes;
-            String mime = response.headers().firstValue("Content-Type").orElse("").split(";")[0].trim();
-            try (var input = response.body()) {
-                if (response.statusCode() != 200) {
-                    throw new IllegalStateException("Source image " + file.id() + ": HTTP " + response.statusCode() + ", MIME " + mime);
+            String mime;
+            try {
+                var response = http.send(HttpRequest.newBuilder(URI.create(file.publicUrl())).timeout(REQUEST_TIMEOUT).GET().build(),
+                        HttpResponse.BodyHandlers.ofInputStream());
+                mime = response.headers().firstValue("Content-Type").orElse("").split(";")[0].trim();
+                try (var input = response.body()) {
+                    if (response.statusCode() != 200) {
+                        throw new InvalidSourceImage("HTTP " + response.statusCode());
+                    }
+                    bytes = input.readNBytes(MAX_IMAGE_BYTES + 1);
                 }
-                bytes = input.readNBytes(MAX_IMAGE_BYTES + 1);
+                if (bytes.length == 0 || bytes.length > MAX_IMAGE_BYTES) throw new InvalidSourceImage("invalid image size");
+                if (!mime.startsWith("image/")) mime = imageMime(bytes);
+                if (mime == null) throw new InvalidSourceImage("unrecognized image bytes");
+            } catch (IOException | InvalidSourceImage invalid) {
+                System.err.println("media: skipped source image " + file.id() + " (" + file.publicUrl() + "): " + invalid.getMessage());
+                return null;
             }
-            if (bytes.length == 0 || bytes.length > MAX_IMAGE_BYTES) throw new IllegalStateException("Invalid image size: " + file.id());
-            if (!mime.startsWith("image/")) mime = imageMime(bytes);
-            if (mime == null) throw new IllegalStateException("Source image " + file.id() + ": unrecognized image bytes");
             String contentType = mime;
             try {
                 s3.putObject(request -> request.bucket(bucket).key(key).contentType(contentType).ifNoneMatch("*"), RequestBody.fromBytes(bytes));
@@ -123,6 +139,9 @@ final class SeedImages {
     }
 
     static String objectKey(SeedData.Media file) { return "seed/catalog/" + file.id() + "/" + file.originalName(); }
+    private static final class InvalidSourceImage extends RuntimeException {
+        InvalidSourceImage(String message) { super(message); }
+    }
     private static String imageMime(byte[] bytes) {
         if (bytes.length >= 8 && (bytes[0] & 0xff) == 0x89 && bytes[1] == 'P' && bytes[2] == 'N'
                 && bytes[3] == 'G' && bytes[4] == 13 && bytes[5] == 10 && bytes[6] == 26 && bytes[7] == 10) return "image/png";
