@@ -15,17 +15,29 @@ import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
+import com.ecm.identity.helper.CustomerRegistrar;
+import com.ecm.identity.helper.GoogleAccountLinker;
+import com.ecm.identity.helper.TokenIssuer;
+import com.ecm.identity.helper.UserSummaryResolver;
+import com.ecm.identity.mapper.AdminMapper;
+import com.ecm.identity.mapper.EmployeeMapper;
+import com.ecm.identity.repository.AdminRepository;
+import com.ecm.identity.repository.CustomerAddressRepository;
+import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.CustomerRepository;
 import com.ecm.identity.repository.RoleRepository;
+import com.ecm.identity.service.google.GoogleIdentityVerifier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -60,7 +72,19 @@ class AuthServiceTest {
     @Mock private OtpService otpService;
     @Mock private CustomerMapper customerMapper;
     @Mock private TokenRevocationService tokenRevocationService;
-    @InjectMocks private AuthService authService;
+    private AuthService authService;
+
+    @BeforeEach
+    void setUp() {
+        UserSummaryResolver summaries = new UserSummaryResolver(customerRepository, mock(EmployeeRepository.class),
+                mock(AdminRepository.class), customerMapper, mock(EmployeeMapper.class), mock(AdminMapper.class));
+        TokenIssuer tokenIssuer = new TokenIssuer(tokenProvider, jwtProperties, roleRepository, summaries);
+        CustomerRegistrar registrar = new CustomerRegistrar(
+                accountRepository, customerRepository, mock(CustomerAddressRepository.class), customerMapper, passwordEncoder);
+        GoogleAccountLinker linker = new GoogleAccountLinker(accountRepository, customerRepository, roleRepository, mock(TransactionTemplate.class), mock(ApplicationEventPublisher.class));
+        authService = new AuthService(accountRepository, roleRepository, passwordEncoder, tokenProvider, jwtProperties, otpService,
+                mock(GoogleIdentityVerifier.class), customerMapper, tokenRevocationService, tokenIssuer, registrar, linker);
+    }
 
     private static RegisterRequest registerRequest() {
         return new RegisterRequest(" User@Example.com ", "0912345678", "Passw0rd!x", "An", "Test", null, null, "1 Test St");

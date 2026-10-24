@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.Locale;
 
 public record RegisterRequest(
 
@@ -40,4 +41,17 @@ public record RegisterRequest(
         @NotBlank(message = "Address is required")
         @Size(max = 500, message = "Address cannot exceed 500 characters")
         String address) {
+
+    /** The identity fields trimmed and the email lower-cased, so later lookups and comparisons are stable. */
+    public RegisterRequest normalized() {
+        return new RegisterRequest(
+                email.trim().toLowerCase(Locale.ROOT),
+                phone.trim(),
+                password,
+                firstName.trim(),
+                lastName.trim(),
+                gender,
+                birthday,
+                address.trim());
+    }
 }
