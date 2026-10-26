@@ -32,6 +32,9 @@ ghcr.io/pc-shopping-assistant-org/backend-media-service
 ghcr.io/pc-shopping-assistant-org/backend-sync-service
 ```
 
+New CI runs cancel older runs of the same workflow on the same branch or PR,
+including release branches.
+
 Only a push or manual dispatch on `release/vX.Y.Z` (or `release/vX.Y.Z-rc.N`)
 builds/publishes images tagged `X.Y.Z` (or `X.Y.Z-rc.N`) and `sha-<full commit>`.
 For example, `release/v1.0.0` publishes all ten images as `1.0.0`. Other branches, tags, PRs and
