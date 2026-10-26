@@ -159,3 +159,14 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
           provenance: mode=max
           sbom: true
+
+  propose:
+    name: Propose backend images for production
+    needs: image
+    if: github.event_name == 'push'
+    uses: pc-shopping-assistant-org/infra/.github/workflows/propose-image.yml@release/production
+    with:
+      component: backend
+      release_branch: ${{ github.ref_name }}
+    secrets:
+      INFRA_RELEASE_PR_TOKEN: ${{ secrets.INFRA_RELEASE_PR_TOKEN }}
