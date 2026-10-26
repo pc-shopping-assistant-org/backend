@@ -36,8 +36,10 @@ Only a push or manual dispatch on `release/vX.Y.Z` (or `release/vX.Y.Z-rc.N`)
 builds/publishes images tagged `X.Y.Z` (or `X.Y.Z-rc.N`) and `sha-<full commit>`.
 For example, `release/v1.0.0` publishes all ten images as `1.0.0`. Other branches, tags, PRs and
 merge queues verify only. This repository never deploys or connects to the server.
-`common-lib` is embedded in service JARs, not a separate image. Only the infra
-repository's versioned release workflow deploys the stack; see `../infra/README.md`.
+`common-lib` is embedded in service JARs, not a separate image. After a release
+push publishes all ten images, CI proposes the backend tag in
+`infra/release/images.lock` (requires `INFRA_RELEASE_PR_TOKEN`). Only a merge into
+infra `release/production` deploys the stack; see `../infra/README.md`.
 Server runtime configuration comes from `infra/.env.docker`, never an image env file.
 Use `Verify Java backend` as a required check if GitHub branch rules should block
 merges when Maven verification fails.
