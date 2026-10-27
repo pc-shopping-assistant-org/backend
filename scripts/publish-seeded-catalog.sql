@@ -1,10 +1,11 @@
--- One-time publication of the 1,625 zero-stock variants in catalog_seed.json.
+-- One-time publication of all 2,389 zero-stock variants in the merged seed
+-- datasets (components, prebuilt PCs and gear).
 -- Guard the seed owner and dataset size; reruns leave already published rows alone.
 BEGIN;
 DO $publish$
 DECLARE
     seed_owner CONSTANT uuid := '018f0000-0000-7000-8000-000000000001';
-    dataset_size CONSTANT integer := 1625;
+    dataset_size CONSTANT integer := 2389;
     matched_count integer;
     inactive_count integer;
     hidden_product_count integer;
@@ -21,8 +22,9 @@ BEGIN
       JOIN products p ON p.id = v.product_id
      WHERE v.created_by = seed_owner AND p.created_by = seed_owner;
 
-    IF matched_count <> dataset_size OR hidden_product_count <> 0 OR unexpected_status_count <> 0
-       OR inactive_count NOT IN (0, dataset_size) THEN
+    -- An older import may leave only the original component variants inactive,
+    -- while newly inserted PC/gear variants are already ACTIVE.
+    IF matched_count <> dataset_size OR hidden_product_count <> 0 OR unexpected_status_count <> 0 THEN
         RAISE EXCEPTION 'Seed publication precondition failed: total=%, inactive_zero_stock=%, hidden_products=%, unexpected_status=%',
             matched_count, inactive_count, hidden_product_count, unexpected_status_count;
     END IF;

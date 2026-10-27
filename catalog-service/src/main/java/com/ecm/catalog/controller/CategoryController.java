@@ -4,6 +4,7 @@ import com.ecm.catalog.dto.response.CategoryResponse;
 import com.ecm.catalog.dto.request.CreateCategoryRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryDetailsRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryRequest;
+import com.ecm.catalog.dto.request.ReorderCategoriesRequest;
 import com.ecm.catalog.service.CategoryService;
 import com.ecm.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,12 @@ public class CategoryController {
     @PatchMapping("/{id}")
     public ApiResponse<CategoryResponse> updateWithStatus(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody UpdateCategoryRequest request) {
         return ApiResponse.success(categoryService.update(id, request));
+    }
+
+    @PutMapping("/order")
+    public ApiResponse<Void> reorder(@jakarta.validation.Valid @RequestBody ReorderCategoriesRequest request) {
+        categoryService.reorder(request);
+        return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")

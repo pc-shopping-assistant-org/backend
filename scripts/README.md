@@ -1,7 +1,9 @@
 # Production seed
 
 Seed chạy bằng Java trong bootstrap của `catalog-service`, không cần Node/npm.
-Nguồn dữ liệu duy nhất: `seed/catalog_seed.json` (giữ nguyên JSON CRLF/indent khi sửa).
+Mặc định CLI/Compose gộp ba dataset: `seed/catalog_seed.json`,
+`seed/pc_catalog_seed.json` và `seed/gear_catalog_seed.json`. Có thể thay bằng
+`SEED_FILES` (danh sách path/resource phân tách bằng dấu phẩy).
 
 ```sh
 # Từ backend/, sau khi export runtime env vào shell:
@@ -27,7 +29,7 @@ hiện công khai là “Hết hàng” và không thể mua. Seed không đổi
 psql "$CATALOG_DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/publish-seeded-catalog.sql
 ```
 
-Script chỉ công bố 1.625 biến thể của tài khoản seed và có thể chạy lại mà
+Script chỉ công bố 2.389 biến thể của tài khoản seed và có thể chạy lại mà
 không ghi đè trạng thái đã công bố. Sau đó gọi
 `POST /sync-service/products/sync` bằng token ADMIN để rebuild Elasticsearch.
 
@@ -41,7 +43,8 @@ không ghi đè trạng thái đã công bố. Sau đó gọi
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | S3 client key tạo trong Admin UI; không phải admin UI password |
 | `S3_PUBLIC_BASE_URL` | Public origin, ví dụ `https://gearpc-files.lamdx4.duckdns.org`, không thêm bucket |
 | `SEED_IMAGE_WORKERS` | Tối đa số ảnh tải đồng thời, mặc định `8`, phạm vi `1..32` |
-| `SEED_FILE` | JSON khác khi cần; bỏ trống dùng dataset được đóng trong JAR |
+| `SEED_FILES` | Danh sách JSON/resource gộp theo ID; Compose mặc định dùng components + PC + gear |
+| `SEED_FILE` | Dataset đơn lẻ tương thích ngược; chỉ dùng khi `SEED_FILES` không có |
 | `SYNC_URL`, `SYNC_TOKEN` | Tùy chọn POST rebuild search sau commit; token ADMIN |
 
 Bucket và credentials phải tồn tại trước seed. Cần quyền kiểm tra bucket, đọc/ghi
@@ -60,6 +63,7 @@ lỗi giữa các lần commit được báo rõ DB đã commit để chạy l�
 migrations vẫn commit độc lập. Search lỗi làm CLI exit lỗi nhưng không rollback
 data đã commit; chỉ chạy lại sync nếu cần.
 
-Lần đầu 8.502 ảnh có thể vượt thời gian CD; chạy seed thủ công trước release đầu.
+Lần đầu 14.600 file nguồn/17.237 gallery records có thể vượt thời gian CD;
+chạy seed thủ công trước release đầu.
 Không ghi credentials vào JSON/JAR/Git. Spring/Maven không tự đọc `.env.docker`;
 Compose wrapper của infra inject env khi chạy image.

@@ -12,9 +12,13 @@ public interface CategoryMapper {
 
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "productCount", ignore = true)
+    @Mapping(target = "hardwareType", source = "hardwareType.code")
     CategoryResponse toResponse(Category category);
 
     @Mapping(target = "hardwareType", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     Category toEntity(com.ecm.catalog.dto.request.CreateCategoryRequest request);
 
     List<CategoryResponse> toResponseList(List<Category> categories);

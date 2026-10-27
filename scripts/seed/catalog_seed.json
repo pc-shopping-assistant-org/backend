@@ -85751,7 +85751,8 @@
       "description": "Danh mục linh kiện VGA - Card màn hình",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "GPU"
+      "hardware_type": "GPU",
+      "display_order": 40
     },
     {
       "id": "01a119fe-8dd1-7f75-b299-c9a4781f9627",
@@ -85760,7 +85761,8 @@
       "description": "Danh mục linh kiện CPU - Bộ vi xử lý",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "CPU"
+      "hardware_type": "CPU",
+      "display_order": 10
     },
     {
       "id": "01a119fe-8dd1-7e4b-a610-a0a6e479d292",
@@ -85769,7 +85771,8 @@
       "description": "Danh mục linh kiện Mainboard - Bo mạch chủ",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "MAINBOARD"
+      "hardware_type": "MAINBOARD",
+      "display_order": 20
     },
     {
       "id": "01a119fe-8dd1-7322-9835-62104e6a1e63",
@@ -85778,7 +85781,8 @@
       "description": "Danh mục linh kiện RAM - Bộ nhớ trong",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "RAM"
+      "hardware_type": "RAM",
+      "display_order": 30
     },
     {
       "id": "01a119fe-8dd1-72c0-bd03-7683fbd7240e",
@@ -85787,7 +85791,8 @@
       "description": "Danh mục linh kiện Ổ cứng SSD",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "STORAGE"
+      "hardware_type": "STORAGE",
+      "display_order": 80
     },
     {
       "id": "01a119fe-8dd1-79eb-ad45-9d3f538e8369",
@@ -85796,7 +85801,8 @@
       "description": "Danh mục linh kiện Ổ cứng HDD",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "STORAGE"
+      "hardware_type": "STORAGE",
+      "display_order": 80
     },
     {
       "id": "01a119fe-8dd1-7410-a4e1-824752b08191",
@@ -85805,7 +85811,8 @@
       "description": "Danh mục linh kiện Nguồn máy tính - PSU",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "PSU"
+      "hardware_type": "PSU",
+      "display_order": 50
     },
     {
       "id": "01a119fe-8dd1-72dd-b4bc-dabcb9cd3e1d",
@@ -85814,7 +85821,8 @@
       "description": "Danh mục linh kiện Vỏ máy tính - Case",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "CASE"
+      "hardware_type": "CASE",
+      "display_order": 60
     },
     {
       "id": "01a119fe-8dd2-7eef-b0bb-a703eee79c57",
@@ -85823,7 +85831,8 @@
       "description": "Danh mục linh kiện Tản nhiệt - Cooling",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "COOLER"
+      "hardware_type": "COOLER",
+      "display_order": 70
     },
     {
       "id": "01a119fe-8dd2-7277-a14f-71cf9059a079",
@@ -85832,7 +85841,8 @@
       "description": "Danh mục linh kiện Màn hình máy tính",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "MONITOR"
+      "hardware_type": "MONITOR",
+      "display_order": 90
     },
     {
       "id": "92f1931a-79ca-5aed-b9b3-d29760b22865",
@@ -85841,7 +85851,8 @@
       "hardware_type": "MOUSE",
       "description": null,
       "parent_id": null,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "display_order": 100
     },
     {
       "id": "5d8465a2-3a9c-5688-9bd3-7dc5b452584a",
@@ -85850,7 +85861,8 @@
       "hardware_type": "KEYBOARD",
       "description": null,
       "parent_id": null,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "display_order": 110
     },
     {
       "id": "db4fbbca-54c0-552b-8b65-7506eeb09656",
@@ -85859,6 +85871,17 @@
       "hardware_type": "HEADSET",
       "description": null,
       "parent_id": null,
+      "status": "ACTIVE",
+      "display_order": 120
+    },
+    {
+      "id": "01a119fe-8dd1-7000-a000-000000000001",
+      "name": "Khác",
+      "seo_name": "other",
+      "hardware_type": "OTHER",
+      "description": "Danh mục khác",
+      "parent_id": null,
+      "display_order": 999,
       "status": "ACTIVE"
     }
   ],

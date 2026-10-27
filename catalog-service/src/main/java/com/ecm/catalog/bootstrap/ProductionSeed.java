@@ -15,11 +15,22 @@ import java.util.UUID;
 final class ProductionSeed {
     private static final String EMPLOYEE_ROLE = "ROLE_EMPLOYEE";
     private static final String EMPLOYEE_EMAIL = "catalog.seed@pcshop.local";
+    private static final String DEFAULT_SEED_FILES =
+            "/seed/catalog_seed.json,/seed/pc_catalog_seed.json,/seed/gear_catalog_seed.json";
 
     private ProductionSeed() {}
 
     static void run(Map<String, String> environment) throws Exception {
-        SeedData dataset = SeedData.load(environment.get("SEED_FILE"));
+        String seedFiles = environment.get("SEED_FILES");
+        String singleSeedFile = environment.get("SEED_FILE");
+        SeedData dataset;
+        if (seedFiles != null && !seedFiles.isBlank()) {
+            dataset = SeedData.loadAll(seedFiles);
+        } else if (singleSeedFile != null && !singleSeedFile.isBlank()) {
+            dataset = SeedData.load(singleSeedFile);
+        } else {
+            dataset = SeedData.loadAll(DEFAULT_SEED_FILES);
+        }
         if (dataset.products().isEmpty()) throw new IllegalArgumentException("Catalog seed contains no products");
         String user = environment.getOrDefault("SPRING_DATASOURCE_USERNAME", environment.getOrDefault("POSTGRES_USER", "postgres"));
         String password = environment.get("SPRING_DATASOURCE_PASSWORD");
