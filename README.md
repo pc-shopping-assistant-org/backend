@@ -6,9 +6,9 @@ The project is organized as a single Maven reactor. Services run on the host dur
 
 For **server infrastructure + local application development**, use the independent
 `../infra/` checkout and its README. Its single compose starts dependencies by default;
-profile `apps` adds GHCR application images for server deployment. Import
-`../infra/env/backend.env.example` settings into the local process, using actual
-server credentials. `docker-compose.yml` here remains the isolated local/CI stack;
+profile `apps` adds GHCR application images for server deployment. Start from
+`.env.example` in this repository, set tunnel host/ports and server credentials,
+then import the settings into the local process. `docker-compose.yml` here remains the isolated local/CI stack;
 do not run both stacks against the same ports/volumes. The local commands below
 describe that existing local/CI stack, not the remote server configuration.
 
