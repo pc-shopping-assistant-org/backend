@@ -8,9 +8,9 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
-import com.ecm.catalog.repository.CategoryProductCount;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
+import com.ecm.catalog.util.CategoryTrees;
 import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.exception.BusinessException;
@@ -35,7 +35,7 @@ public class CategoryService {
     public CategoryResponse create(CreateCategoryRequest request) {
         // 1. Reject a name or SEO name already held by a non-deleted category
         String name = request.name().trim();
-        String seoName = normalizeSeo(request.seoName(), name);
+        String seoName = SeoNames.slug(request.seoName(), name);
         ensureNameAvailable(name, seoName);
 
         // 2. The parent, when given, must be an ACTIVE category
@@ -80,13 +80,54 @@ public class CategoryService {
         categoryRepository.save(category);
     }
 
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategoriesForAdmin() {
+        // 1. Admin listing includes INACTIVE categories, never DELETED ones
+        return categoryMapper.toResponseList(categoryRepository.findByStatusNot(CatalogStatus.DELETED));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getCategoryTree() {
+        // 1. Fetch all active categories and map them to response DTOs
+        Map<UUID, CategoryResponse> categoryMap = categoryRepository.findByStatus(CatalogStatus.ACTIVE).stream()
+                .map(categoryMapper::toResponse)
+                .collect(Collectors.toMap(CategoryResponse::getId, c -> c));
+
+        // 2. Each category counts the products it lists, its sub-categories' included
+        addProductCounts(categoryMap);
+
+        // 3. Return root categories with nested children
+        return CategoryTrees.roots(categoryMap);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategories() {
+        // 1. Fetch all active categories
+        List<Category> categories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
+
+        // 2. Map to response DTOs (flat list), each with the products it lists
+        List<CategoryResponse> responses = categoryMapper.toResponseList(categories);
+        addProductCounts(responses.stream().collect(Collectors.toMap(CategoryResponse::getId, response -> response)));
+        return responses;
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryResponse getCategoryById(UUID id) {
+        // 1. Fetch category by ID
+        Category category = categoryRepository.findByIdAndStatus(id, CatalogStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+
+        // 2. Map to response DTO
+        return categoryMapper.toResponse(category);
+    }
+
     private Category applyDetails(UUID id, String rawName, String rawSeoName, String description, UUID parentId) {
         // 1. Load the category being edited
         Category category = findLiveCategory(id);
 
         // 2. Name and SEO name may only collide with themselves
         String name = rawName.trim();
-        String seoName = normalizeSeo(rawSeoName, name);
+        String seoName = SeoNames.slug(rawSeoName, name);
         boolean nameChanged = !category.getName().equalsIgnoreCase(name);
         boolean seoNameChanged = !category.getSeoName().equals(seoName);
         if ((nameChanged && categoryRepository.existsByNameIgnoreCaseAndStatusNot(name, CatalogStatus.DELETED))
@@ -144,80 +185,11 @@ public class CategoryService {
         return false;
     }
 
+    private void addProductCounts(Map<UUID, CategoryResponse> categories) {
+        CategoryTrees.addProductCounts(categories, productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE));
+    }
+
     private String normalizeDescription(String description) {
         return description == null || description.isBlank() ? null : description.trim();
-    }
-
-    private String normalizeSeo(String seoName, String name) {
-        return SeoNames.slug(seoName, name);
-    }
-
-    @Transactional(readOnly = true)
-    public List<CategoryResponse> getCategoryTree() {
-        // 1. Fetch all active categories
-        List<Category> allCategories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
-
-        // 2. Map to response DTOs
-        Map<UUID, CategoryResponse> categoryMap = allCategories.stream()
-                .map(categoryMapper::toResponse)
-                .collect(Collectors.toMap(CategoryResponse::getId, c -> c));
-
-        // 3. Each category counts the products it lists, its sub-categories' included
-        addProductCounts(categoryMap);
-
-        // 4. Build tree structure
-        List<CategoryResponse> roots = new ArrayList<>();
-        for (CategoryResponse category : categoryMap.values()) {
-            if (category.getParentId() == null) {
-                roots.add(category);
-            } else {
-                CategoryResponse parent = categoryMap.get(category.getParentId());
-                if (parent != null) {
-                    parent.getChildren().add(category);
-                }
-            }
-        }
-
-        // 5. Return root categories with nested children
-        return roots;
-    }
-
-    /** Adds each category's listed products to it and to every category above it, so a parent shows its whole branch. */
-    private void addProductCounts(Map<UUID, CategoryResponse> categories) {
-        for (CategoryProductCount own : productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE)) {
-            Set<UUID> visited = new HashSet<>();
-            CategoryResponse current = categories.get(own.categoryId());
-            while (current != null && visited.add(current.getId())) {
-                current.setProductCount(current.getProductCount() + own.count());
-                current = current.getParentId() == null ? null : categories.get(current.getParentId());
-            }
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategoriesForAdmin() {
-        // 1. Admin listing includes INACTIVE categories, never DELETED ones
-        return categoryMapper.toResponseList(categoryRepository.findByStatusNot(CatalogStatus.DELETED));
-    }
-
-    @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategories() {
-        // 1. Fetch all active categories
-        List<Category> categories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
-
-        // 2. Map to response DTOs (flat list), each with the products it lists
-        List<CategoryResponse> responses = categoryMapper.toResponseList(categories);
-        addProductCounts(responses.stream().collect(Collectors.toMap(CategoryResponse::getId, response -> response)));
-        return responses;
-    }
-
-    @Transactional(readOnly = true)
-    public CategoryResponse getCategoryById(UUID id) {
-        // 1. Fetch category by ID
-        Category category = categoryRepository.findByIdAndStatus(id, CatalogStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
-
-        // 2. Map to response DTO
-        return categoryMapper.toResponse(category);
     }
 }
