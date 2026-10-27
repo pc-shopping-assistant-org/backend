@@ -1,18 +1,15 @@
 package com.ecm.catalog.controller;
 
-import com.ecm.catalog.client.MediaServiceClient;
 import com.ecm.catalog.dto.response.BrandResponse;
 import com.ecm.catalog.dto.request.CreateBrandRequest;
 import com.ecm.catalog.dto.request.UpdateBrandRequest;
 import com.ecm.catalog.dto.request.UpdateStatusRequest;
-import com.ecm.catalog.dto.response.MediaFileResponse;
 import com.ecm.catalog.service.BrandService;
 import com.ecm.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -21,7 +18,6 @@ import java.util.UUID;
 public class BrandController {
 
     private final BrandService brandService;
-    private final MediaServiceClient mediaServiceClient;
 
     @PostMapping
     public ApiResponse<BrandResponse> create(@jakarta.validation.Valid @RequestBody CreateBrandRequest request) {
@@ -46,33 +42,16 @@ public class BrandController {
 
     @GetMapping("/admin")
     public ApiResponse<List<BrandResponse>> getAllBrandsForAdmin() {
-        return ApiResponse.success(withImageUrls(brandService.getAllBrandsForAdmin()));
+        return ApiResponse.success(brandService.getAllBrandsForAdmin());
     }
 
     @GetMapping
     public ApiResponse<List<BrandResponse>> getAllBrands() {
-        return ApiResponse.success(withImageUrls(brandService.getAllBrands()));
-    }
-
-    private List<BrandResponse> withImageUrls(List<BrandResponse> response) {
-        List<UUID> imageFileIds = response.stream().map(BrandResponse::getImageFileId)
-                .filter(Objects::nonNull).distinct().toList();
-        if (!imageFileIds.isEmpty()) {
-            var imageUrls = mediaServiceClient.getFiles(imageFileIds).getData().stream()
-                    .filter(file -> file.url() != null)
-                    .collect(java.util.stream.Collectors.toMap(MediaFileResponse::id, MediaFileResponse::url));
-            response.forEach(brand -> brand.setImageUrl(imageUrls.get(brand.getImageFileId())));
-        }
-        return response;
+        return ApiResponse.success(brandService.getAllBrands());
     }
 
     @GetMapping("/{id}")
     public ApiResponse<BrandResponse> getBrandById(@PathVariable UUID id) {
-        BrandResponse response = brandService.getBrandById(id);
-        if (response.getImageFileId() != null) {
-            response.setImageUrl(mediaServiceClient.getFiles(List.of(response.getImageFileId()))
-                    .getData().stream().findFirst().map(MediaFileResponse::url).orElse(null));
-        }
-        return ApiResponse.success(response);
+        return ApiResponse.success(brandService.getBrandById(id));
     }
 }

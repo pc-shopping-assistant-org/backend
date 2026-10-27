@@ -13,6 +13,7 @@ import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.VariantOption;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.OptionMapper;
 import com.ecm.catalog.mapper.ProductMapper;
 import com.ecm.catalog.mapper.ProductVariantMapper;
@@ -53,7 +54,7 @@ public class ProductAssembler {
     private final ProductMapper productMapper;
     private final ProductVariantMapper productVariantMapper;
     private final OptionMapper optionMapper;
-    private final ProductMediaResolver mediaResolver;
+    private final MediaFileResolver mediaResolver;
 
     public ProductDetailResponse detail(Product product, Collection<CatalogStatus> variantStatuses) {
         return details(List.of(product), variantStatuses).get(0);

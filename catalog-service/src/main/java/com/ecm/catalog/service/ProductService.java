@@ -10,6 +10,7 @@ import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductImageRepository;
@@ -43,7 +44,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final OrderServiceClient orderServiceClient;
     private final ProductSpecificationValidator specificationValidator;
-    private final ProductMediaResolver mediaResolver;
+    private final MediaFileResolver mediaResolver;
     private final ProductAssembler assembler;
 
     @Transactional

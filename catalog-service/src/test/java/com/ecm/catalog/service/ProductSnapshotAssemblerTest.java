@@ -7,6 +7,7 @@ import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.entity.HardwareType;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.OptionMapper;
 import com.ecm.catalog.mapper.ProductMapper;
 import com.ecm.catalog.mapper.ProductVariantMapper;
@@ -42,7 +43,7 @@ class ProductSnapshotAssemblerTest {
         OptionRepository options = mock(OptionRepository.class);
         ProductMapper productMapper = mock(ProductMapper.class);
         ProductVariantMapper variantMapper = mock(ProductVariantMapper.class);
-        ProductMediaResolver media = mock(ProductMediaResolver.class);
+        MediaFileResolver media = mock(MediaFileResolver.class);
         ProductAssembler assembler = new ProductAssembler(brands, categories, images, variants, links, options,
                 productMapper, variantMapper, mock(OptionMapper.class), media);
         UUID categoryId = UUID.randomUUID();

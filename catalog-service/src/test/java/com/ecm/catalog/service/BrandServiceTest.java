@@ -2,9 +2,11 @@ package com.ecm.catalog.service;
 
 import com.ecm.catalog.dto.request.CreateBrandRequest;
 import com.ecm.catalog.dto.request.UpdateBrandRequest;
+import com.ecm.catalog.dto.response.BrandResponse;
 import com.ecm.catalog.entity.Brand;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.BrandMapperImpl;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.repository.ProductRepository;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,13 +36,15 @@ class BrandServiceTest {
 
     private BrandRepository brandRepository;
     private ProductRepository productRepository;
+    private MediaFileResolver mediaFileResolver;
     private BrandService brandService;
 
     @BeforeEach
     void setUp() {
         brandRepository = mock(BrandRepository.class);
         productRepository = mock(ProductRepository.class);
-        brandService = new BrandService(brandRepository, new BrandMapperImpl(), productRepository);
+        mediaFileResolver = mock(MediaFileResolver.class);
+        brandService = new BrandService(brandRepository, new BrandMapperImpl(), productRepository, mediaFileResolver);
         when(brandRepository.save(any(Brand.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -130,5 +135,40 @@ class BrandServiceTest {
         when(brandRepository.findByStatusNot(CatalogStatus.DELETED)).thenReturn(List.of(brand("Hidden", CatalogStatus.INACTIVE)));
 
         assertEquals("INACTIVE", brandService.getAllBrandsForAdmin().get(0).getStatus());
+    }
+
+    @Test
+    void theBrandListGetsItsImageUrlsFromOneBatchedLookup() {
+        UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b3");
+        Brand first = Brand.builder().id(ID).name("A").seoName("a").status(CatalogStatus.ACTIVE).imageFileId(IMAGE_ID).build();
+        Brand second = Brand.builder().id(other).name("B").seoName("b").status(CatalogStatus.ACTIVE).imageFileId(IMAGE_ID).build();
+        Brand third = Brand.builder().id(UUID.randomUUID()).name("C").seoName("c").status(CatalogStatus.ACTIVE).build();
+        when(brandRepository.findByStatus(CatalogStatus.ACTIVE)).thenReturn(List.of(first, second, third));
+        when(mediaFileResolver.resolveUrls(any())).thenReturn(Map.of(IMAGE_ID, "https://cdn.example/a.jpg"));
+
+        List<BrandResponse> brands = brandService.getAllBrands();
+
+        assertEquals("https://cdn.example/a.jpg", brands.get(0).getImageUrl());
+        assertEquals("https://cdn.example/a.jpg", brands.get(1).getImageUrl());
+        assertEquals(null, brands.get(2).getImageUrl());
+        verify(mediaFileResolver).resolveUrls(any());
+    }
+
+    @Test
+    void aBrandWithoutAnImageHasNoUrlAndNoLookupFailure() {
+        when(brandRepository.findByIdAndStatus(ID, CatalogStatus.ACTIVE))
+                .thenReturn(Optional.of(brand("Asus", CatalogStatus.ACTIVE)));
+        when(mediaFileResolver.resolveUrls(any())).thenReturn(Map.of());
+
+        assertEquals(null, brandService.getBrandById(ID).getImageUrl());
+    }
+
+    @Test
+    void aSingleBrandGetsItsImageUrl() {
+        Brand withImage = Brand.builder().id(ID).name("Asus").seoName("asus").status(CatalogStatus.ACTIVE).imageFileId(IMAGE_ID).build();
+        when(brandRepository.findByIdAndStatus(ID, CatalogStatus.ACTIVE)).thenReturn(Optional.of(withImage));
+        when(mediaFileResolver.resolveUrls(any())).thenReturn(Map.of(IMAGE_ID, "https://cdn.example/asus.jpg"));
+
+        assertEquals("https://cdn.example/asus.jpg", brandService.getBrandById(ID).getImageUrl());
     }
 }

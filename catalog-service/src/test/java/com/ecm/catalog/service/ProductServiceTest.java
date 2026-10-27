@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductImageRepository;
@@ -54,7 +55,7 @@ class ProductServiceTest {
     private CategoryRepository categoryRepository;
     private OrderServiceClient orderServiceClient;
     private ProductSpecificationValidator specificationValidator;
-    private ProductMediaResolver mediaResolver;
+    private MediaFileResolver mediaResolver;
     private ProductAssembler assembler;
     private ProductService service;
 
@@ -67,7 +68,7 @@ class ProductServiceTest {
         categoryRepository = mock(CategoryRepository.class);
         orderServiceClient = mock(OrderServiceClient.class);
         specificationValidator = mock(ProductSpecificationValidator.class);
-        mediaResolver = mock(ProductMediaResolver.class);
+        mediaResolver = mock(MediaFileResolver.class);
         assembler = mock(ProductAssembler.class);
         service = new ProductService(productRepository, variantRepository, imageRepository, brandRepository, categoryRepository,
                 orderServiceClient, specificationValidator, mediaResolver, assembler);

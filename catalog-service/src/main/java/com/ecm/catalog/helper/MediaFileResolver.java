@@ -1,4 +1,4 @@
-package com.ecm.catalog.service;
+package com.ecm.catalog.helper;
 
 import com.ecm.catalog.client.MediaServiceClient;
 import com.ecm.catalog.dto.response.MediaFileResponse;
@@ -16,10 +16,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/** Looks up product and variant images in the Media Service, which owns the files. */
+/** Looks up files (product, variant and brand images) in the Media Service, which owns them. */
 @Component
 @RequiredArgsConstructor
-public class ProductMediaResolver {
+public class MediaFileResolver {
 
     private static final String MEDIA_SERVICE = "media-service";
 

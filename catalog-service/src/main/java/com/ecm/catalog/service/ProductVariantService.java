@@ -12,6 +12,7 @@ import com.ecm.catalog.entity.Option;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.VariantOption;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
@@ -39,7 +40,7 @@ public class ProductVariantService {
     private final OptionRepository optionRepository;
     private final VariantOptionRepository variantOptionRepository;
     private final OrderServiceClient orderServiceClient;
-    private final ProductMediaResolver mediaResolver;
+    private final MediaFileResolver mediaResolver;
     private final ProductAssembler assembler;
     private final CatalogProperties catalogProperties;
 

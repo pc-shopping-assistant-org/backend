@@ -7,6 +7,7 @@ import com.ecm.catalog.dto.request.UpdateStatusRequest;
 import com.ecm.catalog.entity.Brand;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.BrandMapper;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.common.exception.ResourceNotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +30,7 @@ public class BrandService {
     private final BrandRepository brandRepository;
     private final BrandMapper brandMapper;
     private final ProductRepository productRepository;
+    private final MediaFileResolver mediaFileResolver;
 
     @Transactional
     public BrandResponse create(CreateBrandRequest request) {
@@ -108,7 +111,10 @@ public class BrandService {
     @Transactional(readOnly = true)
     public List<BrandResponse> getAllBrandsForAdmin() {
         // 1. Admin listing includes INACTIVE brands, never DELETED ones
-        return brandMapper.toResponseList(brandRepository.findByStatusNot(CatalogStatus.DELETED));
+        List<BrandResponse> brands = brandMapper.toResponseList(brandRepository.findByStatusNot(CatalogStatus.DELETED));
+
+        // 2. Add the image URLs
+        return withImageUrls(brands);
     }
 
     @Transactional(readOnly = true)
@@ -116,8 +122,8 @@ public class BrandService {
         // 1. Fetch all active brands
         List<Brand> brands = brandRepository.findByStatus(CatalogStatus.ACTIVE);
 
-        // 2. Map to response DTOs
-        return brandMapper.toResponseList(brands);
+        // 2. Map to response DTOs and add the image URLs
+        return withImageUrls(brandMapper.toResponseList(brands));
     }
 
     @Transactional(readOnly = true)
@@ -126,7 +132,14 @@ public class BrandService {
         Brand brand = brandRepository.findByIdAndStatus(id, CatalogStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Brand", id));
 
-        // 2. Map to response DTO
-        return brandMapper.toResponse(brand);
+        // 2. Map to response DTO and add the image URL
+        return withImageUrls(List.of(brandMapper.toResponse(brand))).get(0);
+    }
+
+    /** One batched Media Service call for the whole list; a brand without an image keeps a null URL. */
+    private List<BrandResponse> withImageUrls(List<BrandResponse> brands) {
+        Map<UUID, String> urls = mediaFileResolver.resolveUrls(brands.stream().map(BrandResponse::getImageFileId).toList());
+        brands.forEach(brand -> brand.setImageUrl(brand.getImageFileId() == null ? null : urls.get(brand.getImageFileId())));
+        return brands;
     }
 }
