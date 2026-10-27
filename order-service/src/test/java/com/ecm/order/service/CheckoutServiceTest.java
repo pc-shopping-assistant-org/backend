@@ -20,6 +20,11 @@ import com.ecm.order.entity.OrderStatus;
 import com.ecm.order.entity.ShippingMethod;
 import com.ecm.order.entity.ShippingMethodStatus;
 import com.ecm.order.exception.OrderErrorCode;
+import com.ecm.order.helper.CatalogVariantLookup;
+import com.ecm.order.helper.InvoiceNumberGenerator;
+import com.ecm.order.helper.OrderOutbox;
+import com.ecm.order.helper.PaymentLookup;
+import com.ecm.order.helper.RecipientResolver;
 import com.ecm.order.mapper.OrderMapper;
 import com.ecm.order.repository.CartItemRepository;
 import com.ecm.order.repository.CartRepository;
@@ -90,7 +95,7 @@ class CheckoutServiceTest {
         statusService = mock(OrderStatusService.class);
         outbox = mock(OrderOutbox.class);
         service = new CheckoutService(orderRepository, orderItemRepository, cartRepository, cartItemRepository, shippingMethodRepository,
-                new CatalogVariantLookup(catalogClient), discountService, paymentClient, identityClient, invoiceNumbers, statusService,
+                new CatalogVariantLookup(catalogClient), discountService, new PaymentLookup(paymentClient), new RecipientResolver(identityClient), invoiceNumbers, statusService,
                 outbox, Mappers.getMapper(OrderMapper.class));
 
         when(orderRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());

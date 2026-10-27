@@ -1,4 +1,4 @@
-package com.ecm.order.service;
+package com.ecm.order.helper;
 
 import com.ecm.common.exception.ExternalServiceException;
 import com.ecm.order.client.CatalogServiceClient;

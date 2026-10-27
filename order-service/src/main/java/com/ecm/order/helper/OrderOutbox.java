@@ -1,4 +1,4 @@
-package com.ecm.order.service;
+package com.ecm.order.helper;
 
 import com.ecm.order.entity.Order;
 import com.ecm.order.entity.OrderItem;

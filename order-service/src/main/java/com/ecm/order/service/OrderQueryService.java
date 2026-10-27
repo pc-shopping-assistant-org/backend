@@ -18,6 +18,7 @@ import com.ecm.order.entity.Order;
 import com.ecm.order.entity.OrderItem;
 import com.ecm.order.entity.OrderStatus;
 import com.ecm.order.entity.OrderStatusHistory;
+import com.ecm.order.helper.PaymentLookup;
 import com.ecm.order.mapper.OrderMapper;
 import com.ecm.order.repository.OrderItemRepository;
 import com.ecm.order.repository.OrderRepository;
@@ -107,15 +108,6 @@ public class OrderQueryService {
         return orderMapper.toDetail(order, items, paymentLookup.forOrder(order.getId(), bearerToken), cancellationReason(order));
     }
 
-    /** Why the order was cancelled, for the customer to read; null when it is not cancelled or no reason was given. */
-    private String cancellationReason(Order order) {
-        if (order.getStatus() != OrderStatus.CANCELLED) {
-            return null;
-        }
-        return historyRepository.findFirstByOrderIdAndToStatusOrderByCreatedAtDesc(order.getId(), OrderStatus.CANCELLED)
-                .map(OrderStatusHistory::getReason).orElse(null);
-    }
-
     /** The orders of every customer for the shop, newest first (UC-ADM-ORD-001). */
     @Transactional(readOnly = true)
     public PageResponse<AdminOrderSummaryResponse> searchOrders(AdminOrderSearchRequest filter, int page, int size) {
@@ -169,6 +161,15 @@ public class OrderQueryService {
         Order order = orderRepository.findById(orderId).filter(candidate -> candidate.getStatus() == OrderStatus.COMPLETED)
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice", orderId));
         return orderMapper.toInvoiceDetail(order, orderItemRepository.findByOrderId(orderId));
+    }
+
+    /** Why the order was cancelled, for the customer to read; null when it is not cancelled or no reason was given. */
+    private String cancellationReason(Order order) {
+        if (order.getStatus() != OrderStatus.CANCELLED) {
+            return null;
+        }
+        return historyRepository.findFirstByOrderIdAndToStatusOrderByCreatedAtDesc(order.getId(), OrderStatus.CANCELLED)
+                .map(OrderStatusHistory::getReason).orElse(null);
     }
 
     private Order findOwnedOrder(UUID orderId, UUID customerId) {

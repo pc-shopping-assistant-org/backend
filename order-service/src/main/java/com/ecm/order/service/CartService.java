@@ -9,6 +9,7 @@ import com.ecm.order.dto.response.CartVariantDetailsResponse;
 import com.ecm.order.entity.Cart;
 import com.ecm.order.entity.CartItem;
 import com.ecm.order.exception.OrderErrorCode;
+import com.ecm.order.helper.CatalogVariantLookup;
 import com.ecm.order.repository.CartItemRepository;
 import com.ecm.order.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
