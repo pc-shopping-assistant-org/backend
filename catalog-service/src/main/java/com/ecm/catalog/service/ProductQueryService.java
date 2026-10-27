@@ -13,8 +13,10 @@ import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
 import com.ecm.common.exception.BusinessException;
+import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,10 +99,12 @@ public class ProductQueryService {
         ProductPage page = selectPage(filter, productStatuses, variantStatuses, onlyWithVariants);
         List<ProductSummaryResponse> items = assembler.summaries(page.products(), variantStatuses, onlyWithVariants);
         return CursorPageResponse.<ProductSummaryResponse>builder()
-                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
+                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size())
+                .page(page.number()).totalElements(page.totalElements()).totalPages(page.totalPages()).build();
     }
 
-    private record ProductPage(List<Product> products, boolean hasNext, String nextCursor) { }
+    /** The products of a page; the last three are set only for a numbered page. */
+    private record ProductPage(List<Product> products, boolean hasNext, String nextCursor, Integer number, Long totalElements, Integer totalPages) { }
 
     private ProductPage selectPage(ProductFilterRequest filter, List<CatalogStatus> productStatuses,
                                    List<CatalogStatus> variantStatuses, boolean onlyWithVariants) {
@@ -115,7 +119,19 @@ public class ProductQueryService {
         boolean anyCategory = filter.getCategoryId() == null;
         List<UUID> categoryIds = anyCategory ? List.of() : categoryRepository.findSelfAndDescendantIds(filter.getCategoryId());
 
-        // 3. Read one extra row to learn whether another page follows
+        // 3. A numbered page comes with its total
+        if (filter.getPage() != null) {
+            if (filter.getPage() < 0) {
+                throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+            }
+            Page<Product> numbered = productRepository.searchPage(productStatuses, variantStatuses, onlyWithVariants, null,
+                    anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
+                    PageRequest.of(filter.getPage(), pageSize));
+            return new ProductPage(numbered.getContent(), numbered.hasNext(), null, numbered.getNumber(),
+                    numbered.getTotalElements(), numbered.getTotalPages());
+        }
+
+        // 4. Otherwise read one extra row to learn whether another page follows
         List<Product> products = productRepository.search(productStatuses, variantStatuses, onlyWithVariants, filter.getCursor(),
                 anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
                 PageRequest.of(0, pageSize + 1));
@@ -123,7 +139,7 @@ public class ProductQueryService {
         List<Product> results = hasNext ? products.subList(0, pageSize) : products;
         String nextCursor = hasNext ? results.get(results.size() - 1).getId().toString() : null;
 
-        return new ProductPage(results, hasNext, nextCursor);
+        return new ProductPage(results, hasNext, nextCursor, null, null, null);
     }
 
     private void validatePriceRange(ProductFilterRequest filter) {

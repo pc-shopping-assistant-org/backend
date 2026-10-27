@@ -2,6 +2,7 @@ package com.ecm.catalog.repository;
 
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,13 +25,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Optional<Product> findByIdAndStatusIn(UUID id, Collection<CatalogStatus> statuses);
 
-    /**
-     * Keyset page (newest first) of products whose status is one of {@code statuses}. A null cursor starts at the
-     * newest product. Unless {@code anyCategory}, only products in {@code categoryIds} match. Price bounds match when at least one variant, with a status in {@code variantStatuses},
-     * falls inside them. With {@code onlyWithVariants}, products without a variant in {@code variantStatuses} are skipped
-     * by the query itself so a page is never short of the requested size.
-     */
-    @Query("""
+    String SEARCH_PRODUCTS = """
             SELECT p FROM Product p
             WHERE p.status IN :statuses
               AND (:cursor IS NULL OR p.id < :cursor)
@@ -47,8 +42,32 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                      AND (:minPrice IS NULL OR v.price >= :minPrice)
                      AND (:maxPrice IS NULL OR v.price <= :maxPrice)))
             ORDER BY p.id DESC
-            """)
+            """;
+
+    /**
+     * Keyset page (newest first) of products whose status is one of {@code statuses}. A null cursor starts at the
+     * newest product. Unless {@code anyCategory}, only products in {@code categoryIds} match. Price bounds match when at least one variant, with a status in {@code variantStatuses},
+     * falls inside them. With {@code onlyWithVariants}, products without a variant in {@code variantStatuses} are skipped
+     * by the query itself so a page is never short of the requested size.
+     */
+    @Query(SEARCH_PRODUCTS)
     List<Product> search(
+            @Param("statuses") Collection<CatalogStatus> statuses,
+            @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
+            @Param("onlyWithVariants") boolean onlyWithVariants,
+            @Param("cursor") UUID cursor,
+            @Param("anyCategory") boolean anyCategory,
+            @Param("categoryIds") Collection<UUID> categoryIds,
+            @Param("brandId") UUID brandId,
+            @Param("keyword") String keyword,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            Pageable pageable
+    );
+
+    /** The same products as {@link #search}, but a numbered page (the cursor is ignored) with the total the storefront needs to number them. */
+    @Query(SEARCH_PRODUCTS)
+    Page<Product> searchPage(
             @Param("statuses") Collection<CatalogStatus> statuses,
             @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
             @Param("onlyWithVariants") boolean onlyWithVariants,

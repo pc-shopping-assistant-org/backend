@@ -28,6 +28,7 @@ import com.ecm.order.dto.request.AdminOrderSearchRequest;
 import com.ecm.order.dto.response.AdminOrderDetailResponse;
 import com.ecm.order.dto.response.AdminOrderSummaryResponse;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import com.ecm.order.dto.response.InvoiceDetailResponse;
 import com.ecm.order.dto.response.InvoiceSummaryResponse;
 import com.ecm.order.dto.request.AdminInvoiceSearchRequest;
@@ -49,6 +50,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -112,6 +114,27 @@ class OrderQueryServiceTest {
         assertEquals(2, page.items().size());
         assertNotNull(page.nextCursor());
         assertEquals(3, verifyListQuery(true, true, new UUID(0L, 0L), "").getValue().getPageSize());
+    }
+
+    @Test
+    void aNumberedPageCarriesItsNumberAndTheTotals() {
+        when(orderRepository.findCustomerNumberedPage(any(), anyBoolean(), any(), anyBoolean(), any(), anyString(), any()))
+                .thenReturn(new PageImpl<>(orders(2), PageRequest.of(1, 2), 5));
+
+        CursorPageResponse<OrderSummaryResponse> page = service.getOrdersPage(CUSTOMER, null, null, 1, 2);
+
+        assertEquals(2, page.items().size());
+        assertEquals(1, page.page());
+        assertEquals(5L, page.totalElements());
+        assertEquals(3, page.totalPages());
+        assertTrue(page.hasNext());
+        assertNull(page.nextCursor());
+        verify(orderRepository, never()).findCustomerPage(any(), anyBoolean(), any(), anyBoolean(), any(), anyString(), any(), any(), any());
+    }
+
+    @Test
+    void aNegativeNumberedPageIsRejected() {
+        assertThrows(BusinessException.class, () -> service.getOrdersPage(CUSTOMER, null, null, -1, 10));
     }
 
     @Test
