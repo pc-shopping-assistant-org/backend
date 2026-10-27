@@ -13,11 +13,11 @@ import com.ecm.promotion.entity.Discount;
 import com.ecm.promotion.entity.DiscountCategory;
 import com.ecm.promotion.entity.DiscountState;
 import com.ecm.promotion.entity.DiscountStatus;
-import com.ecm.promotion.entity.DiscountType;
 import com.ecm.promotion.exception.PromotionErrorCode;
 import com.ecm.promotion.mapper.DiscountMapper;
 import com.ecm.promotion.repository.DiscountCategoryRepository;
 import com.ecm.promotion.repository.DiscountRepository;
+import com.ecm.promotion.util.DiscountRules;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -39,8 +38,6 @@ import java.util.stream.Collectors;
 public class DiscountService {
 
     private static final int MAX_PAGE_SIZE = 100;
-    private static final int MAX_PERCENT = 100;
-    private static final long NO_MINIMUM_ORDER = 0L;
 
     private final DiscountRepository discountRepository;
     private final DiscountCategoryRepository categoryRepository;
@@ -50,9 +47,9 @@ public class DiscountService {
     @Transactional
     public DiscountResponse create(CreateDiscountRequest request, UUID employeeId) {
         // 1. Validate the definition and the code, and that the targets fit the scope
-        String code = normalizeCode(request.code());
-        validateDefinition(request.discountType(), request.value(), request.minOrderAmount(), request.startAt(), request.endAt());
-        validateCode(code, request.applicationScope());
+        String code = DiscountRules.normalizeCode(request.code());
+        DiscountRules.validateDefinition(request.discountType(), request.value(), request.minOrderAmount(), request.startAt(), request.endAt());
+        DiscountRules.validateCode(code, request.applicationScope());
         Set<UUID> categoryIds = validateTargets(request.applicationScope(), request.categoryIds());
         if (code != null && discountRepository.existsByCodeIgnoreCaseAndStatusNot(code, DiscountStatus.DELETED)) {
             throw new DuplicateResourceException(PromotionErrorCode.DISCOUNT_CODE_ALREADY_EXISTS, "Discount", "code", code);
@@ -61,7 +58,7 @@ public class DiscountService {
         // 2. Save the discount with all its targets in one transaction
         Discount discount = discountRepository.save(Discount.builder()
                 .code(code).title(request.title().trim()).discountType(request.discountType()).value(request.value())
-                .applicationScope(request.applicationScope()).minOrderAmount(minOrderAmount(request.minOrderAmount()))
+                .applicationScope(request.applicationScope()).minOrderAmount(DiscountRules.minOrderAmount(request.minOrderAmount()))
                 .startAt(request.startAt()).endAt(request.endAt()).description(request.description())
                 .createdBy(employeeId).status(DiscountStatus.ACTIVE).build());
         saveTargets(discount.getId(), categoryIds);
@@ -71,13 +68,13 @@ public class DiscountService {
     @Transactional
     public DiscountResponse update(UUID id, UpdateDiscountRequest request, UUID employeeId) {
         // 1. Validate the new definition
-        validateDefinition(request.discountType(), request.value(), request.minOrderAmount(), request.startAt(), request.endAt());
+        DiscountRules.validateDefinition(request.discountType(), request.value(), request.minOrderAmount(), request.startAt(), request.endAt());
         Set<UUID> categoryIds = validateTargets(request.applicationScope(), request.categoryIds());
 
         // 2. Resolve the code: omitted keeps the current one, blank removes it
         Discount discount = lockLive(id);
-        String code = request.code() == null ? discount.getCode() : normalizeCode(request.code());
-        validateCode(code, request.applicationScope());
+        String code = request.code() == null ? discount.getCode() : DiscountRules.normalizeCode(request.code());
+        DiscountRules.validateCode(code, request.applicationScope());
         if (code != null && discountRepository.existsByCodeIgnoreCaseAndIdNotAndStatusNot(code, id, DiscountStatus.DELETED)) {
             throw new DuplicateResourceException(PromotionErrorCode.DISCOUNT_CODE_ALREADY_EXISTS, "Discount", "code", code);
         }
@@ -88,7 +85,7 @@ public class DiscountService {
         discount.setDiscountType(request.discountType());
         discount.setValue(request.value());
         discount.setApplicationScope(request.applicationScope());
-        discount.setMinOrderAmount(minOrderAmount(request.minOrderAmount()));
+        discount.setMinOrderAmount(DiscountRules.minOrderAmount(request.minOrderAmount()));
         discount.setStartAt(request.startAt());
         discount.setEndAt(request.endAt());
         discount.setDescription(request.description());
@@ -115,7 +112,7 @@ public class DiscountService {
                 .collect(Collectors.groupingBy(DiscountCategory::getDiscountId,
                         Collectors.mapping(DiscountCategory::getCategoryId, Collectors.toSet())));
         return PageResponse.of(result.map(discount ->
-                discountMapper.toResponse(discount, stateOf(discount, now), targets.getOrDefault(discount.getId(), Set.of()))));
+                discountMapper.toResponse(discount, discount.stateAt(now), targets.getOrDefault(discount.getId(), Set.of()))));
     }
 
     @Transactional(readOnly = true)
@@ -143,7 +140,7 @@ public class DiscountService {
     public void delete(UUID id, UUID employeeId) {
         // 1. A discount that is in effect right now must be locked first
         Discount discount = lockLive(id);
-        if (stateOf(discount, Instant.now()) == DiscountState.RUNNING) {
+        if (discount.stateAt(Instant.now()) == DiscountState.RUNNING) {
             throw new BusinessException(PromotionErrorCode.DISCOUNT_RUNNING);
         }
 
@@ -159,37 +156,6 @@ public class DiscountService {
             throw new ResourceNotFoundException("Discount", id);
         }
         return discount;
-    }
-
-    private static DiscountState stateOf(Discount discount, Instant now) {
-        if (discount.getStatus() == DiscountStatus.INACTIVE) {
-            return DiscountState.LOCKED;
-        }
-        if (now.isBefore(discount.getStartAt())) {
-            return DiscountState.SCHEDULED;
-        }
-        return now.isBefore(discount.getEndAt()) ? DiscountState.RUNNING : DiscountState.EXPIRED;
-    }
-
-    private static String normalizeCode(String code) {
-        return code == null || code.isBlank() ? null : code.trim().toUpperCase(Locale.ROOT);
-    }
-
-    private static long minOrderAmount(Long requested) {
-        return requested == null ? NO_MINIMUM_ORDER : requested;
-    }
-
-    private static void validateDefinition(DiscountType type, int value, Long minOrderAmount, Instant startAt, Instant endAt) {
-        boolean validValue = type == DiscountType.PERCENT ? value > 0 && value <= MAX_PERCENT : value > 0;
-        if (!validValue || !startAt.isBefore(endAt) || (minOrderAmount != null && minOrderAmount < 0)) {
-            throw new BusinessException(PromotionErrorCode.INVALID_DISCOUNT_VALUE);
-        }
-    }
-
-    private static void validateCode(String code, ApplicationScope scope) {
-        if (code != null && scope != ApplicationScope.ORDER) {
-            throw new BusinessException(PromotionErrorCode.INVALID_DISCOUNT_CODE);
-        }
     }
 
     /** ORDER and ALL_ITEMS take no targets; CATEGORY needs at least one, and every one must be in use. */
@@ -219,6 +185,6 @@ public class DiscountService {
     }
 
     private DiscountResponse toResponse(Discount discount, Set<UUID> categoryIds) {
-        return discountMapper.toResponse(discount, stateOf(discount, Instant.now()), categoryIds);
+        return discountMapper.toResponse(discount, discount.stateAt(Instant.now()), categoryIds);
     }
 }

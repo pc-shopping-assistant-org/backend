@@ -79,4 +79,15 @@ public class Discount {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private DiscountStatus status;
+
+    /** Where the discount stands at {@code now}: locked by an employee, not started, running or over. */
+    public DiscountState stateAt(Instant now) {
+        if (status == DiscountStatus.INACTIVE) {
+            return DiscountState.LOCKED;
+        }
+        if (now.isBefore(startAt)) {
+            return DiscountState.SCHEDULED;
+        }
+        return now.isBefore(endAt) ? DiscountState.RUNNING : DiscountState.EXPIRED;
+    }
 }
