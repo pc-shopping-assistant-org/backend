@@ -7,6 +7,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.entity.CategoryAttribute;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.ecm.catalog.repository.AttributeDefinitionRepository;
 import com.ecm.catalog.repository.CategoryAttributeRepository;
 import com.ecm.catalog.repository.CategoryRepository;

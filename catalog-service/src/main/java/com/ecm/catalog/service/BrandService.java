@@ -10,6 +10,7 @@ import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.BrandMapper;
 import com.ecm.catalog.repository.BrandRepository;
+import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.catalog.repository.ProductRepository;

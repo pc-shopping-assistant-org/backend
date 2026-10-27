@@ -12,6 +12,7 @@ import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.VariantOption;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;

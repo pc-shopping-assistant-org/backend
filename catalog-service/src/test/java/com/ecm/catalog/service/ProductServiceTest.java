@@ -10,6 +10,8 @@ import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.ProductAssembler;
+import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductImageRepository;

@@ -11,6 +11,7 @@ import com.ecm.catalog.mapper.CategoryMapper;
 import com.ecm.catalog.repository.CategoryProductCount;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
+import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,8 @@
-package com.ecm.catalog.service;
+package com.ecm.catalog.helper;
 
 import com.ecm.catalog.dto.response.CategoryAttributeTemplateResponse;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.service.CategoryAttributeService;
 import com.ecm.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

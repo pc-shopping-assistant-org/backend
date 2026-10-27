@@ -2,7 +2,7 @@ package com.ecm.catalog.bootstrap;
 
 import com.ecm.catalog.dto.response.CategoryAttributeTemplateResponse.Item;
 import com.ecm.catalog.entity.AttributeDataType;
-import com.ecm.catalog.service.ProductSpecificationValidator;
+import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.ArrayList;

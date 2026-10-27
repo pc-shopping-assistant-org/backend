@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;

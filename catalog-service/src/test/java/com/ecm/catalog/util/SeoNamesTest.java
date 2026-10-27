@@ -1,4 +1,4 @@
-package com.ecm.catalog.service;
+package com.ecm.catalog.util;
 
 import org.junit.jupiter.api.Test;
 

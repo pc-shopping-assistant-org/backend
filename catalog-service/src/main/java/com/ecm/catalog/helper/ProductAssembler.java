@@ -1,4 +1,4 @@
-package com.ecm.catalog.service;
+package com.ecm.catalog.helper;
 
 import com.ecm.catalog.dto.response.OptionResponse;
 import com.ecm.catalog.dto.response.ProductDetailResponse;
