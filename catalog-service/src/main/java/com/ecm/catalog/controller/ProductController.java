@@ -15,10 +15,10 @@ import com.ecm.catalog.service.ProductQueryService;
 import com.ecm.catalog.service.ProductService;
 import com.ecm.catalog.service.ProductVariantService;
 import com.ecm.common.response.ApiResponse;
+import com.ecm.common.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -37,7 +37,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private static final String ACCOUNT_ID_CLAIM = "accountId";
 
     private final ProductService productService;
     private final ProductVariantService productVariantService;
@@ -46,51 +45,51 @@ public class ProductController {
     @PostMapping
     public ApiResponse<ProductDetailResponse> createProduct(@Valid @RequestBody CreateProductRequest request,
                                                             Authentication authentication) {
-        return ApiResponse.success(productService.createProduct(request, employeeId(authentication)));
+        return ApiResponse.success(productService.createProduct(request, CurrentUser.requireAccountId(authentication)));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<ProductDetailResponse> updateProduct(@PathVariable UUID id, @Valid @RequestBody UpdateProductRequest request,
                                                             Authentication authentication) {
-        return ApiResponse.success(productService.updateProduct(id, request, employeeId(authentication)));
+        return ApiResponse.success(productService.updateProduct(id, request, CurrentUser.requireAccountId(authentication)));
     }
 
     @PatchMapping("/{id}/status")
     public ApiResponse<ProductDetailResponse> updateProductStatus(@PathVariable UUID id,
                                                                   @Valid @RequestBody UpdateProductStatusRequest request,
                                                                   Authentication authentication) {
-        return ApiResponse.success(productService.updateProductStatus(id, request.status(), employeeId(authentication)));
+        return ApiResponse.success(productService.updateProductStatus(id, request.status(), CurrentUser.requireAccountId(authentication)));
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteProduct(@PathVariable UUID id, Authentication authentication) {
-        productService.deleteProduct(id, employeeId(authentication));
+        productService.deleteProduct(id, CurrentUser.requireAccountId(authentication));
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/variants")
     public ApiResponse<ProductVariantResponse> createVariant(@PathVariable UUID id, @Valid @RequestBody CreateVariantRequest request,
                                                              Authentication authentication) {
-        return ApiResponse.success(productVariantService.createVariant(id, request, employeeId(authentication)));
+        return ApiResponse.success(productVariantService.createVariant(id, request, CurrentUser.requireAccountId(authentication)));
     }
 
     @PutMapping("/{id}/variants/{variantId}")
     public ApiResponse<ProductVariantResponse> updateVariant(@PathVariable UUID id, @PathVariable UUID variantId,
                                                              @Valid @RequestBody UpdateVariantRequest request,
                                                              Authentication authentication) {
-        return ApiResponse.success(productVariantService.updateVariant(id, variantId, request, employeeId(authentication)));
+        return ApiResponse.success(productVariantService.updateVariant(id, variantId, request, CurrentUser.requireAccountId(authentication)));
     }
 
     @PatchMapping("/{id}/variants/{variantId}/status")
     public ApiResponse<ProductVariantResponse> updateVariantStatus(@PathVariable UUID id, @PathVariable UUID variantId,
                                                                    @Valid @RequestBody UpdateVariantStatusRequest request,
                                                                    Authentication authentication) {
-        return ApiResponse.success(productVariantService.updateVariantStatus(id, variantId, request.status(), employeeId(authentication)));
+        return ApiResponse.success(productVariantService.updateVariantStatus(id, variantId, request.status(), CurrentUser.requireAccountId(authentication)));
     }
 
     @DeleteMapping("/{id}/variants/{variantId}")
     public ApiResponse<Void> deleteVariant(@PathVariable UUID id, @PathVariable UUID variantId, Authentication authentication) {
-        productVariantService.deleteVariant(id, variantId, employeeId(authentication));
+        productVariantService.deleteVariant(id, variantId, CurrentUser.requireAccountId(authentication));
         return ApiResponse.success(null);
     }
 
@@ -129,10 +128,4 @@ public class ProductController {
         return ApiResponse.success(productQueryService.getProductVariant(id, variantId));
     }
 
-    private UUID employeeId(Authentication authentication) {
-        if (authentication instanceof JwtAuthenticationToken jwt) {
-            return UUID.fromString(jwt.getToken().getClaimAsString(ACCOUNT_ID_CLAIM));
-        }
-        throw new IllegalStateException("Employee identity is missing from the authentication");
-    }
 }

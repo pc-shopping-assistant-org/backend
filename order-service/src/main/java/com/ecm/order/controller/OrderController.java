@@ -1,6 +1,5 @@
 package com.ecm.order.controller;
 
-import com.ecm.common.exception.BusinessException;
 import com.ecm.common.response.ApiResponse;
 import com.ecm.common.security.CurrentUser;
 import com.ecm.order.dto.request.CancelOrderRequest;
@@ -10,7 +9,6 @@ import com.ecm.order.dto.response.OrderDetailResponse;
 import com.ecm.order.dto.response.OrderStatusResponse;
 import com.ecm.order.dto.response.OrderSummaryResponse;
 import com.ecm.order.entity.OrderStatus;
-import com.ecm.order.exception.OrderErrorCode;
 import com.ecm.order.service.CheckoutService;
 import com.ecm.order.service.OrderService;
 import com.ecm.order.service.OrderQueryService;
@@ -36,6 +34,7 @@ import com.ecm.order.dto.response.AdminOrderDetailResponse;
 import com.ecm.order.dto.response.AdminOrderSummaryResponse;
 import com.ecm.order.dto.response.InvoiceDetailResponse;
 import com.ecm.order.dto.response.InvoiceSummaryResponse;
+import com.ecm.order.util.CurrentCustomer;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import java.util.UUID;
@@ -53,7 +52,7 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OrderDetailResponse> create(@Valid @RequestBody CreateOrderRequest request, Authentication authentication) {
-        return ApiResponse.success(checkoutService.placeOrder(request, customerId(authentication), CurrentUser.bearerToken(authentication)));
+        return ApiResponse.success(checkoutService.placeOrder(request, CurrentCustomer.id(authentication), CurrentUser.bearerToken(authentication)));
     }
 
     @GetMapping
@@ -63,24 +62,24 @@ public class OrderController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String cursor,
             @RequestParam(required = false) Integer limit) {
-        return ApiResponse.success(orderQueryService.getOrders(customerId(authentication), status, keyword, cursor, limit));
+        return ApiResponse.success(orderQueryService.getOrders(CurrentCustomer.id(authentication), status, keyword, cursor, limit));
     }
 
     @GetMapping("/{orderId}")
     public ApiResponse<OrderDetailResponse> getMyOrder(@PathVariable UUID orderId, Authentication authentication) {
-        return ApiResponse.success(orderQueryService.getDetail(orderId, customerId(authentication), CurrentUser.bearerToken(authentication)));
+        return ApiResponse.success(orderQueryService.getDetail(orderId, CurrentCustomer.id(authentication), CurrentUser.bearerToken(authentication)));
     }
 
     @GetMapping("/{orderId}/status")
     public ApiResponse<OrderStatusResponse> getMyOrderStatus(@PathVariable UUID orderId, Authentication authentication) {
-        return ApiResponse.success(orderQueryService.getStatus(orderId, customerId(authentication)));
+        return ApiResponse.success(orderQueryService.getStatus(orderId, CurrentCustomer.id(authentication)));
     }
 
     @PostMapping("/{orderId}/cancel")
     public ApiResponse<OrderDetailResponse> cancelMyOrder(@PathVariable UUID orderId,
                                                           @Valid @RequestBody(required = false) CancelOrderRequest request,
                                                           Authentication authentication) {
-        return ApiResponse.success(orderService.cancelByCustomer(orderId, customerId(authentication),
+        return ApiResponse.success(orderService.cancelByCustomer(orderId, CurrentCustomer.id(authentication),
                 request == null ? null : request.reason()));
     }
 
@@ -122,11 +121,4 @@ public class OrderController {
         return ApiResponse.success(orderService.cancelByEmployee(orderId, CurrentUser.accountId(authentication), request.reason()));
     }
 
-    private UUID customerId(Authentication authentication) {
-        UUID accountId = CurrentUser.accountId(authentication);
-        if (accountId == null) {
-            throw new BusinessException(OrderErrorCode.CART_OWNER_REQUIRED);
-        }
-        return accountId;
-    }
 }
