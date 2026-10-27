@@ -11,10 +11,13 @@ import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
 import com.ecm.common.exception.BusinessException;
+import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
@@ -67,6 +70,54 @@ class ProductQueryServiceTest {
         ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
         verify(productRepository).search(eq(statuses), eq(variantStatuses), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), pageable.capture());
         return pageable;
+    }
+
+    // ---- numbered pages of the storefront ----
+
+    @Test
+    void aNumberedPageCarriesItsNumberAndTheTotals() {
+        ProductFilterRequest filter = new ProductFilterRequest();
+        filter.setLimit(12);
+        filter.setPage(2);
+        filter.setCursor(UUID.randomUUID());
+        List<Product> results = products(12);
+        when(productRepository.searchPage(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(results, PageRequest.of(2, 12), 40));
+
+        CursorPageResponse<ProductSummaryResponse> page = service.getProducts(filter);
+
+        assertEquals(2, page.getPage());
+        assertEquals(40L, page.getTotalElements());
+        assertEquals(4, page.getTotalPages());
+        assertTrue(page.isHasNext());
+        ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+        verify(productRepository).searchPage(eq(List.of(CatalogStatus.ACTIVE)), eq(List.of(CatalogStatus.ACTIVE)), eq(true), eq(null),
+                anyBoolean(), any(), any(), any(), any(), any(), pageable.capture());
+        assertEquals(24, pageable.getValue().getOffset());
+        assertEquals(12, pageable.getValue().getPageSize());
+        verify(productRepository, never()).search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void aListWithoutAPageNumberCarriesNoTotals() {
+        when(productRepository.search(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(products(1));
+
+        CursorPageResponse<ProductSummaryResponse> page = service.getProducts(new ProductFilterRequest());
+
+        assertNull(page.getPage());
+        assertNull(page.getTotalElements());
+        assertNull(page.getTotalPages());
+    }
+
+    @Test
+    void aNegativePageNumberIsRejected() {
+        ProductFilterRequest filter = new ProductFilterRequest();
+        filter.setPage(-1);
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.getProducts(filter));
+
+        assertEquals(CommonErrorCode.BAD_REQUEST, ex.getErrorCode());
+        verify(productRepository, never()).searchPage(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
     }
 
     // ---- UC-ADM-PROD-001 / 002 ----
