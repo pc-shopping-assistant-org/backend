@@ -1,6 +1,5 @@
 package com.ecm.catalog.dto.response;
 
-import com.ecm.catalog.entity.HardwareType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,8 +19,9 @@ public class CategoryResponse {
     private UUID id;
     private String name;
     private String seoName;
-    private HardwareType hardwareType;
+    private String hardwareType;
     private String description;
+    private int displayOrder;
     private UUID parentId;
     private String status;
     private Instant createdAt;

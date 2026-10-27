@@ -3,8 +3,10 @@ package com.ecm.catalog.service;
 import com.ecm.catalog.dto.request.CreateCategoryRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryDetailsRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryRequest;
+import com.ecm.catalog.dto.request.ReorderCategoriesRequest;
+import com.ecm.catalog.dto.response.CategoryResponse;
 import com.ecm.catalog.entity.CatalogStatus;
-import com.ecm.catalog.entity.HardwareType;
+import com.ecm.catalog.entity.HardwareTypeEntity;
 import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
@@ -12,6 +14,7 @@ import com.ecm.catalog.mapper.CategoryMapperImpl;
 import com.ecm.catalog.repository.CategoryProductCount;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
+import com.ecm.catalog.repository.HardwareTypeRepository;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,15 +42,19 @@ class CategoryServiceTest {
 
     private CategoryRepository categoryRepository;
     private ProductRepository productRepository;
+    private HardwareTypeRepository hardwareTypeRepository;
     private CategoryService categoryService;
 
     @BeforeEach
     void setUp() {
         categoryRepository = mock(CategoryRepository.class);
         productRepository = mock(ProductRepository.class);
+        hardwareTypeRepository = mock(HardwareTypeRepository.class);
         CategoryMapper mapper = new CategoryMapperImpl();
-        categoryService = new CategoryService(categoryRepository, mapper, productRepository);
+        categoryService = new CategoryService(categoryRepository, mapper, productRepository, hardwareTypeRepository);
         when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(hardwareTypeRepository.findByCodeAndStatus("OTHER", CatalogStatus.ACTIVE))
+                .thenReturn(Optional.of(HardwareTypeEntity.builder().code("OTHER").status(CatalogStatus.ACTIVE).build()));
     }
 
     private static Category category(UUID id, String name, UUID parentId, CatalogStatus status) {
@@ -59,11 +66,11 @@ class CategoryServiceTest {
     @Test
     void categoryResponseExposesStableHardwareTypeWithoutInferringFromName() {
         Category renamedCategory = category(ID, "Processors", null, CatalogStatus.ACTIVE);
-        renamedCategory.setHardwareType(HardwareType.CPU);
+        renamedCategory.setHardwareType(HardwareTypeEntity.builder().code("CPU").build());
 
         var response = new CategoryMapperImpl().toResponse(renamedCategory);
 
-        assertEquals(HardwareType.CPU, response.getHardwareType());
+        assertEquals("CPU", response.getHardwareType());
         assertEquals("Processors", response.getName());
     }
 
@@ -77,7 +84,58 @@ class CategoryServiceTest {
         assertEquals("graphics-card", saved.getValue().getSeoName());
         assertEquals("GPUs", saved.getValue().getDescription());
         assertEquals(CatalogStatus.ACTIVE, saved.getValue().getStatus());
+        assertEquals("OTHER", saved.getValue().getHardwareType().getCode());
         assertEquals("graphics-card", response.getSeoName());
+    }
+
+    @Test
+    void createStoresDisplayOrder() {
+        categoryService.create(new CreateCategoryRequest("Graphics Card", null, null, null, 40));
+
+        ArgumentCaptor<Category> saved = ArgumentCaptor.forClass(Category.class);
+        verify(categoryRepository).save(saved.capture());
+
+        assertEquals(40, saved.getValue().getDisplayOrder());
+    }
+
+    @Test
+    void createResolvesHardwareTypeFromActiveMasterData() {
+        HardwareTypeEntity gaming = HardwareTypeEntity.builder().code("PC_GAMING").status(CatalogStatus.ACTIVE).build();
+        when(hardwareTypeRepository.findByCodeAndStatus("PC_GAMING", CatalogStatus.ACTIVE)).thenReturn(Optional.of(gaming));
+
+        var response = categoryService.create(new CreateCategoryRequest("Gaming", null, null, null, 10, "PC_GAMING"));
+
+        assertEquals("PC_GAMING", response.getHardwareType());
+        assertThrows(BusinessException.class, () -> categoryService.create(
+                new CreateCategoryRequest("Invalid", null, null, null, 10, "MISSING")));
+    }
+
+    @Test
+    void reorderUpdatesOnlyCategoriesWithTheSameParent() {
+        Category first = category(ID, "First", null, CatalogStatus.ACTIVE);
+        Category second = category(PARENT_ID, "Second", null, CatalogStatus.ACTIVE);
+        when(categoryRepository.findAllById(any())).thenReturn(List.of(first, second));
+
+        categoryService.reorder(new ReorderCategoriesRequest(List.of(
+                new ReorderCategoriesRequest.Item(ID, 20),
+                new ReorderCategoriesRequest.Item(PARENT_ID, 10))));
+
+        assertEquals(20, first.getDisplayOrder());
+        assertEquals(10, second.getDisplayOrder());
+        verify(categoryRepository).saveAll(any());
+    }
+
+    @Test
+    void reorderRejectsMixedParentsWithoutChangingOrder() {
+        Category root = category(ID, "Root", null, CatalogStatus.ACTIVE);
+        Category child = category(CHILD_ID, "Child", ID, CatalogStatus.ACTIVE);
+        when(categoryRepository.findAllById(any())).thenReturn(List.of(root, child));
+
+        assertThrows(BusinessException.class, () -> categoryService.reorder(new ReorderCategoriesRequest(List.of(
+                new ReorderCategoriesRequest.Item(ID, 20), new ReorderCategoriesRequest.Item(CHILD_ID, 10)))));
+
+        assertEquals(0, root.getDisplayOrder());
+        verify(categoryRepository, never()).saveAll(any());
     }
 
     @Test
@@ -241,6 +299,24 @@ class CategoryServiceTest {
 
         assertEquals(1, roots.size());
         assertEquals(CHILD_ID, roots.get(0).getChildren().get(0).getId());
+    }
+
+    @Test
+    void treeSortsRootsAndChildrenByDisplayOrderThenName() {
+        Category laterRoot = category(ID, "Z root", null, CatalogStatus.ACTIVE);
+        laterRoot.setDisplayOrder(20);
+        Category firstRoot = category(PARENT_ID, "A root", null, CatalogStatus.ACTIVE);
+        firstRoot.setDisplayOrder(10);
+        Category laterChild = category(CHILD_ID, "Z child", PARENT_ID, CatalogStatus.ACTIVE);
+        laterChild.setDisplayOrder(20);
+        Category firstChild = category(UUID.fromString("00000000-0000-0000-0000-0000000000a4"), "A child", PARENT_ID, CatalogStatus.ACTIVE);
+        firstChild.setDisplayOrder(10);
+        when(categoryRepository.findByStatus(CatalogStatus.ACTIVE)).thenReturn(List.of(laterChild, laterRoot, firstChild, firstRoot));
+
+        var roots = categoryService.getCategoryTree();
+
+        assertEquals(List.of(PARENT_ID, ID), roots.stream().map(CategoryResponse::getId).toList());
+        assertEquals(List.of(firstChild.getId(), CHILD_ID), roots.get(0).getChildren().stream().map(CategoryResponse::getId).toList());
     }
 
     // ---- product counts on the storefront category tree ----

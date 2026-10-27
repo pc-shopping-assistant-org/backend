@@ -29,12 +29,15 @@ public class Category {
     @Column(name = "seo_name", nullable = false)
     private String seoName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "hardware_type", length = 20)
-    private HardwareType hardwareType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "hardware_type_id", nullable = false)
+    private HardwareTypeEntity hardwareType;
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "display_order", nullable = false)
+    private int displayOrder;
 
     @Column(name = "parent_id")
     private UUID parentId;

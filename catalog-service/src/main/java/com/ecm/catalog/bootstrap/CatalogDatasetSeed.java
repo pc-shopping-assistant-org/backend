@@ -1,7 +1,5 @@
 package com.ecm.catalog.bootstrap;
 
-import com.ecm.catalog.entity.HardwareType;
-
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +15,7 @@ import static com.ecm.catalog.bootstrap.SeedDatabase.reference;
 final class CatalogDatasetSeed {
     private static final String STORAGE_CATEGORY = "storage";
     private static final String STORAGE_CATEGORY_NAME = "Ổ cứng";
+    private static final String STORAGE_HARDWARE_TYPE = "STORAGE";
     private final SeedDatabase catalog;
 
     CatalogDatasetSeed(SeedDatabase catalog) { this.catalog = catalog; }
@@ -123,6 +122,7 @@ final class CatalogDatasetSeed {
 
     private Categories categories(List<SeedData.Category> seeds) throws Exception {
         var stored = categoryIds();
+        var hardwareTypes = hardwareTypeIds();
         var byName = new HashMap<String, UUID>();
         for (var row : catalog.query("SELECT id, name FROM categories ORDER BY (status <> 'DELETED'), created_at")) {
             byName.put(((String) row.get("name")).toLowerCase(Locale.ROOT), (UUID) row.get("id"));
@@ -131,19 +131,28 @@ final class CatalogDatasetSeed {
         if (storageId != null) stored.put(STORAGE_CATEGORY, storageId);
         var mapped = new HashMap<UUID, UUID>();
         for (var category : seeds) {
+            if (!hardwareTypes.containsKey(category.hardwareType())) {
+                throw new IllegalArgumentException("Unknown hardware type: " + category.hardwareType());
+            }
             if (!stored.containsKey(category.seoName())) {
                 UUID named = byName.get(category.name().toLowerCase(Locale.ROOT));
                 if (named != null) stored.put(category.seoName(), named);
             }
             if (!stored.containsKey(category.seoName())) {
-                if (category.hardwareType() != HardwareType.STORAGE || storageId == null) {
-                    throw new IllegalArgumentException("Unknown production category: " + category.seoName());
+                UUID parentId = category.parentId() == null ? null : mapped.get(category.parentId());
+                if (category.parentId() != null && parentId == null) {
+                    throw new IllegalArgumentException("Unknown parent category: " + category.seoName());
+                }
+                if (STORAGE_HARDWARE_TYPE.equals(category.hardwareType())) parentId = storageId;
+                if (STORAGE_HARDWARE_TYPE.equals(category.hardwareType()) && parentId == null) {
+                    throw new IllegalArgumentException("Missing storage parent category: " + category.seoName());
                 }
                 catalog.insert("""
-                        INSERT INTO categories (id, name, seo_name, description, parent_id, hardware_type, status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
+                        INSERT INTO categories (id, name, seo_name, description, parent_id, hardware_type_id, display_order, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
                         """, java.util.Collections.singletonList(new Object[] {category.id(), category.name(), category.seoName(),
-                        category.description(), storageId, category.hardwareType(), category.status()}));
+                        category.description(), parentId, hardwareTypes.get(category.hardwareType()),
+                        category.displayOrder(), category.status()}));
                 stored.putAll(categoryIds());
             }
             UUID id = stored.get(category.seoName());
@@ -157,6 +166,14 @@ final class CatalogDatasetSeed {
         var ids = new HashMap<String, UUID>();
         for (var row : catalog.query("SELECT id, seo_name FROM categories ORDER BY (status <> 'DELETED'), created_at")) {
             ids.put((String) row.get("seo_name"), (UUID) row.get("id"));
+        }
+        return ids;
+    }
+
+    private Map<String, UUID> hardwareTypeIds() throws Exception {
+        var ids = new HashMap<String, UUID>();
+        for (var row : catalog.query("SELECT id, code FROM hardware_types WHERE status <> 'DELETED'")) {
+            ids.put((String) row.get("code"), (UUID) row.get("id"));
         }
         return ids;
     }
