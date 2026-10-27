@@ -62,7 +62,11 @@ public class OrderController {
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer limit) {
+        if (page != null) {
+            return ApiResponse.success(orderQueryService.getOrdersPage(customerId(authentication), status, keyword, page, limit));
+        }
         return ApiResponse.success(orderQueryService.getOrders(customerId(authentication), status, keyword, cursor, limit));
     }
 
