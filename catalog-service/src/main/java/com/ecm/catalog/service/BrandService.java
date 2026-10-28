@@ -37,7 +37,7 @@ public class BrandService {
     public BrandResponse create(CreateBrandRequest request) {
         // 1. Reject a name or SEO name already held by a non-deleted brand
         String name = request.name().trim();
-        String seoName = normalizeSeo(request.seoName(), name);
+        String seoName = SeoNames.slug(request.seoName(), name);
         if (brandRepository.existsByNameIgnoreCaseAndStatusNot(name, CatalogStatus.DELETED)
                 || brandRepository.existsBySeoNameAndStatusNot(seoName, CatalogStatus.DELETED)) {
             throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT);
@@ -58,7 +58,7 @@ public class BrandService {
 
         // 2. Name and SEO name may only collide with themselves
         String name = request.name().trim();
-        String seoName = normalizeSeo(request.seoName(), name);
+        String seoName = SeoNames.slug(request.seoName(), name);
         boolean nameChanged = !brand.getName().equalsIgnoreCase(name);
         boolean seoNameChanged = !brand.getSeoName().equals(seoName);
         if ((nameChanged && brandRepository.existsByNameIgnoreCaseAndStatusNot(name, CatalogStatus.DELETED))
@@ -97,18 +97,6 @@ public class BrandService {
         brandRepository.save(brand);
     }
 
-    private Brand findLiveBrand(UUID id) {
-        Brand brand = brandRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brand", id));
-        if (brand.getStatus() == CatalogStatus.DELETED) {
-            throw new ResourceNotFoundException("Brand", id);
-        }
-        return brand;
-    }
-
-    private String normalizeSeo(String seoName, String name) {
-        return SeoNames.slug(seoName, name);
-    }
-
     @Transactional(readOnly = true)
     public List<BrandResponse> getAllBrandsForAdmin() {
         // 1. Admin listing includes INACTIVE brands, never DELETED ones
@@ -135,6 +123,14 @@ public class BrandService {
 
         // 2. Map to response DTO and add the image URL
         return withImageUrls(List.of(brandMapper.toResponse(brand))).get(0);
+    }
+
+    private Brand findLiveBrand(UUID id) {
+        Brand brand = brandRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brand", id));
+        if (brand.getStatus() == CatalogStatus.DELETED) {
+            throw new ResourceNotFoundException("Brand", id);
+        }
+        return brand;
     }
 
     /** One batched Media Service call for the whole list; a brand without an image keeps a null URL. */
