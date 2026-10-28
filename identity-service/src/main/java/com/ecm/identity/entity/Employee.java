@@ -57,4 +57,10 @@ public class Employee {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    /** Names are stored without the spaces around them. */
+    public void trimNames() {
+        firstName = firstName.trim();
+        lastName = lastName.trim();
+    }
 }

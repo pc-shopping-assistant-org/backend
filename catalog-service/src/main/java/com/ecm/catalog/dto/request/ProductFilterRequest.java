@@ -30,4 +30,11 @@ public class ProductFilterRequest {
 
     /** Zero-based number of the page to return; when set, the response carries the totals and the cursor is ignored. */
     private Integer page;
+
+    /** A price below zero, or a minimum above the maximum, can match nothing. */
+    public boolean hasInvalidPriceRange() {
+        return (minPrice != null && minPrice < 0)
+                || (maxPrice != null && maxPrice < 0)
+                || (minPrice != null && maxPrice != null && minPrice > maxPrice);
+    }
 }

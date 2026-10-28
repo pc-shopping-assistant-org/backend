@@ -13,6 +13,7 @@ import com.ecm.catalog.mapper.CategoryMapper;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.HardwareTypeRepository;
 import com.ecm.catalog.repository.ProductRepository;
+import com.ecm.catalog.util.BlankText;
 import com.ecm.catalog.util.CategoryTrees;
 import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
@@ -47,8 +48,8 @@ public class CategoryService {
         validateParent(request.parentId(), null);
 
         // 3. Persist the new category
-        Category category = Category.builder().name(name).seoName(seoName).description(normalizeDescription(request.description()))
-                .parentId(request.parentId()).displayOrder(normalizeDisplayOrder(request.displayOrder()))
+        Category category = Category.builder().name(name).seoName(seoName).description(BlankText.trimmedOrNull(request.description()))
+                .parentId(request.parentId()).displayOrder(Objects.requireNonNullElse(request.displayOrder(), 0))
                 .hardwareType(resolveHardwareType(request.hardwareTypeCode()))
                 .status(CatalogStatus.ACTIVE).build();
         return categoryMapper.toResponse(categoryRepository.save(category));
@@ -167,7 +168,7 @@ public class CategoryService {
 
         category.setName(name);
         category.setSeoName(seoName);
-        category.setDescription(normalizeDescription(description));
+        category.setDescription(BlankText.trimmedOrNull(description));
         category.setParentId(parentId);
         if (displayOrder != null) category.setDisplayOrder(displayOrder);
         if (hardwareTypeCode != null) category.setHardwareType(resolveHardwareType(hardwareTypeCode));
@@ -224,13 +225,5 @@ public class CategoryService {
 
     private void addProductCounts(Map<UUID, CategoryResponse> categories) {
         CategoryTrees.addProductCounts(categories, productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE));
-    }
-
-    private String normalizeDescription(String description) {
-        return description == null || description.isBlank() ? null : description.trim();
-    }
-
-    private int normalizeDisplayOrder(Integer displayOrder) {
-        return displayOrder == null ? 0 : displayOrder;
     }
 }

@@ -90,7 +90,7 @@ public class EmployeeService {
         }
         Employee employee = employeeMapper.toEntity(request);
         employee.setAccountId(account.getId());
-        trimNames(employee);
+        employee.trimNames();
         employeeRepository.save(employee);
 
         // 5. Answer with the stored row
@@ -141,7 +141,7 @@ public class EmployeeService {
 
         // 4. Fields left out keep their value
         employeeMapper.updateEntity(employee, request);
-        trimNames(employee);
+        employee.trimNames();
         try {
             accountRepository.saveAndFlush(account);
         } catch (DataIntegrityViolationException ex) {
@@ -206,11 +206,6 @@ public class EmployeeService {
             }
             account.setPhone(phone);
         }
-    }
-
-    private void trimNames(Employee employee) {
-        employee.setFirstName(employee.getFirstName().trim());
-        employee.setLastName(employee.getLastName().trim());
     }
 
     private EmployeeResponse detail(UUID accountId) {

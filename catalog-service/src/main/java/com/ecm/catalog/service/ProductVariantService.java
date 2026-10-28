@@ -20,15 +20,14 @@ import com.ecm.catalog.repository.ProductVariantRepository;
 import com.ecm.catalog.repository.VariantOptionRepository;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.ResourceNotFoundException;
+import com.ecm.catalog.util.BlankText;
+import com.ecm.catalog.util.VariantOptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 
 /** Variant writes (UC-ADM-PROD-007 and its follow-ups) plus the by-id lookup other services call. */
@@ -53,12 +52,12 @@ public class ProductVariantService {
 
         // 2. SKU and barcode must be free among non-deleted variants; the image and the options must be valid
         String sku = request.sku().trim();
-        String barcode = normalizeBarcode(request.barcode());
+        String barcode = BlankText.trimmedOrNull(request.barcode());
         if (productVariantRepository.existsBySkuAndStatusNot(sku, CatalogStatus.DELETED)
                 || barcode != null && productVariantRepository.existsByBarcodeAndStatusNot(barcode, CatalogStatus.DELETED)) {
             throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Variant SKU or barcode already exists");
         }
-        validateOptionNames(request.options());
+        VariantOptions.ensureUniqueNames(request.options());
         validateImage(request.imageFileId());
 
         // 3. Save the variant and its option links in this transaction
@@ -76,12 +75,12 @@ public class ProductVariantService {
         // 1. Load the variant and check SKU and barcode against the other non-deleted variants
         ProductVariant variant = findLiveVariant(productId, variantId);
         String sku = request.sku().trim();
-        String barcode = normalizeBarcode(request.barcode());
+        String barcode = BlankText.trimmedOrNull(request.barcode());
         if (productVariantRepository.existsBySkuAndIdNotAndStatusNot(sku, variantId, CatalogStatus.DELETED)
                 || barcode != null && productVariantRepository.existsByBarcodeAndIdNotAndStatusNot(barcode, variantId, CatalogStatus.DELETED)) {
             throw new BusinessException(CatalogErrorCode.RESOURCE_CONFLICT, "Variant SKU or barcode already exists");
         }
-        validateOptionNames(request.options());
+        VariantOptions.ensureUniqueNames(request.options());
         validateImage(request.imageFileId());
 
         // 2. Apply the edit and replace the options
@@ -151,27 +150,9 @@ public class ProductVariantService {
                 .orElseThrow(() -> new ResourceNotFoundException("ProductVariant", variantId));
     }
 
-    private String normalizeBarcode(String barcode) {
-        return barcode == null || barcode.isBlank() ? null : barcode.trim();
-    }
-
     private void validateImage(UUID imageFileId) {
         if (imageFileId != null) {
             mediaResolver.requireExisting(List.of(imageFileId));
-        }
-    }
-
-    // A variant may hold only one option per option name, compared ignoring case and surrounding whitespace.
-    private void validateOptionNames(List<VariantOptionRequest> options) {
-        if (options == null) {
-            return;
-        }
-        Set<String> names = new HashSet<>();
-        for (VariantOptionRequest option : options) {
-            if (!names.add(option.name().trim().toUpperCase(Locale.ROOT))) {
-                throw new BusinessException(CatalogErrorCode.INVALID_VARIANT_OPTIONS,
-                        "Variant has more than one option named " + option.name().trim());
-            }
         }
     }
 

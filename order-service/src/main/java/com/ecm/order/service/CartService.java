@@ -3,7 +3,6 @@ package com.ecm.order.service;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.order.dto.request.AddToCartRequest;
 import com.ecm.order.dto.request.UpdateCartItemRequest;
-import com.ecm.order.dto.response.CartItemResponse;
 import com.ecm.order.dto.response.CartResponse;
 import com.ecm.order.dto.response.CartVariantDetailsResponse;
 import com.ecm.order.entity.Cart;
@@ -12,11 +11,11 @@ import com.ecm.order.exception.OrderErrorCode;
 import com.ecm.order.helper.CatalogVariantLookup;
 import com.ecm.order.repository.CartItemRepository;
 import com.ecm.order.repository.CartRepository;
+import com.ecm.order.util.CartResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,7 +36,7 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public CartResponse getCart(UUID customerId) {
-        return cartRepository.findByCustomerId(customerId).map(this::toResponse).orElseGet(() -> emptyCart(null));
+        return cartRepository.findByCustomerId(customerId).map(this::toResponse).orElseGet(() -> CartResponses.empty(null));
     }
 
     @Transactional
@@ -89,8 +88,8 @@ public class CartService {
     public CartResponse clearCart(UUID customerId) {
         return cartRepository.lockByCustomerId(customerId).map(cart -> {
             cartItemRepository.deleteByCartId(cart.getId());
-            return emptyCart(cart.getId());
-        }).orElseGet(() -> emptyCart(null));
+            return CartResponses.empty(cart.getId());
+        }).orElseGet(() -> CartResponses.empty(null));
     }
 
     private Cart lockOrCreateCart(UUID customerId) {
@@ -121,29 +120,12 @@ public class CartService {
         // 1. Load the lines and their variants, one call to the Catalog Service for all of them
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
         if (cartItems.isEmpty()) {
-            return emptyCart(cart.getId());
+            return CartResponses.empty(cart.getId());
         }
         Map<UUID, CartVariantDetailsResponse> variants = variantLookup.details(cartItems.stream().map(CartItem::getVariantId).toList()).stream()
                 .collect(Collectors.toMap(CartVariantDetailsResponse::id, Function.identity()));
 
         // 2. Build the lines; only the lines on sale count towards the totals
-        List<CartItemResponse> items = cartItems.stream().map(item -> toItemResponse(item, variants.get(item.getVariantId())))
-                .sorted(Comparator.comparing(item -> item.sku() == null ? "" : item.sku())).toList();
-        int totalItems = items.stream().filter(CartItemResponse::available).mapToInt(CartItemResponse::quantity).sum();
-        long subtotal = items.stream().filter(CartItemResponse::available).mapToLong(CartItemResponse::subtotal).sum();
-        return new CartResponse(cart.getId(), items, totalItems, subtotal);
-    }
-
-    private CartItemResponse toItemResponse(CartItem item, CartVariantDetailsResponse variant) {
-        if (variant == null) {
-            return new CartItemResponse(item.getVariantId(), null, null, null, null, null, null, null, null, item.getQuantity(), 0L, null, false);
-        }
-        long lineTotal = variant.price() * item.getQuantity();
-        return new CartItemResponse(variant.id(), variant.productId(), variant.categoryId(), variant.productName(), variant.sku(), variant.model(), variant.variantLabel(),
-                variant.mainImageUrl(), variant.price(), item.getQuantity(), lineTotal, variant.quantity(), variant.sellable());
-    }
-
-    private CartResponse emptyCart(UUID cartId) {
-        return new CartResponse(cartId, List.of(), 0, 0L);
+        return CartResponses.of(cart.getId(), cartItems, variants);
     }
 }
