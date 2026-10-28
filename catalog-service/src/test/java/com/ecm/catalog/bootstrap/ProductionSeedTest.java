@@ -37,7 +37,10 @@ class ProductionSeedTest {
 
         assertEquals(2_389, data.products().size());
         assertEquals(2_389, data.productVariants().size());
-        assertEquals(19, data.categories().stream().map(SeedData.Category::hardwareType).distinct().count());
+        assertEquals(20, data.categories().stream().map(SeedData.Category::hardwareType).distinct().count());
+        // SSD and HDD are hardware types of their own, not STORAGE
+        assertEquals(Set.of("SSD", "HDD"), data.categories().stream().filter(category -> category.seoName().equals("ssd") || category.seoName().equals("hdd"))
+                .map(SeedData.Category::hardwareType).collect(java.util.stream.Collectors.toSet()));
         assertTrue(data.categories().stream().allMatch(category -> category.hardwareType() != null));
         assertEquals(data.brands().size(), data.brands().stream().map(SeedData.Brand::id).distinct().count());
         assertEquals(10, data.attributeDefinitions().stream().filter(attribute ->

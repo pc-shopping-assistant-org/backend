@@ -15,7 +15,8 @@ import static com.ecm.catalog.bootstrap.SeedDatabase.reference;
 final class CatalogDatasetSeed {
     private static final String STORAGE_CATEGORY = "storage";
     private static final String STORAGE_CATEGORY_NAME = "Ổ cứng";
-    private static final String STORAGE_HARDWARE_TYPE = "STORAGE";
+    /** The hardware types of the storage family; their categories sit under the "Ổ cứng" category. */
+    private static final java.util.Set<String> STORAGE_HARDWARE_TYPES = java.util.Set.of("STORAGE", "SSD", "HDD");
     private final SeedDatabase catalog;
 
     CatalogDatasetSeed(SeedDatabase catalog) { this.catalog = catalog; }
@@ -143,8 +144,8 @@ final class CatalogDatasetSeed {
                 if (category.parentId() != null && parentId == null) {
                     throw new IllegalArgumentException("Unknown parent category: " + category.seoName());
                 }
-                if (STORAGE_HARDWARE_TYPE.equals(category.hardwareType())) parentId = storageId;
-                if (STORAGE_HARDWARE_TYPE.equals(category.hardwareType()) && parentId == null) {
+                if (STORAGE_HARDWARE_TYPES.contains(category.hardwareType())) parentId = storageId;
+                if (STORAGE_HARDWARE_TYPES.contains(category.hardwareType()) && parentId == null) {
                     throw new IllegalArgumentException("Missing storage parent category: " + category.seoName());
                 }
                 catalog.insert("""

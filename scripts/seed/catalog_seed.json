@@ -85791,7 +85791,7 @@
       "description": "Danh mục linh kiện Ổ cứng SSD",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "STORAGE",
+      "hardware_type": "SSD",
       "display_order": 80
     },
     {
@@ -85801,7 +85801,7 @@
       "description": "Danh mục linh kiện Ổ cứng HDD",
       "parent_id": null,
       "status": "ACTIVE",
-      "hardware_type": "STORAGE",
+      "hardware_type": "HDD",
       "display_order": 80
     },
     {
