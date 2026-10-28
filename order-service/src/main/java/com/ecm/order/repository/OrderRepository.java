@@ -52,6 +52,24 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             Pageable pageable
     );
 
+    /** The same orders as {@link #findCustomerPage}, but a numbered page (no cursor) with the total the storefront needs to number them. */
+    @Query("""
+            SELECT o FROM Order o
+            WHERE o.customerId = :customerId
+              AND (:anyStatus = TRUE OR o.status = :status)
+              AND (:anyKeyword = TRUE OR o.id = :orderId OR o.invoiceNumber = :invoiceNumber)
+            ORDER BY o.createdAt DESC, o.id DESC
+            """)
+    Page<Order> findCustomerNumberedPage(
+            @Param("customerId") UUID customerId,
+            @Param("anyStatus") boolean anyStatus,
+            @Param("status") OrderStatus status,
+            @Param("anyKeyword") boolean anyKeyword,
+            @Param("orderId") UUID orderId,
+            @Param("invoiceNumber") String invoiceNumber,
+            Pageable pageable
+    );
+
     /** The invoices: completed orders whose invoice number or recipient name contains the keyword, delivered within the period. */
     @Query("SELECT o FROM Order o WHERE o.status = com.ecm.order.entity.OrderStatus.COMPLETED " +
             "AND o.deliveredAt >= :deliveredFrom AND o.deliveredAt < :deliveredTo " +

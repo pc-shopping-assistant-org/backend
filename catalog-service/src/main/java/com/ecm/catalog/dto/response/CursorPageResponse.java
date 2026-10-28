@@ -17,4 +17,9 @@ public class CursorPageResponse<T> {
     private String nextCursor;
     private boolean hasNext;
     private int size;
+
+    /** Only when a numbered page was asked for: its number and the totals. */
+    private Integer page;
+    private Long totalElements;
+    private Integer totalPages;
 }

@@ -81,15 +81,40 @@ public class OrderQueryService {
         boolean hasNext = rows.size() > pageSize;
         List<Order> page = hasNext ? rows.subList(0, pageSize) : rows;
 
-        // 2. The lines of the whole page in one query
+        // 2. The lines of the whole page
+        List<OrderSummaryResponse> items = summaries(page);
+        String nextCursor = hasNext ? new Cursor(page.getLast().getCreatedAt(), page.getLast().getId()).encode() : null;
+        return new CursorPageResponse<>(items, nextCursor, hasNext, items.size());
+    }
+
+    /** The same list as {@link #getOrders}, as a numbered page (zero-based) with its number and the totals. */
+    @Transactional(readOnly = true)
+    public CursorPageResponse<OrderSummaryResponse> getOrdersPage(UUID customerId, OrderStatus status, String keyword, int page, Integer limit) {
+        // 1. Reject a page that makes no sense
+        if (page < 0) {
+            throw new BusinessException(CommonErrorCode.BAD_REQUEST);
+        }
+
+        // 2. One page of orders, with the total
+        int pageSize = limit == null || limit < 1 ? DEFAULT_LIMIT : Math.min(limit, MAX_LIMIT);
+        String trimmedKeyword = keyword == null ? "" : keyword.trim();
+        UUID keywordOrderId = parseOrderId(trimmedKeyword);
+        Page<Order> orders = orderRepository.findCustomerNumberedPage(customerId, status == null, status, trimmedKeyword.isEmpty(),
+                keywordOrderId == null ? NO_ORDER_ID : keywordOrderId, trimmedKeyword.toUpperCase(Locale.ROOT),
+                PageRequest.of(page, pageSize));
+        List<OrderSummaryResponse> items = summaries(orders.getContent());
+        return new CursorPageResponse<>(items, null, orders.hasNext(), items.size(),
+                orders.getNumber(), orders.getTotalElements(), orders.getTotalPages());
+    }
+
+    /** The orders of a page with their line count and first product, the lines read in one query. */
+    private List<OrderSummaryResponse> summaries(List<Order> page) {
         Map<UUID, List<OrderItem>> itemsByOrder = orderItemRepository.findByOrderIdIn(page.stream().map(Order::getId).toList()).stream()
                 .collect(Collectors.groupingBy(OrderItem::getOrderId));
-        List<OrderSummaryResponse> items = page.stream().map(order -> {
+        return page.stream().map(order -> {
             List<OrderItem> lines = itemsByOrder.getOrDefault(order.getId(), List.of());
             return orderMapper.toSummary(order, lines.size(), lines.isEmpty() ? null : lines.getFirst().getProductName());
         }).toList();
-        String nextCursor = hasNext ? new Cursor(page.getLast().getCreatedAt(), page.getLast().getId()).encode() : null;
-        return new CursorPageResponse<>(items, nextCursor, hasNext, items.size());
     }
 
     @Transactional(readOnly = true)

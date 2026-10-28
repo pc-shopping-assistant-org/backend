@@ -27,4 +27,7 @@ public class ProductFilterRequest {
     private Integer limit = 20;
     
     private UUID cursor;
+
+    /** Zero-based number of the page to return; when set, the response carries the totals and the cursor is ignored. */
+    private Integer page;
 }

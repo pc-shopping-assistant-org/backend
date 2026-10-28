@@ -4,6 +4,7 @@ import com.ecm.catalog.dto.response.CategoryResponse;
 import com.ecm.catalog.repository.CategoryProductCount;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,10 @@ public final class CategoryTrees {
         }
     }
 
-    /** Hangs each category under its parent and returns the ones without a parent; a category whose parent is missing is left out. */
+    /**
+     * Hangs each category under its parent and returns the ones without a parent; a category whose parent is missing is left out.
+     * Roots and every level of children come back by display order, then by name.
+     */
     public static List<CategoryResponse> roots(Map<UUID, CategoryResponse> categories) {
         List<CategoryResponse> roots = new ArrayList<>();
         for (CategoryResponse category : categories.values()) {
@@ -40,6 +44,15 @@ public final class CategoryTrees {
                 parent.getChildren().add(category);
             }
         }
+        Comparator<CategoryResponse> storefrontOrder = Comparator.comparingInt(CategoryResponse::getDisplayOrder)
+                .thenComparing(CategoryResponse::getName, String.CASE_INSENSITIVE_ORDER);
+        roots.sort(storefrontOrder);
+        roots.forEach(root -> sortChildren(root, storefrontOrder));
         return roots;
+    }
+
+    private static void sortChildren(CategoryResponse category, Comparator<CategoryResponse> order) {
+        category.getChildren().sort(order);
+        category.getChildren().forEach(child -> sortChildren(child, order));
     }
 }

@@ -10,14 +10,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collection;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
-    @Query("SELECT c FROM Category c WHERE c.status = :status ORDER BY c.name ASC")
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.hardwareType WHERE c.status = :status ORDER BY c.displayOrder ASC, c.name ASC")
     List<Category> findByStatus(@Param("status") CatalogStatus status);
 
-    @Query("SELECT c FROM Category c WHERE c.parentId IS NULL AND c.status = :status ORDER BY c.name ASC")
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.hardwareType WHERE c.parentId IS NULL AND c.status = :status ORDER BY c.displayOrder ASC, c.name ASC")
     List<Category> findRootCategoriesByStatus(@Param("status") CatalogStatus status);
 
     @Query("SELECT c FROM Category c WHERE c.id = :id AND c.status = :status")
@@ -25,8 +26,11 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     boolean existsByIdAndStatus(UUID id, CatalogStatus status);
 
-    @Query("SELECT c FROM Category c WHERE c.status <> :status ORDER BY c.name ASC")
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.hardwareType WHERE c.status <> :status ORDER BY c.displayOrder ASC, c.name ASC")
     List<Category> findByStatusNot(@Param("status") CatalogStatus status);
+
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.hardwareType WHERE c.id IN :ids")
+    List<Category> findAllWithHardwareTypeByIdIn(@Param("ids") Collection<UUID> ids);
 
     boolean existsBySeoNameAndStatusNot(String seoName, CatalogStatus status);
 

@@ -6,9 +6,9 @@ The project is organized as a single Maven reactor. Services run on the host dur
 
 For **server infrastructure + local application development**, use the independent
 `../infra/` checkout and its README. Its single compose starts dependencies by default;
-profile `apps` adds GHCR application images for server deployment. Import
-`../infra/env/backend.env.example` settings into the local process, using actual
-server credentials. `docker-compose.yml` here remains the isolated local/CI stack;
+profile `apps` adds GHCR application images for server deployment. Start from
+`.env.example` in this repository, set tunnel host/ports and server credentials,
+then import the settings into the local process. `docker-compose.yml` here remains the isolated local/CI stack;
 do not run both stacks against the same ports/volumes. The local commands below
 describe that existing local/CI stack, not the remote server configuration.
 
@@ -32,12 +32,16 @@ ghcr.io/pc-shopping-assistant-org/backend-media-service
 ghcr.io/pc-shopping-assistant-org/backend-sync-service
 ```
 
+New CI runs cancel older runs of the same workflow on the same branch or PR,
+including release branches.
+
 Only a push or manual dispatch on `release/vX.Y.Z` (or `release/vX.Y.Z-rc.N`)
 builds/publishes images tagged `X.Y.Z` (or `X.Y.Z-rc.N`) and `sha-<full commit>`.
 For example, `release/v1.0.0` publishes all ten images as `1.0.0`. Other branches, tags, PRs and
 merge queues verify only. This repository never deploys or connects to the server.
-`common-lib` is embedded in service JARs, not a separate image. Only the infra
-repository's versioned release workflow deploys the stack; see `../infra/README.md`.
+`common-lib` is embedded in service JARs, not a separate image. Select the
+published backend tag in the server's `infra/.release.env`, then run the infra
+release workflow to deploy; see `../infra/README.md`.
 Server runtime configuration comes from `infra/.env.docker`, never an image env file.
 Use `Verify Java backend` as a required check if GitHub branch rules should block
 merges when Maven verification fails.

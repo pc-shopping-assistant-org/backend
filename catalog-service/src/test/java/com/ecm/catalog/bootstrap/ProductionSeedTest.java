@@ -2,7 +2,6 @@ package com.ecm.catalog.bootstrap;
 
 import com.ecm.catalog.entity.AttributeDataType;
 import com.ecm.catalog.entity.CatalogStatus;
-import com.ecm.catalog.entity.HardwareType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
@@ -13,6 +12,7 @@ import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,10 +24,28 @@ class ProductionSeedTest {
     void bundledDatasetLoadsTypedContractsAndIncludesReferencedImages() throws Exception {
         SeedData data = SeedData.load(null);
         assertFalse(data.products().isEmpty());
+        assertTrue(data.productVariants().stream().allMatch(variant -> variant.status() == CatalogStatus.ACTIVE && variant.quantity() == 0));
         var files = data.files().stream().map(SeedData.Media::id).collect(java.util.stream.Collectors.toSet());
         assertTrue(data.productImages().stream().allMatch(image -> files.contains(image.imageFileId())));
         assertTrue(data.productVariants().stream().allMatch(variant -> variant.imageFileId() == null || files.contains(variant.imageFileId())));
         assertEquals(1, data.products().stream().map(SeedData.Product::createdBy).distinct().count());
+    }
+
+    @Test
+    void configuredDatasetsMergeWithoutDuplicatingSharedMasterRows() throws Exception {
+        SeedData data = SeedData.loadAll("/seed/catalog_seed.json,/seed/pc_catalog_seed.json,/seed/gear_catalog_seed.json");
+
+        assertEquals(2_389, data.products().size());
+        assertEquals(2_389, data.productVariants().size());
+        assertEquals(20, data.categories().stream().map(SeedData.Category::hardwareType).distinct().count());
+        // SSD and HDD are hardware types of their own, not STORAGE
+        assertEquals(Set.of("SSD", "HDD"), data.categories().stream().filter(category -> category.seoName().equals("ssd") || category.seoName().equals("hdd"))
+                .map(SeedData.Category::hardwareType).collect(java.util.stream.Collectors.toSet()));
+        assertTrue(data.categories().stream().allMatch(category -> category.hardwareType() != null));
+        assertEquals(data.brands().size(), data.brands().stream().map(SeedData.Brand::id).distinct().count());
+        assertEquals(10, data.attributeDefinitions().stream().filter(attribute ->
+                Set.of("cpu", "mainboard", "ram", "ram_2", "storage", "psu", "gpu", "case", "cooler", "monitor")
+                        .contains(attribute.key())).count());
     }
 
     @Test
@@ -49,7 +67,7 @@ class ProductionSeedTest {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "SEED_TEST_JDBC_URL", matches = "jdbc:postgresql:.*")
-    void fullBundledCatalogStagesAgainstCurrentSchemaAndTemplateWithoutImageRequests() throws Exception {
+    void fullMergedCatalogStagesAgainstCurrentSchemaAndTemplatesWithoutImageRequests() throws Exception {
         String adminUrl = System.getenv("SEED_TEST_JDBC_URL");
         String user = System.getenv().getOrDefault("SEED_TEST_DB_USER", "postgres");
         String password = System.getenv().getOrDefault("SEED_TEST_DB_PASSWORD", "postgres");
@@ -58,14 +76,27 @@ class ProductionSeedTest {
         try (var admin = DriverManager.getConnection(adminUrl, user, password)) {
             try {
                 try (var statement = admin.createStatement()) { statement.execute("CREATE DATABASE " + name); }
-                SeedData data = SeedData.load(null);
+                SeedData data = SeedData.loadAll("/seed/catalog_seed.json,/seed/pc_catalog_seed.json,/seed/gear_catalog_seed.json");
                 var mediaIds = data.files().stream().map(SeedData.Media::id)
                         .collect(java.util.stream.Collectors.toMap(id -> id, id -> id));
                 try (var database = new SeedDatabase("catalog", url, user, password)) {
-                    new CatalogDatasetSeed(database).insert(data, data.products().getFirst().createdBy(), mediaIds);
+                    var seed = new CatalogDatasetSeed(database);
+                    seed.insert(data, data.products().getFirst().createdBy(), mediaIds);
                     assertEquals(data.products().size(), scalar(database.connection, "SELECT count(*) FROM products"));
                     assertEquals(data.productVariants().size(), scalar(database.connection, "SELECT count(*) FROM product_variants"));
                     assertEquals(data.productImages().size(), scalar(database.connection, "SELECT count(*) FROM product_images"));
+                    assertEquals(21, scalar(database.connection, "SELECT count(*) FROM hardware_types"));
+                    assertEquals(1, scalar(database.connection, "SELECT count(*) FROM categories WHERE seo_name = 'other'"));
+                    assertEquals(0, scalar(database.connection, "SELECT count(*) FROM categories WHERE hardware_type_id IS NULL"));
+                    assertEquals(data.productVariants().size(), scalar(database.connection,
+                            "SELECT count(*) FROM product_variants WHERE status = 'ACTIVE' AND quantity = 0"));
+                    try (var statement = database.connection.createStatement()) {
+                        statement.execute("UPDATE categories SET display_order = 777 WHERE seo_name = 'pc-gaming'");
+                    }
+                    seed.insert(data, data.products().getFirst().createdBy(), mediaIds);
+                    assertEquals(data.products().size(), scalar(database.connection, "SELECT count(*) FROM products"));
+                    assertEquals(data.productImages().size(), scalar(database.connection, "SELECT count(*) FROM product_images"));
+                    assertEquals(777, scalar(database.connection, "SELECT display_order FROM categories WHERE seo_name = 'pc-gaming'"));
                     // Closing an uncommitted bootstrap connection must roll all staged seed rows back.
                 }
                 try (var connection = DriverManager.getConnection(url, user, password)) {
@@ -214,7 +245,7 @@ class ProductionSeedTest {
             return new SeedData(
                     List.of(new SeedData.Media(fileId, "source-key", "seed.png", "image/png", sourceUrl)),
                     List.of(new SeedData.Brand(seedBrand, "Seed Brand", "seed-brand", null, null, CatalogStatus.ACTIVE)),
-                    List.of(new SeedData.Category(category, "CPU", "cpu", null, HardwareType.CPU, CatalogStatus.ACTIVE)),
+                    List.of(new SeedData.Category(category, "CPU", "cpu", null, null, "CPU", 10, CatalogStatus.ACTIVE)),
                     List.of(new SeedData.Product(seedProduct, "Seed product", "existing-product", seedBrand, category, Map.of("core_count", 8), null, CatalogStatus.ACTIVE, employee),
                             new SeedData.Product(newProduct, "New product", "new-product", seedBrand, category, Map.of("core_count", cores), null, CatalogStatus.ACTIVE, employee)),
                     List.of(new SeedData.Variant(seedVariant, seedProduct, 100L, 0, "existing-sku", null, null, 12, null, null, CatalogStatus.INACTIVE, fileId),

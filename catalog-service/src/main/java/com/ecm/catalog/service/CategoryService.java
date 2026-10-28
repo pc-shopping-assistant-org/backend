@@ -4,11 +4,14 @@ import com.ecm.catalog.dto.response.CategoryResponse;
 import com.ecm.catalog.dto.request.CreateCategoryRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryDetailsRequest;
 import com.ecm.catalog.dto.request.UpdateCategoryRequest;
+import com.ecm.catalog.dto.request.ReorderCategoriesRequest;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Category;
+import com.ecm.catalog.entity.HardwareTypeEntity;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
 import com.ecm.catalog.repository.CategoryRepository;
+import com.ecm.catalog.repository.HardwareTypeRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.util.CategoryTrees;
 import com.ecm.catalog.util.SeoNames;
@@ -26,10 +29,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
+    private static final String DEFAULT_HARDWARE_TYPE_CODE = "OTHER";
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final ProductRepository productRepository;
+    private final HardwareTypeRepository hardwareTypeRepository;
 
     @Transactional
     public CategoryResponse create(CreateCategoryRequest request) {
@@ -43,13 +48,16 @@ public class CategoryService {
 
         // 3. Persist the new category
         Category category = Category.builder().name(name).seoName(seoName).description(normalizeDescription(request.description()))
-                .parentId(request.parentId()).status(CatalogStatus.ACTIVE).build();
+                .parentId(request.parentId()).displayOrder(normalizeDisplayOrder(request.displayOrder()))
+                .hardwareType(resolveHardwareType(request.hardwareTypeCode()))
+                .status(CatalogStatus.ACTIVE).build();
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
     public CategoryResponse update(UUID id, UpdateCategoryDetailsRequest request) {
-        Category category = applyDetails(id, request.name(), request.seoName(), request.description(), request.parentId());
+        Category category = applyDetails(id, request.name(), request.seoName(), request.description(), request.parentId(),
+                request.displayOrder(), request.hardwareTypeCode());
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
@@ -61,9 +69,27 @@ public class CategoryService {
         }
 
         // 2. Apply the details and the requested status together
-        Category category = applyDetails(id, request.name(), request.seoName(), request.description(), request.parentId());
+        Category category = applyDetails(id, request.name(), request.seoName(), request.description(), request.parentId(),
+                request.displayOrder(), request.hardwareTypeCode());
         category.setStatus(request.status());
         return categoryMapper.toResponse(categoryRepository.save(category));
+    }
+
+    @Transactional
+    public void reorder(ReorderCategoriesRequest request) {
+        Map<UUID, Category> categories = categoryRepository.findAllById(request.items().stream()
+                        .map(ReorderCategoriesRequest.Item::id).toList()).stream()
+                .collect(Collectors.toMap(Category::getId, category -> category));
+        if (categories.size() != request.items().size()
+                || categories.values().stream().anyMatch(category -> category.getStatus() == CatalogStatus.DELETED)) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "All categories must be live");
+        }
+        UUID parentId = categories.values().iterator().next().getParentId();
+        if (categories.values().stream().anyMatch(category -> !Objects.equals(parentId, category.getParentId()))) {
+            throw new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE, "Categories must share the same parent");
+        }
+        request.items().forEach(item -> categories.get(item.id()).setDisplayOrder(item.displayOrder()));
+        categoryRepository.saveAll(categories.values());
     }
 
     @Transactional
@@ -121,7 +147,8 @@ public class CategoryService {
         return categoryMapper.toResponse(category);
     }
 
-    private Category applyDetails(UUID id, String rawName, String rawSeoName, String description, UUID parentId) {
+    private Category applyDetails(UUID id, String rawName, String rawSeoName, String description, UUID parentId,
+                                  Integer displayOrder, String hardwareTypeCode) {
         // 1. Load the category being edited
         Category category = findLiveCategory(id);
 
@@ -142,7 +169,17 @@ public class CategoryService {
         category.setSeoName(seoName);
         category.setDescription(normalizeDescription(description));
         category.setParentId(parentId);
+        if (displayOrder != null) category.setDisplayOrder(displayOrder);
+        if (hardwareTypeCode != null) category.setHardwareType(resolveHardwareType(hardwareTypeCode));
+        else if (category.getHardwareType() == null) category.setHardwareType(resolveHardwareType(null));
         return category;
+    }
+
+    private HardwareTypeEntity resolveHardwareType(String rawCode) {
+        String code = rawCode == null || rawCode.isBlank() ? DEFAULT_HARDWARE_TYPE_CODE : rawCode.trim().toUpperCase(Locale.ROOT);
+        return hardwareTypeRepository.findByCodeAndStatus(code, CatalogStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessException(CatalogErrorCode.INVALID_CATALOG_REFERENCE,
+                        "Hardware type must be ACTIVE"));
     }
 
     private Category findLiveCategory(UUID id) {
@@ -191,5 +228,9 @@ public class CategoryService {
 
     private String normalizeDescription(String description) {
         return description == null || description.isBlank() ? null : description.trim();
+    }
+
+    private int normalizeDisplayOrder(Integer displayOrder) {
+        return displayOrder == null ? 0 : displayOrder;
     }
 }
