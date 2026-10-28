@@ -85,7 +85,7 @@ class ProductionSeedTest {
                     assertEquals(data.products().size(), scalar(database.connection, "SELECT count(*) FROM products"));
                     assertEquals(data.productVariants().size(), scalar(database.connection, "SELECT count(*) FROM product_variants"));
                     assertEquals(data.productImages().size(), scalar(database.connection, "SELECT count(*) FROM product_images"));
-                    assertEquals(19, scalar(database.connection, "SELECT count(*) FROM hardware_types"));
+                    assertEquals(21, scalar(database.connection, "SELECT count(*) FROM hardware_types"));
                     assertEquals(1, scalar(database.connection, "SELECT count(*) FROM categories WHERE seo_name = 'other'"));
                     assertEquals(0, scalar(database.connection, "SELECT count(*) FROM categories WHERE hardware_type_id IS NULL"));
                     assertEquals(data.productVariants().size(), scalar(database.connection,
