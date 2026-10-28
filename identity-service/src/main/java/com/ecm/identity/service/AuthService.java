@@ -3,9 +3,6 @@ package com.ecm.identity.service;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.DuplicateResourceException;
 import com.ecm.common.exception.ExpiredException;
-import com.ecm.common.exception.ResourceNotFoundException;
-import com.ecm.identity.config.JwtProperties;
-import com.ecm.identity.config.JwtTokenProvider;
 import com.ecm.identity.dto.request.GoogleLoginRequest;
 import com.ecm.identity.dto.request.LoginRequest;
 import com.ecm.identity.dto.request.RegisterRequest;
@@ -14,7 +11,6 @@ import com.ecm.identity.dto.request.VerifyOtpRequest;
 import com.ecm.identity.dto.response.AuthResponse;
 import com.ecm.identity.dto.response.UserSummaryResponse;
 import com.ecm.identity.entity.Account;
-import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.helper.CustomerRegistrar;
@@ -31,8 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -42,18 +36,13 @@ public class AuthService {
 
     private static final String ROLE_CUSTOMER = "ROLE_CUSTOMER";
     private static final String OTP_PURPOSE_REGISTRATION = "REGISTRATION";
-    private static final String OTP_PURPOSE_PASSWORD_RESET = "PASSWORD_RESET";
-    private static final String OTP_PURPOSE_PASSWORD_CHANGE = "PASSWORD_CHANGE";
 
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
-    private final JwtProperties jwtProperties;
     private final OtpService otpService;
     private final GoogleIdentityVerifier googleIdentityVerifier;
     private final CustomerMapper customerMapper;
-    private final TokenRevocationService tokenRevocationService;
     private final TokenIssuer tokenIssuer;
     private final CustomerRegistrar customerRegistrar;
     private final GoogleAccountLinker googleAccountLinker;
@@ -137,27 +126,6 @@ public class AuthService {
         return tokenIssuer.issue(created.account(), customerRole, userSummary);
     }
 
-    @Transactional(readOnly = true)
-    public AuthResponse refresh(String refreshToken) {
-        // 1. Only a valid, unexpired refresh token is accepted; an access token is not
-        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isRefreshToken(refreshToken)) {
-            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
-        }
-
-        // 2. A logout (or lock) revokes every token issued before it, refresh tokens included
-        UUID accountId = tokenProvider.getAccountId(refreshToken);
-        Instant issuedAt = tokenProvider.getIssuedAt(refreshToken);
-        if (accountId == null || issuedAt == null || tokenRevocationService.isRevoked(accountId, issuedAt)) {
-            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
-        }
-
-        // 3. The account has to be usable still; its role may have changed since the last token
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS));
-        AccountChecks.ensureUsable(account);
-        return tokenIssuer.issueFor(account);
-    }
-
     @Transactional
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
         // 1. Verify Google ID token signature, issuer, audience and email_verified
@@ -176,91 +144,5 @@ public class AuthService {
 
         // 4. Issue token pair
         return tokenIssuer.issueFor(account);
-    }
-
-    public boolean logout(String accessToken) {
-        // 1. Reject malformed, expired, or refresh tokens
-        if (!tokenProvider.validateToken(accessToken) || tokenProvider.isRefreshToken(accessToken)) {
-            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
-        }
-
-        // 2. Determine the account to revoke tokens for
-        UUID accountId = tokenProvider.getAccountId(accessToken);
-        if (accountId == null) {
-            throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
-        }
-
-        // 3. Revoke every token issued before this logout instant, for the refresh lifetime.
-        // The +1s margin covers the token being revoked itself, whose iat is truncated to the
-        // current second and would otherwise compare equal to the cutoff instead of before it.
-        tokenRevocationService.revokeBefore(accountId, Instant.now().plusSeconds(1),
-                Duration.ofMillis(jwtProperties.getRefreshTokenExpirationMs()));
-        return true;
-    }
-
-    public void forgotPassword(String email) {
-        String normalized = email.trim().toLowerCase(Locale.ROOT);
-
-        // 1. Generate a uniform response path and only send when a usable account exists
-        accountRepository.findByEmailIgnoreCase(normalized)
-                .filter(account -> account.getStatus() == AccountStatus.ACTIVE)
-                .ifPresent(_ -> otpService.generateAndSendOtp(normalized, OTP_PURPOSE_PASSWORD_RESET));
-    }
-
-    @Transactional
-    public void resetPassword(String email, String otp, String newPassword) {
-        String normalized = email.trim().toLowerCase(Locale.ROOT);
-
-        // 1. Confirm that the OTP matches an active account before consuming it
-        Account account = accountRepository.findByEmailIgnoreCase(normalized)
-                .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
-                .orElseThrow(() -> new BusinessException(IdentityErrorCode.INVALID_OTP));
-        if (!otpService.verifyAndConsumeOtp(normalized, OTP_PURPOSE_PASSWORD_RESET, otp)) {
-            throw new BusinessException(IdentityErrorCode.INVALID_OTP);
-        }
-
-        // 2. Update the password
-        account.setPasswordHash(passwordEncoder.encode(newPassword));
-        accountRepository.save(account);
-    }
-
-    public void changePassword(UUID accountId, String currentPassword, String newPassword) {
-        // 1. Retrieve an active account
-        Account account = accountRepository.findById(accountId)
-                .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
-
-        // 2. Verify the current password before sending the confirmation OTP; a Google-only account has none yet,
-        // and the OTP sent to its email is then the only proof asked for
-        if (account.getPasswordHash() != null
-                && (currentPassword == null || !passwordEncoder.matches(currentPassword, account.getPasswordHash()))) {
-            throw new BusinessException(IdentityErrorCode.INCORRECT_PASSWORD);
-        }
-
-        // 3. Cache the new password pending OTP verification, then email the OTP
-        otpService.savePendingPasswordChange(accountId, newPassword);
-        otpService.generateAndSendOtp(account.getEmail(), OTP_PURPOSE_PASSWORD_CHANGE);
-    }
-
-    @Transactional
-    public void verifyPasswordChangeOtp(UUID accountId, String otp) {
-        // 1. Confirm the OTP before consuming it and reading the pending password
-        Account account = accountRepository.findById(accountId)
-                .filter(existing -> existing.getStatus() == AccountStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
-        if (!otpService.verifyAndConsumeOtp(account.getEmail(), OTP_PURPOSE_PASSWORD_CHANGE, otp)) {
-            throw new BusinessException(IdentityErrorCode.INVALID_OTP);
-        }
-
-        // 2. Retrieve the pending password cached at step 3 of changePassword()
-        String newPassword = otpService.getPendingPasswordChange(accountId);
-        if (newPassword == null) {
-            throw new ExpiredException("Password change session", accountId);
-        }
-
-        // 3. Apply the new password and clear the consumed cache entry
-        account.setPasswordHash(passwordEncoder.encode(newPassword));
-        accountRepository.save(account);
-        otpService.deletePendingPasswordChange(accountId);
     }
 }

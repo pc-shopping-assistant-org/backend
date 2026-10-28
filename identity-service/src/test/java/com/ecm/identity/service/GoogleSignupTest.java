@@ -78,6 +78,7 @@ class GoogleSignupTest {
     @Mock private TransactionTemplate transactionTemplate;
     @Mock private ApplicationEventPublisher eventPublisher;
     private AuthService authService;
+    private PasswordService passwordService;
 
     private final Role customerRole = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
 
@@ -90,8 +91,9 @@ class GoogleSignupTest {
         CustomerRegistrar registrar = new CustomerRegistrar(
                 accountRepository, customerRepository, mock(CustomerAddressRepository.class), customerMapper, passwordEncoder);
         GoogleAccountLinker linker = new GoogleAccountLinker(accountRepository, customerRepository, roleRepository, transactionTemplate, eventPublisher);
-        authService = new AuthService(accountRepository, roleRepository, passwordEncoder, tokenProvider, jwtProperties, otpService,
-                googleIdentityVerifier, customerMapper, mock(TokenRevocationService.class), tokenIssuer, registrar, linker);
+        authService = new AuthService(accountRepository, roleRepository, passwordEncoder, otpService,
+                googleIdentityVerifier, customerMapper, tokenIssuer, registrar, linker);
+        passwordService = new PasswordService(accountRepository, passwordEncoder, otpService);
 
         when(roleRepository.findByName("ROLE_CUSTOMER")).thenReturn(Optional.of(customerRole));
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(customerRole));
@@ -282,7 +284,7 @@ class GoogleSignupTest {
                 .roleId(ROLE_ID).status(AccountStatus.ACTIVE).build();
         when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(googleOnly));
 
-        authService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!");
+        passwordService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!");
 
         verify(otpService).savePendingPasswordChange(ACCOUNT_ID, "NewPassw0rd!");
         verify(otpService).generateAndSendOtp(EMAIL, "PASSWORD_CHANGE");
@@ -296,7 +298,7 @@ class GoogleSignupTest {
         when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(withPassword));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> authService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!"));
+                () -> passwordService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!"));
 
         assertEquals(IdentityErrorCode.INCORRECT_PASSWORD, ex.getErrorCode());
         verify(otpService, never()).generateAndSendOtp(any(), any());

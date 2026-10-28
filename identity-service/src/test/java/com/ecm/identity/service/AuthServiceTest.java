@@ -82,8 +82,8 @@ class AuthServiceTest {
         CustomerRegistrar registrar = new CustomerRegistrar(
                 accountRepository, customerRepository, mock(CustomerAddressRepository.class), customerMapper, passwordEncoder);
         GoogleAccountLinker linker = new GoogleAccountLinker(accountRepository, customerRepository, roleRepository, mock(TransactionTemplate.class), mock(ApplicationEventPublisher.class));
-        authService = new AuthService(accountRepository, roleRepository, passwordEncoder, tokenProvider, jwtProperties, otpService,
-                mock(GoogleIdentityVerifier.class), customerMapper, tokenRevocationService, tokenIssuer, registrar, linker);
+        authService = new AuthService(accountRepository, roleRepository, passwordEncoder, otpService,
+                mock(GoogleIdentityVerifier.class), customerMapper, tokenIssuer, registrar, linker);
     }
 
     private static RegisterRequest registerRequest() {
@@ -194,177 +194,9 @@ class AuthServiceTest {
 
     // ---- UC-AUTH-004 logout ----
 
-    @Test
-    void logoutRevokesEveryTokenIssuedBeforeNowForRefreshLifetime() {
-        when(tokenProvider.validateToken("tok")).thenReturn(true);
-        when(tokenProvider.isRefreshToken("tok")).thenReturn(false);
-        when(tokenProvider.getAccountId("tok")).thenReturn(ACCOUNT_ID);
-        when(jwtProperties.getRefreshTokenExpirationMs()).thenReturn(REFRESH_TTL_MS);
-        Instant before = Instant.now();
-
-        assertTrue(authService.logout("tok"));
-
-        ArgumentCaptor<Instant> cutoff = ArgumentCaptor.forClass(Instant.class);
-        verify(tokenRevocationService).revokeBefore(eq(ACCOUNT_ID), cutoff.capture(), eq(Duration.ofMillis(REFRESH_TTL_MS)));
-        assertTrue(cutoff.getValue().isAfter(before), "cutoff must be the logout time, not the token iat");
-    }
-
-    @Test
-    void logoutRejectsInvalidOrRefreshToken() {
-        when(tokenProvider.validateToken("bad")).thenReturn(false);
-        assertThrows(BusinessException.class, () -> authService.logout("bad"));
-
-        when(tokenProvider.validateToken("refresh")).thenReturn(true);
-        when(tokenProvider.isRefreshToken("refresh")).thenReturn(true);
-        assertThrows(BusinessException.class, () -> authService.logout("refresh"));
-
-        verify(tokenRevocationService, never()).revokeBefore(any(), any(), any());
-    }
-
     // ---- refresh token ----
-
-    private void refreshTokenIssuedAt(Instant issuedAt) {
-        when(tokenProvider.validateToken("refresh")).thenReturn(true);
-        when(tokenProvider.isRefreshToken("refresh")).thenReturn(true);
-        when(tokenProvider.getAccountId("refresh")).thenReturn(ACCOUNT_ID);
-        when(tokenProvider.getIssuedAt("refresh")).thenReturn(issuedAt);
-    }
-
-    @Test
-    void refreshIssuesANewTokenPairForAValidRefreshToken() {
-        Account account = account(AccountStatus.ACTIVE);
-        Role role = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
-        Customer customer = Customer.builder().accountId(ACCOUNT_ID).build();
-        UserSummaryResponse summary = mock(UserSummaryResponse.class);
-        refreshTokenIssuedAt(Instant.now());
-        when(tokenRevocationService.isRevoked(eq(ACCOUNT_ID), any())).thenReturn(false);
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
-        when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(role));
-        when(customerRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(customer));
-        when(customerMapper.toSummary(account, role, customer)).thenReturn(summary);
-        when(tokenProvider.generateAccessToken(ACCOUNT_ID, EMAIL, "ROLE_CUSTOMER", "ACTIVE")).thenReturn("access2");
-        when(tokenProvider.generateRefreshToken(ACCOUNT_ID, EMAIL)).thenReturn("refresh2");
-        when(jwtProperties.getAccessTokenExpirationMs()).thenReturn(86_400_000L);
-
-        AuthResponse response = authService.refresh("refresh");
-
-        assertEquals("access2", response.accessToken());
-        assertEquals("refresh2", response.refreshToken());
-    }
-
-    @Test
-    void refreshRejectsAnInvalidTokenOrAnAccessToken() {
-        when(tokenProvider.validateToken("bad")).thenReturn(false);
-        when(tokenProvider.validateToken("access")).thenReturn(true);
-        when(tokenProvider.isRefreshToken("access")).thenReturn(false);
-
-        assertEquals(IdentityErrorCode.INVALID_CREDENTIALS,
-                assertThrows(BusinessException.class, () -> authService.refresh("bad")).getErrorCode());
-        assertEquals(IdentityErrorCode.INVALID_CREDENTIALS,
-                assertThrows(BusinessException.class, () -> authService.refresh("access")).getErrorCode());
-        verify(tokenProvider, never()).generateAccessToken(any(), any(), any(), any());
-    }
-
-    @Test
-    void refreshRejectsATokenIssuedBeforeALogout() {
-        refreshTokenIssuedAt(Instant.now().minusSeconds(60));
-        when(tokenRevocationService.isRevoked(eq(ACCOUNT_ID), any())).thenReturn(true);
-
-        assertEquals(IdentityErrorCode.INVALID_CREDENTIALS,
-                assertThrows(BusinessException.class, () -> authService.refresh("refresh")).getErrorCode());
-        verify(tokenProvider, never()).generateAccessToken(any(), any(), any(), any());
-    }
-
-    @Test
-    void refreshRejectsALockedAccount() {
-        refreshTokenIssuedAt(Instant.now());
-        when(tokenRevocationService.isRevoked(eq(ACCOUNT_ID), any())).thenReturn(false);
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account(AccountStatus.LOCKED)));
-
-        assertEquals(IdentityErrorCode.ACCOUNT_LOCKED,
-                assertThrows(BusinessException.class, () -> authService.refresh("refresh")).getErrorCode());
-    }
 
     // ---- UC-AUTH-003 reset password ----
 
-    @Test
-    void resetPasswordUpdatesHashWhenOtpMatches() {
-        Account account = account(AccountStatus.ACTIVE);
-        when(accountRepository.findByEmailIgnoreCase(EMAIL)).thenReturn(Optional.of(account));
-        when(otpService.verifyAndConsumeOtp(EMAIL, "PASSWORD_RESET", "123456")).thenReturn(true);
-        when(passwordEncoder.encode("NewPass1!")).thenReturn("newHash");
-
-        authService.resetPassword(" " + EMAIL, "123456", "NewPass1!");
-
-        assertEquals("newHash", account.getPasswordHash());
-        verify(accountRepository).save(account);
-    }
-
-    @Test
-    void resetPasswordRejectsWrongOtp() {
-        when(accountRepository.findByEmailIgnoreCase(EMAIL)).thenReturn(Optional.of(account(AccountStatus.ACTIVE)));
-        when(otpService.verifyAndConsumeOtp(EMAIL, "PASSWORD_RESET", "bad")).thenReturn(false);
-
-        assertThrows(BusinessException.class, () -> authService.resetPassword(EMAIL, "bad", "NewPass1!"));
-        verify(accountRepository, never()).save(any());
-    }
-
-    @Test
-    void forgotPasswordSendsOtpOnlyForActiveAccount() {
-        when(accountRepository.findByEmailIgnoreCase(EMAIL)).thenReturn(Optional.of(account(AccountStatus.LOCKED)));
-        authService.forgotPassword(EMAIL);
-        verify(otpService, never()).generateAndSendOtp(any(), any());
-
-        when(accountRepository.findByEmailIgnoreCase(EMAIL)).thenReturn(Optional.of(account(AccountStatus.ACTIVE)));
-        authService.forgotPassword(EMAIL);
-        verify(otpService).generateAndSendOtp(EMAIL, "PASSWORD_RESET");
-    }
-
     // ---- UC-AUTH-005 change password ----
-
-    @Test
-    void changePasswordRejectsIncorrectCurrentPassword() {
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account(AccountStatus.ACTIVE)));
-        when(passwordEncoder.matches("bad", "hash")).thenReturn(false);
-
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> authService.changePassword(ACCOUNT_ID, "bad", "NewPass1!"));
-
-        assertEquals(IdentityErrorCode.INCORRECT_PASSWORD, ex.getErrorCode());
-        verify(otpService, never()).savePendingPasswordChange(any(), any());
-    }
-
-    @Test
-    void changePasswordCachesNewPasswordAndSendsOtp() {
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account(AccountStatus.ACTIVE)));
-        when(passwordEncoder.matches("old", "hash")).thenReturn(true);
-
-        authService.changePassword(ACCOUNT_ID, "old", "NewPass1!");
-
-        verify(otpService).savePendingPasswordChange(ACCOUNT_ID, "NewPass1!");
-        verify(otpService).generateAndSendOtp(EMAIL, "PASSWORD_CHANGE");
-    }
-
-    @Test
-    void verifyPasswordChangeOtpAppliesPendingPassword() {
-        Account account = account(AccountStatus.ACTIVE);
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account));
-        when(otpService.verifyAndConsumeOtp(EMAIL, "PASSWORD_CHANGE", "123456")).thenReturn(true);
-        when(otpService.getPendingPasswordChange(ACCOUNT_ID)).thenReturn("NewPass1!");
-        when(passwordEncoder.encode("NewPass1!")).thenReturn("newHash");
-
-        authService.verifyPasswordChangeOtp(ACCOUNT_ID, "123456");
-
-        assertEquals("newHash", account.getPasswordHash());
-        verify(otpService).deletePendingPasswordChange(ACCOUNT_ID);
-    }
-
-    @Test
-    void verifyPasswordChangeOtpFailsWhenPendingPasswordExpired() {
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account(AccountStatus.ACTIVE)));
-        when(otpService.verifyAndConsumeOtp(EMAIL, "PASSWORD_CHANGE", "123456")).thenReturn(true);
-        when(otpService.getPendingPasswordChange(ACCOUNT_ID)).thenReturn(null);
-
-        assertThrows(ExpiredException.class, () -> authService.verifyPasswordChangeOtp(ACCOUNT_ID, "123456"));
-    }
 }

@@ -18,6 +18,8 @@ import com.ecm.identity.dto.response.AuthResponse;
 import com.ecm.identity.dto.response.LogoutResponse;
 import com.ecm.identity.exception.IdentityErrorCode;
 import com.ecm.identity.service.AuthService;
+import com.ecm.identity.service.PasswordService;
+import com.ecm.identity.service.SessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final SessionService sessionService;
+    private final PasswordService passwordService;
 
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -61,7 +65,7 @@ public class AuthController {
 
     @PostMapping("/refresh-token")
     public ApiResponse<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        return ApiResponse.success(authService.refresh(request.refreshToken()));
+        return ApiResponse.success(sessionService.refresh(request.refreshToken()));
     }
 
     @PostMapping("/google")
@@ -78,19 +82,19 @@ public class AuthController {
         if (token.isEmpty()) {
             throw new BusinessException(IdentityErrorCode.INVALID_CREDENTIALS);
         }
-        boolean revoked = authService.logout(token);
+        boolean revoked = sessionService.logout(token);
         return ApiResponse.success(new LogoutResponse(revoked));
     }
 
     @PostMapping("/forgot-password")
     public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        authService.forgotPassword(request.email());
+        passwordService.forgotPassword(request.email());
         return ApiResponse.success(null);
     }
 
     @PostMapping("/reset-password")
     public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request.email(), request.otp(), request.newPassword());
+        passwordService.resetPassword(request.email(), request.otp(), request.newPassword());
         return ApiResponse.success(null);
     }
 
@@ -98,7 +102,7 @@ public class AuthController {
     public ApiResponse<Void> changePassword(
             @Valid @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        authService.changePassword(principal.getAccountId(), request.currentPassword(), request.newPassword());
+        passwordService.changePassword(principal.getAccountId(), request.currentPassword(), request.newPassword());
         return ApiResponse.success(null);
     }
 
@@ -106,7 +110,7 @@ public class AuthController {
     public ApiResponse<Void> verifyPasswordChange(
             @Valid @RequestBody VerifyPasswordChangeRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        authService.verifyPasswordChangeOtp(principal.getAccountId(), request.otp());
+        passwordService.verifyPasswordChangeOtp(principal.getAccountId(), request.otp());
         return ApiResponse.success(null);
     }
 }
