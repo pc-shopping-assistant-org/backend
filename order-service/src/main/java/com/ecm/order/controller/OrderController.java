@@ -11,6 +11,8 @@ import com.ecm.order.dto.response.OrderSummaryResponse;
 import com.ecm.order.entity.OrderStatus;
 import com.ecm.order.service.CheckoutService;
 import com.ecm.order.service.OrderService;
+import com.ecm.order.service.AdminOrderQueryService;
+import com.ecm.order.service.InvoiceQueryService;
 import com.ecm.order.service.OrderQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,8 @@ public class OrderController {
 
     private final CheckoutService checkoutService;
     private final OrderQueryService orderQueryService;
+    private final AdminOrderQueryService adminOrderQueryService;
+    private final InvoiceQueryService invoiceQueryService;
     private final OrderService orderService;
 
     @PostMapping
@@ -93,24 +97,24 @@ public class OrderController {
     public ApiResponse<PageResponse<AdminOrderSummaryResponse>> getOrders(@Valid @ModelAttribute AdminOrderSearchRequest filter,
                                                                          @RequestParam(defaultValue = "0") int page,
                                                                          @RequestParam(defaultValue = "50") int size) {
-        return ApiResponse.success(orderQueryService.searchOrders(filter, page, size));
+        return ApiResponse.success(adminOrderQueryService.searchOrders(filter, page, size));
     }
 
     @GetMapping("/admin/invoices")
     public ApiResponse<PageResponse<InvoiceSummaryResponse>> getInvoices(@Valid @ModelAttribute AdminInvoiceSearchRequest filter,
                                                                         @RequestParam(defaultValue = "0") int page,
                                                                         @RequestParam(defaultValue = "50") int size) {
-        return ApiResponse.success(orderQueryService.searchInvoices(filter, page, size));
+        return ApiResponse.success(invoiceQueryService.searchInvoices(filter, page, size));
     }
 
     @GetMapping("/admin/invoices/{orderId}")
     public ApiResponse<InvoiceDetailResponse> getInvoice(@PathVariable UUID orderId) {
-        return ApiResponse.success(orderQueryService.getInvoice(orderId));
+        return ApiResponse.success(invoiceQueryService.getInvoice(orderId));
     }
 
     @GetMapping("/admin/{orderId}")
     public ApiResponse<AdminOrderDetailResponse> getOrder(@PathVariable UUID orderId, Authentication authentication) {
-        return ApiResponse.success(orderQueryService.getOrderDetail(orderId, CurrentUser.bearerToken(authentication)));
+        return ApiResponse.success(adminOrderQueryService.getOrderDetail(orderId, CurrentUser.bearerToken(authentication)));
     }
 
     @PatchMapping("/admin/{orderId}/status")
