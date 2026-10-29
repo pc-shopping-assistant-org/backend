@@ -13,6 +13,15 @@ import com.ecm.identity.entity.Customer;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.event.GoogleAvatarRequested;
 import com.ecm.identity.exception.IdentityErrorCode;
+import com.ecm.identity.helper.CustomerRegistrar;
+import com.ecm.identity.helper.GoogleAccountLinker;
+import com.ecm.identity.helper.TokenIssuer;
+import com.ecm.identity.helper.UserSummaryResolver;
+import com.ecm.identity.mapper.AdminMapper;
+import com.ecm.identity.mapper.EmployeeMapper;
+import com.ecm.identity.repository.AdminRepository;
+import com.ecm.identity.repository.CustomerAddressRepository;
+import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.mapper.CustomerMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.CustomerRepository;
@@ -23,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -69,13 +77,24 @@ class GoogleSignupTest {
     @Mock private GoogleIdentityVerifier googleIdentityVerifier;
     @Mock private TransactionTemplate transactionTemplate;
     @Mock private ApplicationEventPublisher eventPublisher;
-    @InjectMocks private AuthService authService;
+    private AuthService authService;
+    private PasswordService passwordService;
 
     private final Role customerRole = Role.builder().id(ROLE_ID).name("ROLE_CUSTOMER").build();
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
+        UserSummaryResolver summaries = new UserSummaryResolver(customerRepository, mock(EmployeeRepository.class),
+                mock(AdminRepository.class), customerMapper, mock(EmployeeMapper.class), mock(AdminMapper.class));
+        TokenIssuer tokenIssuer = new TokenIssuer(tokenProvider, jwtProperties, roleRepository, summaries);
+        CustomerRegistrar registrar = new CustomerRegistrar(
+                accountRepository, customerRepository, mock(CustomerAddressRepository.class), customerMapper, passwordEncoder);
+        GoogleAccountLinker linker = new GoogleAccountLinker(accountRepository, customerRepository, roleRepository, transactionTemplate, eventPublisher);
+        authService = new AuthService(accountRepository, roleRepository, passwordEncoder, otpService,
+                googleIdentityVerifier, customerMapper, tokenIssuer, registrar, linker);
+        passwordService = new PasswordService(accountRepository, passwordEncoder, otpService);
+
         when(roleRepository.findByName("ROLE_CUSTOMER")).thenReturn(Optional.of(customerRole));
         when(roleRepository.findById(ROLE_ID)).thenReturn(Optional.of(customerRole));
         when(transactionTemplate.execute(any())).thenAnswer(call -> ((TransactionCallback<Object>) call.getArgument(0)).doInTransaction(null));
@@ -265,7 +284,7 @@ class GoogleSignupTest {
                 .roleId(ROLE_ID).status(AccountStatus.ACTIVE).build();
         when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(googleOnly));
 
-        authService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!");
+        passwordService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!");
 
         verify(otpService).savePendingPasswordChange(ACCOUNT_ID, "NewPassw0rd!");
         verify(otpService).generateAndSendOtp(EMAIL, "PASSWORD_CHANGE");
@@ -279,7 +298,7 @@ class GoogleSignupTest {
         when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(withPassword));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> authService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!"));
+                () -> passwordService.changePassword(ACCOUNT_ID, null, "NewPassw0rd!"));
 
         assertEquals(IdentityErrorCode.INCORRECT_PASSWORD, ex.getErrorCode());
         verify(otpService, never()).generateAndSendOtp(any(), any());

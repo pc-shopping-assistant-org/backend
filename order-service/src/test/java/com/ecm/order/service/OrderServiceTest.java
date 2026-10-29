@@ -6,6 +6,7 @@ import com.ecm.order.dto.response.OrderStatusResponse;
 import com.ecm.order.entity.Order;
 import com.ecm.order.entity.OrderItem;
 import com.ecm.order.entity.OrderStatus;
+import com.ecm.order.helper.OrderOutbox;
 import com.ecm.order.mapper.OrderMapper;
 import com.ecm.order.repository.OrderItemRepository;
 import com.ecm.order.repository.OrderRepository;

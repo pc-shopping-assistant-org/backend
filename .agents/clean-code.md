@@ -205,6 +205,8 @@ List<OrderSummary> findOrderSummaries();
 
 - **Meaningful names** — no `data`, `obj`, `temp`, `list1`, single-letter variables
   outside a tiny loop index. A name should make a comment explaining it unnecessary.
+- **Small classes** — a service holds the flows the controller calls; pure functions go to
+  `util/`, shared steps and sub-flows go to `helper/` (see `service-structure.md`, Rule 5).
 - **Small methods** — a method should fit on one screen. If you need to scroll to see the
   whole thing, or the numbered-step comment list (Rule 2) goes past ~6-7 steps, extract a
   private method.

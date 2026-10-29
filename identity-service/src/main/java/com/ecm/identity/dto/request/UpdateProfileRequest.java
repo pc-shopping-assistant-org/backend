@@ -23,7 +23,7 @@ public record UpdateProfileRequest(
         @Past(message = "Birthday must be in the past")
         LocalDate birthday,
 
-        @Pattern(regexp = "^(\\+84|0)[0-9]{9}$", message = "Invalid phone number format")
+        @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Phone number must be a valid Vietnamese phone number")
         String phone,
 
         /** A file already uploaded to the Media Service; omitted to keep the current avatar. */

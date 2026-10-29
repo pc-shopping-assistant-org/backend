@@ -11,14 +11,13 @@ import com.ecm.promotion.entity.DiscountCategory;
 import com.ecm.promotion.entity.DiscountStatus;
 import com.ecm.promotion.entity.DiscountType;
 import com.ecm.promotion.exception.PromotionErrorCode;
+import com.ecm.promotion.util.CartLines;
 import com.ecm.promotion.repository.DiscountCategoryRepository;
 import com.ecm.promotion.repository.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,15 +39,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DiscountApplyService {
 
-    private static final int PERCENT_DENOMINATOR = 100;
-
     private final DiscountRepository discountRepository;
     private final DiscountCategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
     public ApplyDiscountResponse apply(ApplyDiscountRequest request) {
         // 1. Validate the submitted cart snapshot
-        long subtotal = subtotal(request.items());
+        long subtotal = CartLines.subtotal(request.items());
         if (request.orderAmount() != subtotal) {
             throw new BusinessException(PromotionErrorCode.DISCOUNT_NOT_APPLICABLE, "Submitted order amount does not match cart lines");
         }
@@ -62,7 +59,7 @@ public class DiscountApplyService {
         long remainingSubtotal = subtotal - itemDiscountTotal;
         Discount orderDiscount = hasCode(request) ? voucher(request.code(), subtotal, now) : bestAutomaticOrderDiscount(subtotal, remainingSubtotal, now);
         UUID orderDiscountId = orderDiscount == null ? null : orderDiscount.getId();
-        long orderDiscountAmount = orderDiscount == null ? 0 : Math.min(calculateDiscount(orderDiscount, remainingSubtotal), remainingSubtotal);
+        long orderDiscountAmount = orderDiscount == null ? 0 : Math.min(orderDiscount.reductionOf(remainingSubtotal), remainingSubtotal);
         return new ApplyDiscountResponse(orderDiscountId, Math.addExact(itemDiscountTotal, orderDiscountAmount),
                 orderDiscountId, orderDiscountAmount, itemDiscounts);
     }
@@ -77,7 +74,7 @@ public class DiscountApplyService {
         if (voucher.getApplicationScope() != ApplicationScope.ORDER) {
             throw new BusinessException(PromotionErrorCode.DISCOUNT_NOT_APPLICABLE, "Voucher code must use ORDER scope");
         }
-        if (!inEffect(voucher, now)) {
+        if (!voucher.isInEffect(now)) {
             throw new BusinessException(PromotionErrorCode.DISCOUNT_INACTIVE);
         }
         if (subtotal < voucher.getMinOrderAmount()) {
@@ -89,24 +86,8 @@ public class DiscountApplyService {
     private Discount bestAutomaticOrderDiscount(long subtotal, long remainingSubtotal, Instant now) {
         return discountRepository.findActiveAutomaticOrder(DiscountStatus.ACTIVE, now).stream()
                 .filter(discount -> subtotal >= discount.getMinOrderAmount())
-                .max(Comparator.comparingLong(discount -> calculateDiscount(discount, remainingSubtotal)))
+                .max(Comparator.comparingLong(discount -> discount.reductionOf(remainingSubtotal)))
                 .orElse(null);
-    }
-
-    private long subtotal(List<DiscountCartItemRequest> items) {
-        Set<UUID> seenVariants = new HashSet<>();
-        long subtotal = 0L;
-        try {
-            for (DiscountCartItemRequest item : items) {
-                if (!seenVariants.add(item.productVariantId())) {
-                    throw new BusinessException(PromotionErrorCode.DISCOUNT_NOT_APPLICABLE, "Duplicate cart line");
-                }
-                subtotal = Math.addExact(subtotal, Math.multiplyExact(item.unitPrice(), (long) item.quantity()));
-            }
-        } catch (ArithmeticException ex) {
-            throw new BusinessException(PromotionErrorCode.INVALID_DISCOUNT_VALUE);
-        }
-        return subtotal;
     }
 
     private List<ItemDiscountResponse> applyItemDiscounts(List<DiscountCartItemRequest> items, Instant now) {
@@ -128,24 +109,11 @@ public class DiscountApplyService {
             return byId.values().stream()
                     .filter(discount -> discount.getApplicationScope() == ApplicationScope.ALL_ITEMS
                             || discount.getApplicationScope() == ApplicationScope.CATEGORY && categoryDiscounts.contains(discount.getId()))
-                    .filter(discount -> inEffect(discount, now) && lineAmount >= discount.getMinOrderAmount())
-                    .max(Comparator.comparingLong(discount -> calculateDiscount(discount, lineAmount)))
+                    .filter(discount -> discount.isInEffect(now) && lineAmount >= discount.getMinOrderAmount())
+                    .max(Comparator.comparingLong(discount -> discount.reductionOf(lineAmount)))
                     .map(best -> new ItemDiscountResponse(item.productVariantId(), best.getId(),
-                            Math.min(calculateDiscount(best, lineAmount), lineAmount)))
+                            Math.min(best.reductionOf(lineAmount), lineAmount)))
                     .orElse(null);
         }).filter(Objects::nonNull).toList();
-    }
-
-    private long calculateDiscount(Discount discount, long amount) {
-        if (discount.getDiscountType() == DiscountType.FIXED) {
-            return Math.min(discount.getValue(), amount);
-        }
-        return BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(discount.getValue()))
-                .divide(BigDecimal.valueOf(PERCENT_DENOMINATOR), 0, RoundingMode.DOWN).longValueExact();
-    }
-
-    private boolean inEffect(Discount discount, Instant now) {
-        return discount.getStatus() == DiscountStatus.ACTIVE
-                && !now.isBefore(discount.getStartAt()) && now.isBefore(discount.getEndAt());
     }
 }

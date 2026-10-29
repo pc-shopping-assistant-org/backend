@@ -2,6 +2,7 @@ package com.ecm.promotion.controller;
 
 import com.ecm.common.response.ApiResponse;
 import com.ecm.common.response.PageResponse;
+import com.ecm.common.security.CurrentUser;
 import com.ecm.promotion.dto.request.ApplyDiscountRequest;
 import com.ecm.promotion.dto.request.CreateDiscountRequest;
 import com.ecm.promotion.dto.request.UpdateDiscountRequest;
@@ -14,8 +15,7 @@ import com.ecm.promotion.service.DiscountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,7 +35,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DiscountController {
 
-    private static final String ACCOUNT_ID_CLAIM = "accountId";
     private static final String DEFAULT_PAGE = "0";
     private static final String DEFAULT_PAGE_SIZE = "20";
 
@@ -44,8 +43,8 @@ public class DiscountController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<DiscountResponse> create(@Valid @RequestBody CreateDiscountRequest request, @AuthenticationPrincipal Jwt jwt) {
-        return ApiResponse.success(discountService.create(request, employeeId(jwt)));
+    public ApiResponse<DiscountResponse> create(@Valid @RequestBody CreateDiscountRequest request, Authentication authentication) {
+        return ApiResponse.success(discountService.create(request, CurrentUser.requireAccountId(authentication)));
     }
 
     @GetMapping
@@ -62,19 +61,19 @@ public class DiscountController {
 
     @PutMapping("/{id}")
     public ApiResponse<DiscountResponse> update(@PathVariable UUID id, @Valid @RequestBody UpdateDiscountRequest request,
-                                                @AuthenticationPrincipal Jwt jwt) {
-        return ApiResponse.success(discountService.update(id, request, employeeId(jwt)));
+                                                Authentication authentication) {
+        return ApiResponse.success(discountService.update(id, request, CurrentUser.requireAccountId(authentication)));
     }
 
     @PatchMapping("/{id}/status")
     public ApiResponse<DiscountResponse> updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateDiscountStatusRequest request,
-                                                      @AuthenticationPrincipal Jwt jwt) {
-        return ApiResponse.success(discountService.updateStatus(id, request.status(), employeeId(jwt)));
+                                                      Authentication authentication) {
+        return ApiResponse.success(discountService.updateStatus(id, request.status(), CurrentUser.requireAccountId(authentication)));
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
-        discountService.delete(id, employeeId(jwt));
+    public ApiResponse<Void> delete(@PathVariable UUID id, Authentication authentication) {
+        discountService.delete(id, CurrentUser.requireAccountId(authentication));
         return ApiResponse.success(null);
     }
 
@@ -83,7 +82,4 @@ public class DiscountController {
         return ApiResponse.success(discountApplyService.apply(request));
     }
 
-    private UUID employeeId(Jwt jwt) {
-        return UUID.fromString(jwt.getClaimAsString(ACCOUNT_ID_CLAIM));
-    }
 }

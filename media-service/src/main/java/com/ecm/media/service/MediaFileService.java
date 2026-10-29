@@ -76,16 +76,6 @@ public class MediaFileService {
         }
     }
 
-    private void removeUncommittedUpload(StoredMedia uploaded, RuntimeException persistenceFailure) {
-        try {
-            storage.delete(uploaded.storageKey());
-        } catch (RuntimeException cleanupFailure) {
-            persistenceFailure.addSuppressed(cleanupFailure);
-            LOG.error("Could not remove {} object {} after failed metadata transaction",
-                    uploaded.provider(), uploaded.storageKey(), cleanupFailure);
-        }
-    }
-
     @Transactional(readOnly = true)
     public List<MediaFileResponse> getActiveFiles(Collection<UUID> ids) {
         return mediaFileRepository.findByIdInAndStatus(ids, FileStatus.ACTIVE).stream()
@@ -98,6 +88,16 @@ public class MediaFileService {
         MediaFile file = mediaFileRepository.findByIdInAndStatus(List.of(id), FileStatus.ACTIVE).stream()
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException("File", id));
         return toResponse(file);
+    }
+
+    private void removeUncommittedUpload(StoredMedia uploaded, RuntimeException persistenceFailure) {
+        try {
+            storage.delete(uploaded.storageKey());
+        } catch (RuntimeException cleanupFailure) {
+            persistenceFailure.addSuppressed(cleanupFailure);
+            LOG.error("Could not remove {} object {} after failed metadata transaction",
+                    uploaded.provider(), uploaded.storageKey(), cleanupFailure);
+        }
     }
 
     private MediaFileResponse toResponse(MediaFile file) {

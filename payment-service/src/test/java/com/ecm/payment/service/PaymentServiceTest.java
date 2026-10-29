@@ -16,6 +16,7 @@ import com.ecm.payment.entity.Payment;
 import com.ecm.payment.entity.PaymentMethod;
 import com.ecm.payment.entity.PaymentStatus;
 import com.ecm.payment.exception.PaymentErrorCode;
+import com.ecm.payment.helper.PaymentOutbox;
 import com.ecm.payment.mapper.PaymentMapper;
 import com.ecm.payment.repository.OutboxEventRepository;
 import com.ecm.payment.repository.PaymentMethodRepository;
@@ -70,8 +71,8 @@ class PaymentServiceTest {
         methodRepository = mock(PaymentMethodRepository.class);
         outboxRepository = mock(OutboxEventRepository.class);
         identityClient = mock(IdentityServiceClient.class);
-        service = new PaymentService(paymentRepository, methodRepository, outboxRepository, identityClient,
-                Mappers.getMapper(PaymentMapper.class), new ObjectMapper());
+        service = new PaymentService(paymentRepository, methodRepository, new PaymentOutbox(outboxRepository, new ObjectMapper()), identityClient,
+                Mappers.getMapper(PaymentMapper.class));
         when(methodRepository.findById(COD_METHOD)).thenReturn(Optional.of(PaymentMethod.builder().id(COD_METHOD).code("COD").build()));
         when(methodRepository.findById(CARD_METHOD)).thenReturn(Optional.of(PaymentMethod.builder().id(CARD_METHOD).code("ONLINE_CARD").build()));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(call -> call.getArgument(0));

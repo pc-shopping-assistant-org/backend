@@ -7,6 +7,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.entity.CategoryAttribute;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.ecm.catalog.repository.AttributeDefinitionRepository;
 import com.ecm.catalog.repository.CategoryAttributeRepository;
 import com.ecm.catalog.repository.CategoryRepository;
@@ -21,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -86,7 +88,7 @@ public class CategoryAttributeService {
             ReplaceCategoryAttributesRequest.Item item = request.attributes().get(index);
             categoryAttributeRepository.save(CategoryAttribute.builder()
                     .categoryId(categoryId).attributeId(item.attributeId()).required(Boolean.TRUE.equals(item.required()))
-                    .displayOrder(orderOrIndex(item.displayOrder(), index)).build());
+                    .displayOrder(Objects.requireNonNullElse(item.displayOrder(), index)).build());
         }
 
         // 3. Return the stored template
@@ -135,10 +137,6 @@ public class CategoryAttributeService {
         if (!exists) {
             throw new ResourceNotFoundException("Category", categoryId);
         }
-    }
-
-    private int orderOrIndex(Integer displayOrder, int index) {
-        return displayOrder != null ? displayOrder : index;
     }
 
     private CategoryAttributeTemplateResponse.Item toItem(CategoryAttribute link, AttributeDefinition definition, UUID owner,

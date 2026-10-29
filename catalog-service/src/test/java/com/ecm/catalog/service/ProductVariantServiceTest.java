@@ -11,6 +11,8 @@ import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.VariantOption;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
@@ -50,7 +52,7 @@ class ProductVariantServiceTest {
     private OptionRepository optionRepository;
     private VariantOptionRepository variantOptionRepository;
     private OrderServiceClient orderServiceClient;
-    private ProductMediaResolver mediaResolver;
+    private MediaFileResolver mediaResolver;
     private ProductAssembler assembler;
     private ProductVariantService service;
 
@@ -61,7 +63,7 @@ class ProductVariantServiceTest {
         optionRepository = mock(OptionRepository.class);
         variantOptionRepository = mock(VariantOptionRepository.class);
         orderServiceClient = mock(OrderServiceClient.class);
-        mediaResolver = mock(ProductMediaResolver.class);
+        mediaResolver = mock(MediaFileResolver.class);
         assembler = mock(ProductAssembler.class);
         service = new ProductVariantService(productRepository, variantRepository, optionRepository, variantOptionRepository,
                 orderServiceClient, mediaResolver, assembler, new CatalogProperties());

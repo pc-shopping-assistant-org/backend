@@ -7,6 +7,7 @@ import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.Option;
 import com.ecm.catalog.entity.VariantOption;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductImageRepository;
 import com.ecm.catalog.repository.ProductRepository;
@@ -33,7 +34,7 @@ public class CartVariantDetailsService {
     private final ProductImageRepository imageRepository;
     private final VariantOptionRepository variantOptionRepository;
     private final OptionRepository optionRepository;
-    private final ProductMediaResolver mediaResolver;
+    private final MediaFileResolver mediaResolver;
 
     @Transactional(readOnly = true)
     public List<CartVariantDetailsResponse> getDetails(List<UUID> ids) {

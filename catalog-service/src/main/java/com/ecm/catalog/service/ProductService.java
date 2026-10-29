@@ -10,11 +10,15 @@ import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.ProductAssembler;
+import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductImageRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
+import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +47,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final OrderServiceClient orderServiceClient;
     private final ProductSpecificationValidator specificationValidator;
-    private final ProductMediaResolver mediaResolver;
+    private final MediaFileResolver mediaResolver;
     private final ProductAssembler assembler;
 
     @Transactional

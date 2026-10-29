@@ -3,6 +3,7 @@ package com.ecm.sync.messaging.kafka.consumer;
 import com.ecm.sync.exception.InvalidChangeEventException;
 import com.ecm.sync.messaging.event.CatalogChange;
 import com.ecm.sync.service.ProductIndexService;
+import com.ecm.sync.util.ChangeRows;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 /**
  * {@code catalog.changed} is fed by Debezium CDC on catalog-service's DB, not by application code (see
@@ -55,8 +54,8 @@ public class CatalogChangeConsumer {
 
         // 2. A changed row makes one product document stale, or renames a brand inside many, or moves a category with its products
         switch (change.table()) {
-            case TABLE_PRODUCTS -> indexService.reindexProduct(uuid(row, COLUMN_ID));
-            case TABLE_PRODUCT_VARIANTS, TABLE_PRODUCT_IMAGES -> indexService.reindexProduct(uuid(row, COLUMN_PRODUCT_ID));
+            case TABLE_PRODUCTS -> indexService.reindexProduct(ChangeRows.uuid(row, COLUMN_ID));
+            case TABLE_PRODUCT_VARIANTS, TABLE_PRODUCT_IMAGES -> indexService.reindexProduct(ChangeRows.uuid(row, COLUMN_PRODUCT_ID));
             case TABLE_BRANDS -> renameBrand(change, row);
             case TABLE_CATEGORIES -> reindexCategory(change, row);
             default -> log.debug("Ignoring a change of table {}", change.table());
@@ -73,29 +72,13 @@ public class CatalogChangeConsumer {
 
     private void renameBrand(CatalogChange change, JsonNode row) {
         if (change.after() != null && !change.after().isNull()) {
-            indexService.renameBrand(uuid(row, COLUMN_ID), text(row, COLUMN_NAME));
+            indexService.renameBrand(ChangeRows.uuid(row, COLUMN_ID), ChangeRows.text(row, COLUMN_NAME));
         }
     }
 
     private void reindexCategory(CatalogChange change, JsonNode row) {
         if (change.after() != null && !change.after().isNull()) {
-            indexService.reindexCategory(uuid(row, COLUMN_ID));
+            indexService.reindexCategory(ChangeRows.uuid(row, COLUMN_ID));
         }
-    }
-
-    private UUID uuid(JsonNode row, String column) {
-        try {
-            return UUID.fromString(text(row, column));
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidChangeEventException("Column " + column + " is not an id: " + row.get(column), ex);
-        }
-    }
-
-    private String text(JsonNode row, String column) {
-        JsonNode value = row.get(column);
-        if (value == null || value.isNull()) {
-            throw new InvalidChangeEventException("Row has no column " + column, null);
-        }
-        return value.asText();
     }
 }

@@ -60,6 +60,11 @@ public class ProductIndexService {
                 inStock, mainImageUrl(product.images()), categoryChain(product.categoryId()), prices, Instant.now()));
     }
 
+    /** A brand rename changes every product of the brand at once, so it is applied inside the index. */
+    public void renameBrand(UUID brandId, String name) {
+        updateNameWhere(ProductDocument.FIELD_BRAND_ID, brandId, "brandName", name);
+    }
+
     /**
      * A category change can move a whole subtree (a rename, a new parent), so every product whose category chain
      * passes through it is rebuilt. A category without products yet has nothing to rebuild.
@@ -100,11 +105,6 @@ public class ProductIndexService {
             chain.add(id.toString());
         }
         return chain;
-    }
-
-    /** A brand rename changes every product of the brand at once, so it is applied inside the index. */
-    public void renameBrand(UUID brandId, String name) {
-        updateNameWhere(ProductDocument.FIELD_BRAND_ID, brandId, "brandName", name);
     }
 
     private void updateNameWhere(String idField, UUID id, String nameField, String name) {

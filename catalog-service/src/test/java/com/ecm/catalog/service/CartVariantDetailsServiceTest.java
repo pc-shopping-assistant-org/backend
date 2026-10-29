@@ -7,6 +7,7 @@ import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.Option;
 import com.ecm.catalog.entity.VariantOption;
+import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductImageRepository;
 import com.ecm.catalog.repository.ProductRepository;
@@ -41,7 +42,7 @@ class CartVariantDetailsServiceTest {
     private ProductImageRepository imageRepository;
     private VariantOptionRepository variantOptionRepository;
     private OptionRepository optionRepository;
-    private ProductMediaResolver mediaResolver;
+    private MediaFileResolver mediaResolver;
     private CartVariantDetailsService service;
 
     @BeforeEach
@@ -51,7 +52,7 @@ class CartVariantDetailsServiceTest {
         imageRepository = mock(ProductImageRepository.class);
         variantOptionRepository = mock(VariantOptionRepository.class);
         optionRepository = mock(OptionRepository.class);
-        mediaResolver = mock(ProductMediaResolver.class);
+        mediaResolver = mock(MediaFileResolver.class);
         service = new CartVariantDetailsService(variantRepository, productRepository, imageRepository, variantOptionRepository, optionRepository, mediaResolver);
         when(mediaResolver.resolveUrls(anyCollection())).thenReturn(Map.of(VARIANT_FILE, "https://img/variant.png", PRODUCT_FILE, "https://img/product.png"));
         when(imageRepository.findMainByProductIdIn(anyCollection()))

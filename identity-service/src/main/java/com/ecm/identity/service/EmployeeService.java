@@ -14,10 +14,14 @@ import com.ecm.identity.entity.AccountStatus;
 import com.ecm.identity.entity.Employee;
 import com.ecm.identity.entity.Role;
 import com.ecm.identity.exception.IdentityErrorCode;
+import com.ecm.identity.helper.AccountLocker;
+import com.ecm.identity.helper.AccountStateChanger;
+import com.ecm.identity.helper.AvatarResolver;
 import com.ecm.identity.mapper.EmployeeMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.EmployeeRepository;
 import com.ecm.identity.repository.RoleRepository;
+import com.ecm.identity.util.AccountDuplicates;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -82,12 +86,11 @@ public class EmployeeService {
         try {
             account = accountRepository.saveAndFlush(account);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateResourceException(IdentityErrorCode.EMAIL_ALREADY_EXISTS, "Account", "email", email);
+            throw AccountDuplicates.from(ex, email, phone);
         }
         Employee employee = employeeMapper.toEntity(request);
         employee.setAccountId(account.getId());
-        employee.setFirstName(employee.getFirstName().trim());
-        employee.setLastName(employee.getLastName().trim());
+        employee.trimNames();
         employeeRepository.save(employee);
 
         // 5. Answer with the stored row
@@ -138,31 +141,15 @@ public class EmployeeService {
 
         // 4. Fields left out keep their value
         employeeMapper.updateEntity(employee, request);
-        trimNames(employee);
+        employee.trimNames();
         try {
             accountRepository.saveAndFlush(account);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateResourceException(IdentityErrorCode.EMAIL_ALREADY_EXISTS, "Account", "email", account.getEmail());
+            throw AccountDuplicates.from(ex, account.getEmail(), account.getPhone());
         }
         employeeRepository.save(employee);
 
         // 5. Answer with the stored row
-        return detail(accountId);
-    }
-
-    @Transactional
-    public EmployeeResponse lock(UUID accountId) {
-        // 1. Only an employee account can be locked here
-        if (!employeeRepository.existsById(accountId)) {
-            throw new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId);
-        }
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId));
-
-        // 2. Lock it and cut off the tokens already issued
-        accountLocker.lock(account, RESOURCE_EMPLOYEE);
-
-        // 3. Answer with the stored row
         return detail(accountId);
     }
 
@@ -183,7 +170,19 @@ public class EmployeeService {
         accountStateChanger.delete(employeeAccount(accountId), RESOURCE_EMPLOYEE);
     }
 
-    /** Only an employee account can be moved between states here. */
+    @Transactional
+    public EmployeeResponse lock(UUID accountId) {
+        // 1. Only an employee account can be locked here
+        Account account = employeeAccount(accountId);
+
+        // 2. Lock it and cut off the tokens already issued
+        accountLocker.lock(account, RESOURCE_EMPLOYEE);
+
+        // 3. Answer with the stored row
+        return detail(accountId);
+    }
+
+    /** Only an employee account can be moved between states or locked here. */
     private Account employeeAccount(UUID accountId) {
         if (!employeeRepository.existsById(accountId)) {
             throw new ResourceNotFoundException(RESOURCE_EMPLOYEE, accountId);
@@ -207,11 +206,6 @@ public class EmployeeService {
             }
             account.setPhone(phone);
         }
-    }
-
-    private void trimNames(Employee employee) {
-        employee.setFirstName(employee.getFirstName().trim());
-        employee.setLastName(employee.getLastName().trim());
     }
 
     private EmployeeResponse detail(UUID accountId) {

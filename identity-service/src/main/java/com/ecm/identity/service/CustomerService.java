@@ -10,6 +10,8 @@ import com.ecm.identity.dto.response.CustomerResponse;
 import com.ecm.identity.dto.response.CustomerSummaryResponse;
 import com.ecm.identity.entity.Account;
 import com.ecm.identity.entity.AccountStatus;
+import com.ecm.identity.helper.AccountLocker;
+import com.ecm.identity.helper.AvatarResolver;
 import com.ecm.identity.mapper.AddressMapper;
 import com.ecm.identity.repository.AccountRepository;
 import com.ecm.identity.repository.CustomerAddressRepository;

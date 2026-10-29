@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
@@ -109,7 +110,9 @@ public class ProductQueryService {
     private ProductPage selectPage(ProductFilterRequest filter, List<CatalogStatus> productStatuses,
                                    List<CatalogStatus> variantStatuses, boolean onlyWithVariants) {
         // 1. Validate the price range and sanitize the page size and keyword
-        validatePriceRange(filter);
+        if (filter.hasInvalidPriceRange()) {
+            throw new BusinessException(CatalogErrorCode.INVALID_PRICE_RANGE);
+        }
         int pageSize = filter.getLimit() != null && filter.getLimit() > 0 ? Math.min(filter.getLimit(), MAX_LIMIT) : DEFAULT_LIMIT;
         String keywordPattern = filter.getKeyword() != null && !filter.getKeyword().isBlank()
                 ? "%" + filter.getKeyword().trim().toLowerCase(Locale.ROOT) + "%"
@@ -140,15 +143,5 @@ public class ProductQueryService {
         String nextCursor = hasNext ? results.get(results.size() - 1).getId().toString() : null;
 
         return new ProductPage(results, hasNext, nextCursor, null, null, null);
-    }
-
-    private void validatePriceRange(ProductFilterRequest filter) {
-        Long minPrice = filter.getMinPrice();
-        Long maxPrice = filter.getMaxPrice();
-        if ((minPrice != null && minPrice < 0)
-                || (maxPrice != null && maxPrice < 0)
-                || (minPrice != null && maxPrice != null && minPrice > maxPrice)) {
-            throw new BusinessException(CatalogErrorCode.INVALID_PRICE_RANGE);
-        }
     }
 }

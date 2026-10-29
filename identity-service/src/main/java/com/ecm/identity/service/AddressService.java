@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/** The delivery addresses of a customer. Every write goes through {@link #ownedAddress}, so one customer cannot touch another's. */
 @Service
 @RequiredArgsConstructor
 public class AddressService {
@@ -32,7 +33,10 @@ public class AddressService {
 
     @Transactional
     public AddressResponse create(UUID customerId, CreateAddressRequest request) {
+        // 1. The first address of a customer becomes the default, so checkout always has one to preselect
         boolean first = addressRepository.countByCustomerId(customerId) == 0;
+
+        // 2. Store it with the text fields trimmed
         CustomerAddress address = CustomerAddress.builder()
                 .customerId(customerId)
                 .recipientName(request.recipientName().trim())
@@ -45,7 +49,10 @@ public class AddressService {
 
     @Transactional
     public AddressResponse update(UUID customerId, UUID addressId, UpdateAddressRequest request) {
+        // 1. Only the owner may edit the address
         CustomerAddress address = ownedAddress(customerId, addressId);
+
+        // 2. Apply the trimmed values; the default flag is changed only through setDefault
         address.setRecipientName(request.recipientName().trim());
         address.setPhone(request.phone().trim());
         address.setAddressLine(request.addressLine().trim());
@@ -54,8 +61,13 @@ public class AddressService {
 
     @Transactional
     public AddressResponse setDefault(UUID customerId, UUID addressId) {
+        // 1. Only the owner may pick the default
         CustomerAddress address = ownedAddress(customerId, addressId);
+
+        // 2. Clear the current default first so a customer never has two
         addressRepository.clearDefault(customerId);
+
+        // 3. Mark the chosen address as the default
         address.setDefault(true);
         return addressMapper.toResponse(addressRepository.save(address));
     }
@@ -66,6 +78,7 @@ public class AddressService {
         addressRepository.delete(address);
     }
 
+    /** Unknown and someone else's address give the same error, so a caller cannot probe which ids exist. */
     private CustomerAddress ownedAddress(UUID customerId, UUID addressId) {
         return addressRepository.findByIdAndCustomerId(addressId, customerId)
                 .orElseThrow(() -> new BusinessException(IdentityErrorCode.ADDRESS_NOT_OWNED));

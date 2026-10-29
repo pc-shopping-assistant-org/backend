@@ -10,10 +10,12 @@ import com.ecm.catalog.entity.Category;
 import com.ecm.catalog.entity.HardwareTypeEntity;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.mapper.CategoryMapper;
-import com.ecm.catalog.repository.CategoryProductCount;
 import com.ecm.catalog.repository.CategoryRepository;
-import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.HardwareTypeRepository;
+import com.ecm.catalog.repository.ProductRepository;
+import com.ecm.catalog.util.BlankText;
+import com.ecm.catalog.util.CategoryTrees;
+import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -39,15 +41,15 @@ public class CategoryService {
     public CategoryResponse create(CreateCategoryRequest request) {
         // 1. Reject a name or SEO name already held by a non-deleted category
         String name = request.name().trim();
-        String seoName = normalizeSeo(request.seoName(), name);
+        String seoName = SeoNames.slug(request.seoName(), name);
         ensureNameAvailable(name, seoName);
 
         // 2. The parent, when given, must be an ACTIVE category
         validateParent(request.parentId(), null);
 
         // 3. Persist the new category
-        Category category = Category.builder().name(name).seoName(seoName).description(normalizeDescription(request.description()))
-                .parentId(request.parentId()).displayOrder(normalizeDisplayOrder(request.displayOrder()))
+        Category category = Category.builder().name(name).seoName(seoName).description(BlankText.trimmedOrNull(request.description()))
+                .parentId(request.parentId()).displayOrder(Objects.requireNonNullElse(request.displayOrder(), 0))
                 .hardwareType(resolveHardwareType(request.hardwareTypeCode()))
                 .status(CatalogStatus.ACTIVE).build();
         return categoryMapper.toResponse(categoryRepository.save(category));
@@ -105,6 +107,47 @@ public class CategoryService {
         categoryRepository.save(category);
     }
 
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategoriesForAdmin() {
+        // 1. Admin listing includes INACTIVE categories, never DELETED ones
+        return categoryMapper.toResponseList(categoryRepository.findByStatusNot(CatalogStatus.DELETED));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getCategoryTree() {
+        // 1. Fetch all active categories and map them to response DTOs
+        Map<UUID, CategoryResponse> categoryMap = categoryRepository.findByStatus(CatalogStatus.ACTIVE).stream()
+                .map(categoryMapper::toResponse)
+                .collect(Collectors.toMap(CategoryResponse::getId, c -> c));
+
+        // 2. Each category counts the products it lists, its sub-categories' included
+        addProductCounts(categoryMap);
+
+        // 3. Return root categories with nested children
+        return CategoryTrees.roots(categoryMap);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategories() {
+        // 1. Fetch all active categories
+        List<Category> categories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
+
+        // 2. Map to response DTOs (flat list), each with the products it lists
+        List<CategoryResponse> responses = categoryMapper.toResponseList(categories);
+        addProductCounts(responses.stream().collect(Collectors.toMap(CategoryResponse::getId, response -> response)));
+        return responses;
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryResponse getCategoryById(UUID id) {
+        // 1. Fetch category by ID
+        Category category = categoryRepository.findByIdAndStatus(id, CatalogStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+
+        // 2. Map to response DTO
+        return categoryMapper.toResponse(category);
+    }
+
     private Category applyDetails(UUID id, String rawName, String rawSeoName, String description, UUID parentId,
                                   Integer displayOrder, String hardwareTypeCode) {
         // 1. Load the category being edited
@@ -112,7 +155,7 @@ public class CategoryService {
 
         // 2. Name and SEO name may only collide with themselves
         String name = rawName.trim();
-        String seoName = normalizeSeo(rawSeoName, name);
+        String seoName = SeoNames.slug(rawSeoName, name);
         boolean nameChanged = !category.getName().equalsIgnoreCase(name);
         boolean seoNameChanged = !category.getSeoName().equals(seoName);
         if ((nameChanged && categoryRepository.existsByNameIgnoreCaseAndStatusNot(name, CatalogStatus.DELETED))
@@ -125,7 +168,7 @@ public class CategoryService {
 
         category.setName(name);
         category.setSeoName(seoName);
-        category.setDescription(normalizeDescription(description));
+        category.setDescription(BlankText.trimmedOrNull(description));
         category.setParentId(parentId);
         if (displayOrder != null) category.setDisplayOrder(displayOrder);
         if (hardwareTypeCode != null) category.setHardwareType(resolveHardwareType(hardwareTypeCode));
@@ -180,93 +223,7 @@ public class CategoryService {
         return false;
     }
 
-    private String normalizeDescription(String description) {
-        return description == null || description.isBlank() ? null : description.trim();
-    }
-
-    private String normalizeSeo(String seoName, String name) {
-        return SeoNames.slug(seoName, name);
-    }
-
-    private int normalizeDisplayOrder(Integer displayOrder) {
-        return displayOrder == null ? 0 : displayOrder;
-    }
-
-    @Transactional(readOnly = true)
-    public List<CategoryResponse> getCategoryTree() {
-        // 1. Fetch all active categories
-        List<Category> allCategories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
-
-        // 2. Map to response DTOs
-        Map<UUID, CategoryResponse> categoryMap = allCategories.stream()
-                .map(categoryMapper::toResponse)
-                .collect(Collectors.toMap(CategoryResponse::getId, c -> c));
-
-        // 3. Each category counts the products it lists, its sub-categories' included
-        addProductCounts(categoryMap);
-
-        // 4. Build tree structure
-        List<CategoryResponse> roots = new ArrayList<>();
-        for (CategoryResponse category : categoryMap.values()) {
-            if (category.getParentId() == null) {
-                roots.add(category);
-            } else {
-                CategoryResponse parent = categoryMap.get(category.getParentId());
-                if (parent != null) {
-                    parent.getChildren().add(category);
-                }
-            }
-        }
-
-        // 5. Return root categories with nested children in the persisted storefront order
-        Comparator<CategoryResponse> categoryOrder = Comparator.comparingInt(CategoryResponse::getDisplayOrder)
-                .thenComparing(CategoryResponse::getName, String.CASE_INSENSITIVE_ORDER);
-        roots.sort(categoryOrder);
-        roots.forEach(root -> sortChildren(root, categoryOrder));
-        return roots;
-    }
-
-    private void sortChildren(CategoryResponse category, Comparator<CategoryResponse> order) {
-        category.getChildren().sort(order);
-        category.getChildren().forEach(child -> sortChildren(child, order));
-    }
-
-    /** Adds each category's listed products to it and to every category above it, so a parent shows its whole branch. */
     private void addProductCounts(Map<UUID, CategoryResponse> categories) {
-        for (CategoryProductCount own : productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE)) {
-            Set<UUID> visited = new HashSet<>();
-            CategoryResponse current = categories.get(own.categoryId());
-            while (current != null && visited.add(current.getId())) {
-                current.setProductCount(current.getProductCount() + own.count());
-                current = current.getParentId() == null ? null : categories.get(current.getParentId());
-            }
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategoriesForAdmin() {
-        // 1. Admin listing includes INACTIVE categories, never DELETED ones
-        return categoryMapper.toResponseList(categoryRepository.findByStatusNot(CatalogStatus.DELETED));
-    }
-
-    @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategories() {
-        // 1. Fetch all active categories
-        List<Category> categories = categoryRepository.findByStatus(CatalogStatus.ACTIVE);
-
-        // 2. Map to response DTOs (flat list), each with the products it lists
-        List<CategoryResponse> responses = categoryMapper.toResponseList(categories);
-        addProductCounts(responses.stream().collect(Collectors.toMap(CategoryResponse::getId, response -> response)));
-        return responses;
-    }
-
-    @Transactional(readOnly = true)
-    public CategoryResponse getCategoryById(UUID id) {
-        // 1. Fetch category by ID
-        Category category = categoryRepository.findByIdAndStatus(id, CatalogStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
-
-        // 2. Map to response DTO
-        return categoryMapper.toResponse(category);
+        CategoryTrees.addProductCounts(categories, productRepository.countListedByCategory(CatalogStatus.ACTIVE, CatalogStatus.ACTIVE));
     }
 }

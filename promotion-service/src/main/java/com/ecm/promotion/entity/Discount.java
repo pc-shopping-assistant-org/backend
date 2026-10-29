@@ -7,6 +7,8 @@ import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.generator.EventType;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -18,6 +20,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Discount {
+
+    private static final int PERCENT_DENOMINATOR = 100;
 
     @Id
     @Generated(event = EventType.INSERT)
@@ -79,4 +83,29 @@ public class Discount {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private DiscountStatus status;
+
+    /** Where the discount stands at {@code now}: locked by an employee, not started, running or over. */
+    public DiscountState stateAt(Instant now) {
+        if (status == DiscountStatus.INACTIVE) {
+            return DiscountState.LOCKED;
+        }
+        if (now.isBefore(startAt)) {
+            return DiscountState.SCHEDULED;
+        }
+        return now.isBefore(endAt) ? DiscountState.RUNNING : DiscountState.EXPIRED;
+    }
+
+    /** True while a customer can get the discount: not locked, started and not over. */
+    public boolean isInEffect(Instant now) {
+        return status == DiscountStatus.ACTIVE && stateAt(now) == DiscountState.RUNNING;
+    }
+
+    /** What the discount takes off {@code amount}: a percentage rounded down, or a fixed sum that never exceeds the amount. */
+    public long reductionOf(long amount) {
+        if (discountType == DiscountType.FIXED) {
+            return Math.min(value, amount);
+        }
+        return BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(value))
+                .divide(BigDecimal.valueOf(PERCENT_DENOMINATOR), 0, RoundingMode.DOWN).longValueExact();
+    }
 }
