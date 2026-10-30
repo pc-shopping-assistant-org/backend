@@ -88,4 +88,11 @@ public class ProductVariant {
      */
     @Column(name = "updated_by")
     private UUID updatedBy;
+
+    /** Takes the variant off sale: deleted when nothing refers to it, otherwise hidden so its stock and orders stay. */
+    public void retire(boolean ordered, Instant now, UUID employeeId) {
+        status = quantity == 0 && !ordered ? CatalogStatus.DELETED : CatalogStatus.INACTIVE;
+        updatedAt = now;
+        updatedBy = employeeId;
+    }
 }

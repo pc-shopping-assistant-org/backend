@@ -9,6 +9,8 @@ import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
 import com.ecm.catalog.repository.VariantOptionRepository;
 import com.ecm.catalog.util.VariantOptions;
+import com.ecm.common.exception.BusinessException;
+import com.ecm.common.exception.CommonErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -76,6 +78,6 @@ public class VariantOptionStore {
         String value = request.value().trim();
         optionRepository.insertIfAbsent(name, value);
         return optionRepository.findByNameAndValueIgnoringCase(name, value)
-                .orElseThrow(() -> new IllegalStateException("Option " + name + ": " + value + " was not saved"));
+                .orElseThrow(() -> new BusinessException(CommonErrorCode.INTERNAL_ERROR, "Option " + name + ": " + value + " was not saved"));
     }
 }

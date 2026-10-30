@@ -28,12 +28,6 @@ public class OrderItemService {
      * Returns the order line only to the customer who owns it; anyone else gets "not found" so
      * the existence of other customers' order lines is not revealed.
      */
-    /** The variants among {@code variantIds} that appear on at least one order, whatever its status. */
-    @Transactional(readOnly = true)
-    public List<UUID> findOrderedVariants(List<UUID> variantIds) {
-        return variantIds.isEmpty() ? List.of() : orderItemRepository.findOrderedVariantIds(variantIds);
-    }
-
     @Transactional(readOnly = true)
     public OrderItemDetailResponse getOwnedOrderItem(UUID orderItemId, Authentication authentication) {
         // 1. Load the order line and its order.
@@ -50,5 +44,11 @@ public class OrderItemService {
 
         // 3. Map to the cross-service view.
         return new OrderItemDetailResponse(item.getId(), order.getId(), order.getStatus(), item.getProductVariantId());
+    }
+
+    /** The variants among {@code variantIds} that appear on at least one order, whatever its status. */
+    @Transactional(readOnly = true)
+    public List<UUID> findOrderedVariants(List<UUID> variantIds) {
+        return variantIds.isEmpty() ? List.of() : orderItemRepository.findOrderedVariantIds(variantIds);
     }
 }

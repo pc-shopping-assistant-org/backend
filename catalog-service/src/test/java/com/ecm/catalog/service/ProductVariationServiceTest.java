@@ -15,6 +15,7 @@ import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.helper.VariantOptionStore;
+import com.ecm.catalog.mapper.ProductVariantMapperImpl;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
@@ -73,7 +74,7 @@ class ProductVariationServiceTest {
         ProductAssembler assembler = mock(ProductAssembler.class);
         service = new ProductVariationService(productRepository, variantRepository,
                 new VariantOptionStore(optionRepository, variantOptionRepository, variantRepository),
-                new OrderHistoryLookup(orderServiceClient), mock(MediaFileResolver.class), assembler);
+                new OrderHistoryLookup(orderServiceClient), mock(MediaFileResolver.class), assembler, new ProductVariantMapperImpl());
 
         when(productRepository.findByIdAndStatusIn(eq(PRODUCT_ID), anyCollection()))
                 .thenReturn(Optional.of(Product.builder().id(PRODUCT_ID).status(CatalogStatus.ACTIVE).build()));
@@ -220,6 +221,14 @@ class ProductVariationServiceTest {
         save(item(DEFAULT_ID, "X-BLACK", null, color("Black")));
 
         verify(variantRepository).save(black);
+    }
+
+    @Test
+    void aVariantListedTwiceIsRejected() {
+        givenVariant(DEFAULT_ID, CatalogStatus.ACTIVE, 1, "X-BLACK", color("Black"));
+
+        assertEquals(CatalogErrorCode.VARIANT_LISTED_TWICE, assertThrows(BusinessException.class, () -> save(
+                item(DEFAULT_ID, "A", null, color("Black")), item(DEFAULT_ID, "B", null, color("White")))).getErrorCode());
     }
 
     @Test

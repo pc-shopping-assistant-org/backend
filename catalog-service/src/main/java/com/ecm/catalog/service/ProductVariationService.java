@@ -11,12 +11,12 @@ import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.helper.VariantOptionStore;
+import com.ecm.catalog.mapper.ProductVariantMapper;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
 import com.ecm.catalog.util.BlankText;
 import com.ecm.catalog.util.VariantOptions;
 import com.ecm.common.exception.BusinessException;
-import com.ecm.common.exception.CommonErrorCode;
 import com.ecm.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,6 +50,7 @@ public class ProductVariationService {
     private final OrderHistoryLookup orderHistory;
     private final MediaFileResolver mediaResolver;
     private final ProductAssembler assembler;
+    private final ProductVariantMapper variantMapper;
 
     /**
      * The listed variants become the ACTIVE ones. An ACTIVE variant left out is deleted when it has no stock and no
@@ -75,22 +76,11 @@ public class ProductVariationService {
             mediaResolver.requireExisting(images);
         }
 
-        // 3. An ordered variant keeps its option values; one Order Service call covers those and the variants left out
+        // 3. An ordered variant keeps its option values, and the variants left out need to know whether they were ordered
         Set<UUID> kept = items.stream().map(VariationItemRequest::id).filter(Objects::nonNull).collect(Collectors.toSet());
         List<ProductVariant> leftOut = current.values().stream()
                 .filter(variant -> variant.getStatus() == CatalogStatus.ACTIVE && !kept.contains(variant.getId())).toList();
-        Map<UUID, Map<String, String>> before = optionStore.combinations(kept);
-        List<UUID> recombined = new ArrayList<>();
-        for (int i = 0; i < items.size(); i++) {
-            UUID id = items.get(i).id();
-            if (id != null && VariantOptions.changesValues(before.get(id), combinations.get(i))) {
-                recombined.add(id);
-            }
-        }
-        Set<UUID> ordered = orderHistory.orderedAmong(Stream.concat(recombined.stream(), leftOut.stream().map(ProductVariant::getId)).toList());
-        if (recombined.stream().anyMatch(ordered::contains)) {
-            throw new BusinessException(CatalogErrorCode.VARIANT_OPTIONS_LOCKED);
-        }
+        Set<UUID> ordered = orderedAmongTouched(items, combinations, leftOut);
 
         // 4. Write the variants, then their options (replacing options clears the persistence context)
         Instant now = Instant.now();
@@ -98,7 +88,7 @@ public class ProductVariationService {
         for (VariationItemRequest item : items) {
             savedIds.add(productVariantRepository.save(apply(item, current.get(item.id()), productId, now, employeeId)).getId());
         }
-        leftOut.forEach(variant -> retire(variant, ordered.contains(variant.getId()), now, employeeId));
+        leftOut.forEach(variant -> variant.retire(ordered.contains(variant.getId()), now, employeeId));
         productVariantRepository.saveAll(leftOut);
         productVariantRepository.flush();
         for (int i = 0; i < items.size(); i++) {
@@ -119,7 +109,7 @@ public class ProductVariationService {
                 throw new ResourceNotFoundException("ProductVariant", item.id());
             }
             if (!seen.add(item.id())) {
-                throw new BusinessException(CommonErrorCode.BAD_REQUEST, "Variant listed more than once: " + item.id());
+                throw new BusinessException(CatalogErrorCode.VARIANT_LISTED_TWICE, "Variant listed more than once: " + item.id());
             }
         }
     }
@@ -150,30 +140,38 @@ public class ProductVariationService {
         }
     }
 
+    /**
+     * Asks the Order Service once about the listed variants whose option values change and the variants left out, and
+     * returns those that were ordered; rejects the save when a variant changing its values is among them.
+     */
+    private Set<UUID> orderedAmongTouched(List<VariationItemRequest> items, List<Map<String, String>> combinations,
+                                          List<ProductVariant> leftOut) {
+        Map<UUID, Map<String, String>> before = optionStore.combinations(
+                items.stream().map(VariationItemRequest::id).filter(Objects::nonNull).toList());
+        List<UUID> recombined = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            UUID id = items.get(i).id();
+            if (id != null && VariantOptions.changesValues(before.get(id), combinations.get(i))) {
+                recombined.add(id);
+            }
+        }
+        Set<UUID> ordered = orderHistory.orderedAmong(Stream.concat(recombined.stream(), leftOut.stream().map(ProductVariant::getId)).toList());
+        if (recombined.stream().anyMatch(ordered::contains)) {
+            throw new BusinessException(CatalogErrorCode.VARIANT_OPTIONS_LOCKED);
+        }
+        return ordered;
+    }
+
     /** The listed variant: an existing one edited and made ACTIVE (its stock untouched), or a new one with its opening stock. */
-    private static ProductVariant apply(VariationItemRequest item, ProductVariant existing, UUID productId, Instant now, UUID employeeId) {
+    private ProductVariant apply(VariationItemRequest item, ProductVariant existing, UUID productId, Instant now, UUID employeeId) {
         ProductVariant variant = existing != null ? existing : ProductVariant.builder()
                 .productId(productId).quantity(item.quantity() == null ? 0 : item.quantity()).createdBy(employeeId).build();
-        variant.setPrice(item.price());
-        variant.setSku(item.sku().trim());
-        variant.setModel(item.model());
-        variant.setDescription(item.description());
-        variant.setWarrantyMonths(item.warrantyMonths());
-        variant.setBarcode(BlankText.trimmedOrNull(item.barcode()));
-        variant.setReleaseAt(item.releaseAt());
-        variant.setImageFileId(item.imageFileId());
+        variantMapper.updateEntity(item, variant);
         variant.setStatus(CatalogStatus.ACTIVE);
         if (existing != null) {
             variant.setUpdatedAt(now);
             variant.setUpdatedBy(employeeId);
         }
         return variant;
-    }
-
-    /** A variant left out of the list: deleted when nothing refers to it, otherwise hidden so its stock and orders stay. */
-    private static void retire(ProductVariant variant, boolean ordered, Instant now, UUID employeeId) {
-        variant.setStatus(variant.getQuantity() == 0 && !ordered ? CatalogStatus.DELETED : CatalogStatus.INACTIVE);
-        variant.setUpdatedAt(now);
-        variant.setUpdatedBy(employeeId);
     }
 }

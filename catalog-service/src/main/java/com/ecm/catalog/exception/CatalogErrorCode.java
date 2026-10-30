@@ -30,7 +30,8 @@ public enum CatalogErrorCode implements ErrorCode {
     VARIANT_OPTIONS_MISMATCH(HttpStatus.BAD_REQUEST, "Every active variant of a product must have the same option names"),
     DUPLICATE_VARIANT_COMBINATION(HttpStatus.CONFLICT, "Another active variant of the product already has these options"),
     VARIANT_OPTIONS_LOCKED(HttpStatus.CONFLICT, "The option values of a variant that has been ordered cannot be changed"),
-    STOCK_BELOW_ZERO(HttpStatus.CONFLICT, "The stock adjustment would make the stock negative");
+    STOCK_BELOW_ZERO(HttpStatus.CONFLICT, "The stock adjustment would make the stock negative"),
+    VARIANT_LISTED_TWICE(HttpStatus.BAD_REQUEST, "The same variant is listed more than once");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;

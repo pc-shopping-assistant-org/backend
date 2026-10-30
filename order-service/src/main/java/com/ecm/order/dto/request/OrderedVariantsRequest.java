@@ -8,5 +8,9 @@ import java.util.UUID;
 
 /** The variants the Catalog Service asks about before deleting or changing them. */
 public record OrderedVariantsRequest(
-        @NotNull @Size(max = 1000) List<@NotNull UUID> variantIds
-) {}
+        @NotNull @Size(max = OrderedVariantsRequest.MAX_VARIANT_IDS) List<@NotNull UUID> variantIds
+) {
+
+    /** Far above the variants of one product, the most the Catalog Service asks about at once. */
+    public static final int MAX_VARIANT_IDS = 1000;
+}
