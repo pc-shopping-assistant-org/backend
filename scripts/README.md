@@ -33,6 +33,14 @@ Script chỉ công bố 2.389 biến thể của tài khoản seed và có thể
 không ghi đè trạng thái đã công bố. Sau đó gọi
 `POST /sync-service/products/sync` bằng token ADMIN để rebuild Elasticsearch.
 
+Để đặt tồn kho 100 và `ACTIVE` cho toàn bộ sản phẩm/biến thể seed (ghi đè
+`quantity` hiện có của các dòng seed), chạy `scripts/stock-seeded-catalog.sql`
+trên `catalog_db` rồi sync lại Elasticsearch như trên:
+
+```sh
+psql "$CATALOG_DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/stock-seeded-catalog.sql
+```
+
 | Env | Giá trị / mục đích |
 | --- | --- |
 | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER` | Mặc định `localhost`, `5433`, `postgres` |
