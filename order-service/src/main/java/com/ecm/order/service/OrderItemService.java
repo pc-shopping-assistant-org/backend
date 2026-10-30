@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,6 +28,12 @@ public class OrderItemService {
      * Returns the order line only to the customer who owns it; anyone else gets "not found" so
      * the existence of other customers' order lines is not revealed.
      */
+    /** The variants among {@code variantIds} that appear on at least one order, whatever its status. */
+    @Transactional(readOnly = true)
+    public List<UUID> findOrderedVariants(List<UUID> variantIds) {
+        return variantIds.isEmpty() ? List.of() : orderItemRepository.findOrderedVariantIds(variantIds);
+    }
+
     @Transactional(readOnly = true)
     public OrderItemDetailResponse getOwnedOrderItem(UUID orderItemId, Authentication authentication) {
         // 1. Load the order line and its order.
