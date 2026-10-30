@@ -3,6 +3,8 @@ package com.ecm.catalog.controller;
 import com.ecm.catalog.dto.request.CreateProductRequest;
 import com.ecm.catalog.dto.request.CreateVariantRequest;
 import com.ecm.catalog.dto.request.ProductFilterRequest;
+import com.ecm.catalog.dto.request.SaveVariationsRequest;
+import com.ecm.catalog.dto.request.StockAdjustmentRequest;
 import com.ecm.catalog.dto.request.UpdateProductRequest;
 import com.ecm.catalog.dto.request.UpdateProductStatusRequest;
 import com.ecm.catalog.dto.request.UpdateVariantRequest;
@@ -14,6 +16,7 @@ import com.ecm.catalog.dto.response.ProductVariantResponse;
 import com.ecm.catalog.service.ProductQueryService;
 import com.ecm.catalog.service.ProductService;
 import com.ecm.catalog.service.ProductVariantService;
+import com.ecm.catalog.service.ProductVariationService;
 import com.ecm.common.response.ApiResponse;
 import com.ecm.common.security.CurrentUser;
 import jakarta.validation.Valid;
@@ -40,6 +43,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final ProductVariantService productVariantService;
+    private final ProductVariationService productVariationService;
     private final ProductQueryService productQueryService;
 
     @PostMapping
@@ -78,6 +82,19 @@ public class ProductController {
                                                              @Valid @RequestBody UpdateVariantRequest request,
                                                              Authentication authentication) {
         return ApiResponse.success(productVariantService.updateVariant(id, variantId, request, CurrentUser.requireAccountId(authentication)));
+    }
+
+    @PostMapping("/{id}/variants/{variantId}/stock-adjustments")
+    public ApiResponse<ProductVariantResponse> adjustStock(@PathVariable UUID id, @PathVariable UUID variantId,
+                                                           @Valid @RequestBody StockAdjustmentRequest request,
+                                                           Authentication authentication) {
+        return ApiResponse.success(productVariantService.adjustStock(id, variantId, request.delta(), CurrentUser.requireAccountId(authentication)));
+    }
+
+    @PutMapping("/{id}/variations")
+    public ApiResponse<ProductDetailResponse> saveVariations(@PathVariable UUID id, @Valid @RequestBody SaveVariationsRequest request,
+                                                             Authentication authentication) {
+        return ApiResponse.success(productVariationService.saveVariations(id, request, CurrentUser.requireAccountId(authentication)));
     }
 
     @PatchMapping("/{id}/variants/{variantId}/status")

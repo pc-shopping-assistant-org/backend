@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
@@ -43,6 +44,7 @@ public class ProductQueryService {
     private final ProductVariantRepository productVariantRepository;
     private final CategoryRepository categoryRepository;
     private final ProductAssembler assembler;
+    private final OrderHistoryLookup orderHistory;
 
     @Transactional(readOnly = true)
     public CursorPageResponse<ProductSummaryResponse> getProducts(ProductFilterRequest filter) {
@@ -77,7 +79,9 @@ public class ProductQueryService {
     public ProductDetailResponse getAdminProductById(UUID id) {
         Product product = productRepository.findByIdAndStatusIn(id, ProductService.ADMIN_VISIBLE_STATUSES)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
-        return assembler.detail(product, ProductService.ADMIN_VISIBLE_STATUSES);
+        ProductDetailResponse detail = assembler.detail(product, ProductService.ADMIN_VISIBLE_STATUSES);
+        orderHistory.markOrdered(detail.getVariants());
+        return detail;
     }
 
     @Transactional(readOnly = true)

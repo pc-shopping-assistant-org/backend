@@ -11,10 +11,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-/** The options list replaces the variant options; a null imageFileId removes the own image of the variant. */
+/**
+ * The options list replaces the variant options; a null imageFileId removes the own image of the variant. Stock is not
+ * edited here but adjusted by a delta ({@link StockAdjustmentRequest}), so an edit never undoes an order.
+ */
 public record UpdateVariantRequest(
         @NotNull @PositiveOrZero Long price,
-        @NotNull @PositiveOrZero Integer quantity,
         @NotBlank @Size(max = 100) String sku,
         @Size(max = 100) String model,
         String description,

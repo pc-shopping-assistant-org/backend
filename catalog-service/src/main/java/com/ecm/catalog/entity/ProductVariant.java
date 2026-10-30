@@ -3,6 +3,7 @@ package com.ecm.catalog.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.generator.EventType;
@@ -11,8 +12,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * {@code @DynamicUpdate}: an edit writes only the columns it changed, so it never writes back a {@code quantity} read before
+ * an order took stock. Stock itself changes only through the atomic adjustments of {@link
+ * com.ecm.catalog.repository.ProductVariantRepository}.
+ */
 @Entity
 @Table(name = "product_variants")
+@DynamicUpdate
 @Getter
 @Setter
 @NoArgsConstructor
