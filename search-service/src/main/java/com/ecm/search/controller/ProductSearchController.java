@@ -20,7 +20,7 @@ public class ProductSearchController {
 
 
     @GetMapping("/search")
-    public ApiResponse<PageResponse<ProductSearchResponse>> search(@RequestParam("q") String query,
+    public ApiResponse<PageResponse<ProductSearchResponse>> search(@RequestParam(value = "q", required = false) String query,
                                                                    ProductSearchFilterRequest filter,
                                                                    @RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "20") int size) {

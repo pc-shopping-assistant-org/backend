@@ -11,6 +11,11 @@ spring:
   elasticsearch:
     # The product index lives in an Elasticsearch node of docker-compose.yml.
     uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
 
 server:
   port: 8086
@@ -45,3 +50,12 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
+
+app:
+  embedding:
+    api-url: ${EMBEDDING_API_URL:}
+    api-key: ${EMBEDDING_API_KEY:}
+    model: ${EMBEDDING_MODEL:BAAI/bge-m3}
+  search:
+    cache-ttl: ${SEARCH_CACHE_TTL:5m}
+    cache-window-size: ${SEARCH_CACHE_WINDOW_SIZE:500}
