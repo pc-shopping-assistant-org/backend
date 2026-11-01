@@ -224,6 +224,16 @@
 
     <profiles>
         <profile>
+            <id>seed-demo-stock</id>
+            <build><plugins><plugin>
+                <groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>
+                <executions><execution>
+                    <id>seed-demo-stock</id><phase>package</phase><goals><goal>java</goal></goals>
+                    <configuration><mainClass>com.ecm.catalog.bootstrap.CatalogStockSeed</mainClass></configuration>
+                </execution></executions>
+            </plugin></plugins></build>
+        </profile>
+        <profile>
             <id>seed-prod</id>
             <build><plugins><plugin>
                 <groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>

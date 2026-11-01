@@ -51,13 +51,19 @@ merges when Maven verification fails.
 From this directory, `mvn -pl catalog-service -am -Pseed-prod -DskipTests package`
 packages and runs the Java seed CLI. The catalog image uses the same entrypoint:
 `java -jar /app/app.jar --seed-prod`. From `../infra/`, run `./scripts/seed-prod.sh`.
+
+Demo stock reset is separate: `mvn -pl catalog-service -am -Pseed-demo-stock -DskipTests package`
+or `java -jar /app/app.jar --seed-demo-stock`. It activates non-deleted catalog and
+sets eligible SKU stock to exactly 10 in one transaction. Run only for demo data;
+normal production seeding never changes stock. From infra, after publishing the new
+catalog image and with PostgreSQL running: `./scripts/seed-demo-stock.sh`.
 No web server or message listener starts in this mode.
 
 The CLI applies the owning service's Flyway migrations, inserts missing taxonomy,
 identity/media/catalog records from `scripts/seed/catalog_seed.json`, and uploads
 missing source images to the pre-created S3 bucket. Existing rows, IDs, prices,
 stock, statuses and storage objects stay unchanged. New variants use the JSON's
-quantity/status (currently zero stock and INACTIVE), not generated inventory.
+quantity/status (currently zero stock and ACTIVE), not generated inventory.
 See [scripts/README.md](scripts/README.md) for runtime env and retry semantics.
 First seed needs a manual bucket/key setup and may take time for 8,502 images;
 run it before the first infra release. Subsequent release jobs skip existing data.

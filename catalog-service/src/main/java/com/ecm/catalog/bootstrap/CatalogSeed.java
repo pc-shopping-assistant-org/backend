@@ -21,7 +21,11 @@ public final class CatalogSeed {
     }
 
     static void seed(Connection connection) throws SQLException, IOException {
-        try (var resource = Objects.requireNonNull(CatalogSeed.class.getResourceAsStream(PROD_SEED_RESOURCE));
+        seed(connection, PROD_SEED_RESOURCE);
+    }
+
+    static void seed(Connection connection, String resourceName) throws SQLException, IOException {
+        try (var resource = Objects.requireNonNull(CatalogSeed.class.getResourceAsStream(resourceName));
              var statement = connection.createStatement()) {
             statement.execute(new String(resource.readAllBytes(), StandardCharsets.UTF_8));
         }
