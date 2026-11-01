@@ -14,16 +14,32 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class MediaFileResolverTest {
+
+    @Test
+    void resolvesLargeGalleriesWithoutOversizedGetRequests() {
+        List<UUID> ids = IntStream.range(0, 1700).mapToObj(i -> new UUID(0, i)).toList();
+        when(client.getFiles(anyList())).thenAnswer(invocation -> {
+            List<UUID> batch = invocation.getArgument(0);
+            assertTrue(batch.size() <= 100, "GET query must fit the media request header limit");
+            return ApiResponse.success(batch.stream().map(id ->
+                    file(id, "https://media.example/" + id)).toList());
+        });
+        assertEquals(ids.size(), resolver.resolveUrls(ids).size());
+        resolver.requireExisting(ids);
+    }
 
     private static final UUID FIRST = UUID.fromString("00000000-0000-0000-0000-0000000000f1");
     private static final UUID SECOND = UUID.fromString("00000000-0000-0000-0000-0000000000f2");
