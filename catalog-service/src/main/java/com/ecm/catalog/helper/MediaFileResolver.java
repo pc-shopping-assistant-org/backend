@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 public class MediaFileResolver {
 
     private static final String MEDIA_SERVICE = "media-service";
+    // Repeated UUID query parameters must stay below the media HTTP header limit.
+    private static final int MEDIA_LOOKUP_BATCH_SIZE = 100;
 
     private final MediaServiceClient mediaServiceClient;
 
@@ -37,7 +40,7 @@ public class MediaFileResolver {
         }
     }
 
-    /** Maps each file id to its URL in one batched call; files without a URL are left out. */
+    /** Maps file ids to URLs through bounded requests; files without a URL are left out. */
     public Map<UUID, String> resolveUrls(Collection<UUID> fileIds) {
         List<UUID> distinct = fileIds.stream().filter(Objects::nonNull).distinct().toList();
         if (distinct.isEmpty()) {
@@ -50,7 +53,12 @@ public class MediaFileResolver {
 
     private List<MediaFileResponse> fetch(List<UUID> fileIds) {
         try {
-            return mediaServiceClient.getFiles(fileIds).getData();
+            List<MediaFileResponse> files = new ArrayList<>();
+            for (int offset = 0; offset < fileIds.size(); offset += MEDIA_LOOKUP_BATCH_SIZE) {
+                files.addAll(mediaServiceClient.getFiles(fileIds.subList(offset,
+                        Math.min(offset + MEDIA_LOOKUP_BATCH_SIZE, fileIds.size()))).getData());
+            }
+            return files;
         } catch (FeignException ex) {
             throw new ExternalServiceException(MEDIA_SERVICE, ex);
         }

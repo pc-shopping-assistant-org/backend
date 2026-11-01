@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 /**
  * Builds product, variant and summary responses, loading brands, categories, gallery images, variants and options
  * in batches (a fixed number of queries per call, whatever the number of products) and resolving image URLs with a
- * single Media Service call.
+ * bounded Media Service requests.
  */
 @Component
 @RequiredArgsConstructor
