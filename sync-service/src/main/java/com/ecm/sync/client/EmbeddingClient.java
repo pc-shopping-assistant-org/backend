@@ -1,6 +1,6 @@
 package com.ecm.sync.client;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,12 +9,14 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.time.Duration;
 
 /**
- * Calls an OpenAI-compatible embeddings endpoint (default model BAAI/bge-m3, 1024 dimensions).
+ * Calls the embeddings endpoint (ai-service /api/v1/embeddings envelope or OpenAI /v1/embeddings format,
+ * default model BAAI/bge-m3, 1024 dimensions).
  * Fails open by returning null when unconfigured or unreachable so catalog sync continues.
  */
 @Slf4j
@@ -23,7 +25,7 @@ public class EmbeddingClient {
 
     public static final int EMBEDDING_DIMS = 1024;
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(3);
-    private static final Duration READ_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(30);
 
     private final String apiUrl;
     private final String apiKey;
@@ -67,14 +69,11 @@ public class EmbeddingClient {
             if (!apiKey.isBlank()) {
                 request.header("Authorization", "Bearer " + apiKey);
             }
-            EmbeddingApiResponse response = request
+            JsonNode response = request
                     .body(Map.of("model", model, "input", text))
                     .retrieve()
-                    .body(EmbeddingApiResponse.class);
-            if (response == null) {
-                return null;
-            }
-            List<Float> vector = response.firstVector();
+                    .body(JsonNode.class);
+            List<Float> vector = extractVector(response);
             if (vector == null || vector.size() != EMBEDDING_DIMS) {
                 log.warn("Embedding endpoint returned unexpected dimension: {}", vector == null ? "null" : vector.size());
                 return null;
@@ -94,6 +93,47 @@ public class EmbeddingClient {
         }
     }
 
+    public static List<Float> extractVector(JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return null;
+        }
+        JsonNode dataNode = node.get("data");
+        if (dataNode != null && dataNode.isObject()) {
+            List<Float> nested = extractVector(dataNode);
+            if (nested != null) {
+                return nested;
+            }
+        }
+        if (dataNode != null && dataNode.isArray() && !dataNode.isEmpty()) {
+            JsonNode first = dataNode.get(0);
+            if (first != null && first.isObject()) {
+                List<Float> fromFirst = toFloatList(first.get("embedding"));
+                if (fromFirst != null) {
+                    return fromFirst;
+                }
+            }
+        }
+        return toFloatList(node.get("embedding"));
+    }
+
+    private static List<Float> toFloatList(JsonNode arrayNode) {
+        if (arrayNode == null || !arrayNode.isArray() || arrayNode.isEmpty()) {
+            return null;
+        }
+        List<Float> values = new ArrayList<>(arrayNode.size());
+        for (JsonNode element : arrayNode) {
+            if (element == null || !element.isNumber()) {
+                return null;
+            }
+            float val = element.floatValue();
+            if (!Float.isFinite(val)) {
+                return null;
+            }
+            values.add(val);
+        }
+        return values;
+    }
+
     public static boolean isValidVector(float[] vector) {
         if (vector == null || vector.length != EMBEDDING_DIMS) {
             return false;
@@ -108,26 +148,12 @@ public class EmbeddingClient {
 
     static String resolveEndpoint(String rawUrl) {
         String trimmed = rawUrl.trim();
-        if (trimmed.endsWith("/v1")) {
+        if (trimmed.endsWith("/api/v1") || trimmed.endsWith("/v1")) {
             return trimmed + "/embeddings";
         }
-        if (trimmed.endsWith("/v1/")) {
+        if (trimmed.endsWith("/api/v1/") || trimmed.endsWith("/v1/")) {
             return trimmed + "embeddings";
         }
         return trimmed;
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record EmbeddingApiResponse(List<EmbeddingData> data, List<Float> embedding) {
-        public List<Float> firstVector() {
-            if (data != null && !data.isEmpty() && data.getFirst() != null && data.getFirst().embedding() != null) {
-                return data.getFirst().embedding();
-            }
-            return embedding;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record EmbeddingData(List<Float> embedding) {
     }
 }
