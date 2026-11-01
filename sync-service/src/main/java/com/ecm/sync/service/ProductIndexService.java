@@ -2,11 +2,12 @@ package com.ecm.sync.service;
 
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.sync.client.CatalogServiceClient;
+import com.ecm.sync.client.EmbeddingClient;
 import com.ecm.sync.dto.response.CatalogProductResponse;
 import com.ecm.sync.entity.ProductDocument;
 import com.ecm.sync.mapper.ProductDocumentMapper;
 import com.ecm.sync.repository.ProductSearchRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -14,23 +15,29 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HexFormat;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Keeps the product index in step with the catalog. A product is indexed from the catalog's own public view of it, so
  * whatever the storefront would not show (inactive, deleted, unknown) is removed from the index.
  */
 @Service
-@RequiredArgsConstructor
 public class ProductIndexService {
 
     private static final int REINDEX_PAGE_SIZE = 500;
@@ -39,6 +46,29 @@ public class ProductIndexService {
     private final ProductSearchRepository repository;
     private final ElasticsearchOperations operations;
     private final ProductDocumentMapper mapper;
+    private final EmbeddingClient embeddingClient;
+
+    public ProductIndexService(
+            CatalogServiceClient catalogClient,
+            ProductSearchRepository repository,
+            ElasticsearchOperations operations,
+            ProductDocumentMapper mapper) {
+        this(catalogClient, repository, operations, mapper, new EmbeddingClient("", "", "BAAI/bge-m3"));
+    }
+
+    @Autowired
+    public ProductIndexService(
+            CatalogServiceClient catalogClient,
+            ProductSearchRepository repository,
+            ElasticsearchOperations operations,
+            ProductDocumentMapper mapper,
+            EmbeddingClient embeddingClient) {
+        this.catalogClient = catalogClient;
+        this.repository = repository;
+        this.operations = operations;
+        this.mapper = mapper;
+        this.embeddingClient = embeddingClient;
+    }
 
     /** Rebuilds the document of one product from the catalog, or drops it when the catalog no longer shows the product. */
     public void reindexProduct(UUID productId) {
@@ -55,9 +85,40 @@ public class ProductIndexService {
         List<CatalogProductResponse.Variant> variants = product.variants() == null ? List.of() : product.variants();
         List<Long> prices = variants.stream().map(CatalogProductResponse.Variant::price).filter(Objects::nonNull).toList();
         boolean inStock = variants.stream().anyMatch(variant -> variant.quantity() != null && variant.quantity() > 0);
-        repository.save(mapper.toDocument(product,
+        String specificationsText = buildSpecificationsText(product.specifications(), variants);
+        List<ProductDocument.VariantDocument> variantDocuments = buildVariantDocuments(variants);
+
+        ProductDocument document = mapper.toDocument(product,
                 prices.stream().min(Long::compare).orElse(null), prices.stream().max(Long::compare).orElse(null),
-                inStock, mainImageUrl(product.images()), categoryChain(product.categoryId()), prices, Instant.now()));
+                inStock, mainImageUrl(product.images()), categoryChain(product.categoryId()), prices, Instant.now());
+        document.setSpecificationsText(specificationsText);
+        document.setVariants(variantDocuments);
+
+        // 3. Compute canonical semantic hash (excluding price/stock) and reuse or compute 1024d bge-m3 embedding
+        String semanticText = buildSemanticText(product, specificationsText);
+        String semanticHash = sha256Hex(semanticText);
+        ProductDocument existing = repository.findById(productId.toString()).orElse(null);
+
+        if (existing != null
+                && semanticHash.equals(existing.getSemanticHash())
+                && EmbeddingClient.isValidVector(existing.getEmbedding())) {
+            document.setSemanticHash(semanticHash);
+            document.setEmbedding(existing.getEmbedding());
+        } else {
+            float[] vector = embeddingClient.embed(semanticText);
+            if (EmbeddingClient.isValidVector(vector)) {
+                document.setSemanticHash(semanticHash);
+                document.setEmbedding(vector);
+            } else if (existing != null && EmbeddingClient.isValidVector(existing.getEmbedding())) {
+                document.setSemanticHash(existing.getSemanticHash());
+                document.setEmbedding(existing.getEmbedding());
+            } else {
+                document.setSemanticHash(semanticHash);
+                document.setEmbedding(null);
+            }
+        }
+
+        repository.save(document);
     }
 
     /** A brand rename changes every product of the brand at once, so it is applied inside the index. */
@@ -126,5 +187,94 @@ public class ProductIndexService {
                 .or(() -> images.stream().findFirst())
                 .map(CatalogProductResponse.Image::url)
                 .orElse(null);
+    }
+
+    static List<ProductDocument.VariantDocument> buildVariantDocuments(List<CatalogProductResponse.Variant> variants) {
+        if (variants == null || variants.isEmpty()) {
+            return List.of();
+        }
+        return variants.stream()
+                .map(variant -> ProductDocument.VariantDocument.builder()
+                        .id(variant.id() == null ? null : variant.id().toString())
+                        .sku(variant.sku())
+                        .model(variant.model())
+                        .price(variant.price())
+                        .inStock(variant.quantity() != null && variant.quantity() > 0)
+                        .optionsText(formatVariantOptions(variant.options()))
+                        .build())
+                .toList();
+    }
+
+    static String formatVariantOptions(List<CatalogProductResponse.Option> options) {
+        if (options == null || options.isEmpty()) {
+            return "";
+        }
+        return options.stream()
+                .filter(Objects::nonNull)
+                .filter(opt -> opt.name() != null && !opt.name().isBlank() && opt.value() != null && !opt.value().isBlank())
+                .sorted(Comparator.comparing(opt -> opt.name().trim().toLowerCase()))
+                .map(opt -> opt.name().trim() + ": " + opt.value().trim())
+                .collect(Collectors.joining("; "));
+    }
+
+    static String buildSpecificationsText(
+            Map<String, Object> specifications,
+            List<CatalogProductResponse.Variant> variants) {
+        Set<String> tokens = new LinkedHashSet<>();
+        if (specifications != null && !specifications.isEmpty()) {
+            specifications.entrySet().stream()
+                    .filter(entry -> entry.getKey() != null && !entry.getKey().isBlank() && entry.getValue() != null)
+                    .sorted(Map.Entry.comparingByKey(String.CASE_INSENSITIVE_ORDER))
+                    .forEach(entry -> {
+                        String val = String.valueOf(entry.getValue()).trim();
+                        if (!val.isBlank()) {
+                            tokens.add(entry.getKey().trim() + ": " + val);
+                        }
+                    });
+        }
+        if (variants != null) {
+            for (CatalogProductResponse.Variant variant : variants) {
+                if (variant == null) {
+                    continue;
+                }
+                if (variant.model() != null && !variant.model().isBlank()) {
+                    tokens.add("model: " + variant.model().trim());
+                }
+                if (variant.sku() != null && !variant.sku().isBlank()) {
+                    tokens.add("sku: " + variant.sku().trim());
+                }
+                String opts = formatVariantOptions(variant.options());
+                if (!opts.isBlank()) {
+                    tokens.add(opts);
+                }
+            }
+        }
+        return String.join(" | ", tokens);
+    }
+
+    static String buildSemanticText(CatalogProductResponse product, String specificationsText) {
+        List<String> parts = new ArrayList<>();
+        addPart(parts, "Product", product.name());
+        addPart(parts, "Brand", product.brandName());
+        addPart(parts, "Category", product.categoryName());
+        addPart(parts, "Specifications", specificationsText);
+        addPart(parts, "Description", product.description());
+        return String.join("\n", parts);
+    }
+
+    private static void addPart(List<String> parts, String label, String value) {
+        if (value != null && !value.isBlank()) {
+            parts.add(label + ": " + value.trim().replaceAll("\\s+", " "));
+        }
+    }
+
+    static String sha256Hex(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest((input == null ? "" : input).getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 unavailable", ex);
+        }
     }
 }

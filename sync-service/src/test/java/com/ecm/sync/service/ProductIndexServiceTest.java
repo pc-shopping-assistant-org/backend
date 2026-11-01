@@ -4,6 +4,7 @@ import com.ecm.common.exception.ExternalServiceException;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.response.ApiResponse;
 import com.ecm.sync.client.CatalogServiceClient;
+import com.ecm.sync.client.EmbeddingClient;
 import com.ecm.sync.dto.response.CatalogCategoryResponse;
 import com.ecm.sync.dto.response.CatalogProductResponse;
 import com.ecm.sync.entity.ProductDocument;
@@ -20,6 +21,8 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -191,5 +194,95 @@ class ProductIndexServiceTest {
         verify(catalogClient).getProduct(PRODUCT_ID);
         verify(catalogClient).getProduct(other);
         verify(repository, times(2)).save(any(ProductDocument.class));
+    }
+
+    @Test
+    void indexesSpecificationsNestedVariantsAndReusesEmbeddingWhenOnlyPriceOrStockChanges() {
+        EmbeddingClient embeddingClient = mock(EmbeddingClient.class);
+        ProductIndexService serviceWithEmbedding = new ProductIndexService(
+                catalogClient, repository, operations, new ProductDocumentMapperImpl(), embeddingClient);
+
+        float[] firstVector = new float[EmbeddingClient.EMBEDDING_DIMS];
+        firstVector[0] = 0.25f;
+        firstVector[1] = 0.75f;
+        when(embeddingClient.embed(any())).thenReturn(firstVector);
+
+        UUID variantId = UUID.randomUUID();
+        CatalogProductResponse initialProduct = new CatalogProductResponse(
+                PRODUCT_ID, "RTX 4070", "rtx-4070", BRAND_ID, "Asus", CATEGORY_ID, "Card đồ họa",
+                "Fast card", Map.of("VRAM", "12GB GDDR6X", "Memory Bus", "192-bit"),
+                List.of(),
+                List.of(new CatalogProductResponse.Variant(
+                        variantId, "SKU-4070-OC", "TUF-RTX4070-O12G", 15_000_000L, 5,
+                        List.of(new CatalogProductResponse.Option("Edition", "OC")))));
+
+        when(catalogClient.getProduct(PRODUCT_ID)).thenReturn(ApiResponse.success(initialProduct));
+        when(repository.findById(PRODUCT_ID.toString())).thenReturn(Optional.empty());
+
+        serviceWithEmbedding.reindexProduct(PRODUCT_ID);
+
+        ProductDocument firstSaved = savedDocument();
+        assertThat(firstSaved.getSpecificationsText())
+                .contains("Memory Bus: 192-bit")
+                .contains("VRAM: 12GB GDDR6X")
+                .contains("model: TUF-RTX4070-O12G")
+                .contains("Edition: OC");
+        assertThat(firstSaved.getVariants()).singleElement().satisfies(v -> {
+            assertThat(v.getId()).isEqualTo(variantId.toString());
+            assertThat(v.getPrice()).isEqualTo(15_000_000L);
+            assertThat(v.isInStock()).isTrue();
+            assertThat(v.getOptionsText()).isEqualTo("Edition: OC");
+        });
+        assertThat(firstSaved.getEmbedding()).isEqualTo(firstVector);
+        assertThat(firstSaved.getSemanticHash()).isNotBlank();
+        verify(embeddingClient, times(1)).embed(any());
+
+        // Second reindex: ONLY price and quantity changed -> must reuse embedding without calling embeddingClient
+        CatalogProductResponse priceChangedProduct = new CatalogProductResponse(
+                PRODUCT_ID, "RTX 4070", "rtx-4070", BRAND_ID, "Asus", CATEGORY_ID, "Card đồ họa",
+                "Fast card", Map.of("VRAM", "12GB GDDR6X", "Memory Bus", "192-bit"),
+                List.of(),
+                List.of(new CatalogProductResponse.Variant(
+                        variantId, "SKU-4070-OC", "TUF-RTX4070-O12G", 14_200_000L, 0,
+                        List.of(new CatalogProductResponse.Option("Edition", "OC")))));
+
+        when(catalogClient.getProduct(PRODUCT_ID)).thenReturn(ApiResponse.success(priceChangedProduct));
+        when(repository.findById(PRODUCT_ID.toString())).thenReturn(Optional.of(firstSaved));
+
+        serviceWithEmbedding.reindexProduct(PRODUCT_ID);
+
+        ArgumentCaptor<ProductDocument> captor = ArgumentCaptor.forClass(ProductDocument.class);
+        verify(repository, times(2)).save(captor.capture());
+        ProductDocument secondSaved = captor.getAllValues().get(1);
+        assertThat(secondSaved.getMinPrice()).isEqualTo(14_200_000L);
+        assertThat(secondSaved.isInStock()).isFalse();
+        assertThat(secondSaved.getEmbedding()).isEqualTo(firstVector);
+        assertThat(secondSaved.getSemanticHash()).isEqualTo(firstSaved.getSemanticHash());
+        verify(embeddingClient, times(1)).embed(any());
+    }
+
+    @Test
+    void preservesExistingValidVectorWhenEmbeddingServiceFailsOnSemanticChange() {
+        EmbeddingClient embeddingClient = mock(EmbeddingClient.class);
+        ProductIndexService serviceWithEmbedding = new ProductIndexService(
+                catalogClient, repository, operations, new ProductDocumentMapperImpl(), embeddingClient);
+
+        float[] existingVector = new float[EmbeddingClient.EMBEDDING_DIMS];
+        existingVector[0] = 0.5f;
+        ProductDocument existingDoc = ProductDocument.builder()
+                .id(PRODUCT_ID.toString())
+                .semanticHash("old-hash")
+                .embedding(existingVector)
+                .build();
+
+        when(repository.findById(PRODUCT_ID.toString())).thenReturn(Optional.of(existingDoc));
+        when(embeddingClient.embed(any())).thenReturn(null);
+        when(catalogClient.getProduct(PRODUCT_ID)).thenReturn(ApiResponse.success(product(null, null)));
+
+        serviceWithEmbedding.reindexProduct(PRODUCT_ID);
+
+        ProductDocument saved = savedDocument();
+        assertThat(saved.getEmbedding()).isEqualTo(existingVector);
+        assertThat(saved.getSemanticHash()).isEqualTo("old-hash");
     }
 }

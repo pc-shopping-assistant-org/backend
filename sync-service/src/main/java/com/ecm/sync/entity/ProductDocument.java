@@ -79,6 +79,44 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword, index = false)
     private String mainImageUrl;
 
+    @Field(type = FieldType.Text, analyzer = "folded")
+    private String specificationsText;
+
+    @Field(type = FieldType.Nested)
+    private List<VariantDocument> variants;
+
+    @Field(type = FieldType.Keyword, index = false)
+    private String semanticHash;
+
+    @Field(type = FieldType.Dense_Vector, dims = 1024, index = true, similarity = "cosine")
+    private float[] embedding;
+
     @Field(type = FieldType.Date)
     private Instant indexedAt;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class VariantDocument {
+
+        @Field(type = FieldType.Keyword)
+        private String id;
+
+        @Field(type = FieldType.Keyword)
+        private String sku;
+
+        @Field(type = FieldType.Text, analyzer = "folded")
+        private String model;
+
+        @Field(type = FieldType.Long)
+        private Long price;
+
+        @Field(type = FieldType.Boolean)
+        private boolean inStock;
+
+        @Field(type = FieldType.Text, analyzer = "folded")
+        private String optionsText;
+    }
 }

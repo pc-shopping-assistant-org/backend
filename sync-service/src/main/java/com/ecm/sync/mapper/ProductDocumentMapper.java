@@ -19,6 +19,10 @@ public interface ProductDocumentMapper {
     @Mapping(target = "categoryId", source = "product.categoryId")
     @Mapping(target = "categoryName", source = "product.categoryName")
     @Mapping(target = "description", source = "product.description")
+    @Mapping(target = "specificationsText", ignore = true)
+    @Mapping(target = "variants", ignore = true)
+    @Mapping(target = "semanticHash", ignore = true)
+    @Mapping(target = "embedding", ignore = true)
     ProductDocument toDocument(CatalogProductResponse product, Long minPrice, Long maxPrice, boolean inStock,
                                String mainImageUrl, List<String> categoryIds, List<Long> prices,
                                Instant indexedAt);
