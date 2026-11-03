@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -43,5 +44,11 @@ public class OrderItemService {
 
         // 3. Map to the cross-service view.
         return new OrderItemDetailResponse(item.getId(), order.getId(), order.getStatus(), item.getProductVariantId());
+    }
+
+    /** The variants among {@code variantIds} that appear on at least one order, whatever its status. */
+    @Transactional(readOnly = true)
+    public List<UUID> findOrderedVariants(List<UUID> variantIds) {
+        return variantIds.isEmpty() ? List.of() : orderItemRepository.findOrderedVariantIds(variantIds);
     }
 }

@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
  * read from the replies this service queued in its outbox: an order holds its stock from {@code StockReservedEvent}
  * until {@code StockReleasedEvent}, so a command delivered twice, or a release for an order that reserved nothing,
  * changes nothing.
+ * <p>
+ * The status of a variant is deliberately not checked: the order service only accepts an order while the variant is on
+ * sale, and hiding a variant or its product afterwards stops new sales, not the orders already placed. To stop such an
+ * order the shop cancels it, which releases its stock.
  */
 @Service
 @RequiredArgsConstructor

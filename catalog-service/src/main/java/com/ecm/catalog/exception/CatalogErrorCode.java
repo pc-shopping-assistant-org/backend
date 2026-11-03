@@ -26,7 +26,12 @@ public enum CatalogErrorCode implements ErrorCode {
     ATTRIBUTE_USED_BY_SUBCATEGORY(HttpStatus.CONFLICT, "Attribute is already used by a sub-category"),
     INVALID_MEDIA_FILE(HttpStatus.BAD_REQUEST, "Image file does not exist"),
     INVALID_GALLERY(HttpStatus.BAD_REQUEST, "Product gallery is invalid"),
-    INVALID_VARIANT_OPTIONS(HttpStatus.BAD_REQUEST, "Variant options are invalid");
+    INVALID_VARIANT_OPTIONS(HttpStatus.BAD_REQUEST, "Variant options are invalid"),
+    VARIANT_OPTIONS_MISMATCH(HttpStatus.BAD_REQUEST, "Every active variant of a product must have the same option names"),
+    DUPLICATE_VARIANT_COMBINATION(HttpStatus.CONFLICT, "Another active variant of the product already has these options"),
+    VARIANT_OPTIONS_LOCKED(HttpStatus.CONFLICT, "The option values of a variant that has been ordered cannot be changed"),
+    STOCK_BELOW_ZERO(HttpStatus.CONFLICT, "The stock adjustment would make the stock negative"),
+    VARIANT_LISTED_TWICE(HttpStatus.BAD_REQUEST, "The same variant is listed more than once");
 
     private final HttpStatus httpStatus;
     private final String defaultMessage;
