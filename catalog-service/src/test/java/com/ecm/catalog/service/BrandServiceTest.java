@@ -9,6 +9,7 @@ import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.BrandMapperImpl;
 import com.ecm.catalog.repository.BrandRepository;
+import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.ResourceNotFoundException;
@@ -44,7 +45,7 @@ class BrandServiceTest {
         brandRepository = mock(BrandRepository.class);
         productRepository = mock(ProductRepository.class);
         mediaFileResolver = mock(MediaFileResolver.class);
-        brandService = new BrandService(brandRepository, new BrandMapperImpl(), productRepository, mediaFileResolver);
+        brandService = new BrandService(brandRepository, new BrandMapperImpl(), productRepository, mock(CategoryRepository.class), mediaFileResolver);
         when(brandRepository.save(any(Brand.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 

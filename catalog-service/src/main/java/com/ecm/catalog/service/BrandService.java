@@ -13,14 +13,17 @@ import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.exception.BusinessException;
+import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -31,6 +34,7 @@ public class BrandService {
     private final BrandRepository brandRepository;
     private final BrandMapper brandMapper;
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     private final MediaFileResolver mediaFileResolver;
 
     @Transactional
@@ -108,10 +112,24 @@ public class BrandService {
 
     @Transactional(readOnly = true)
     public List<BrandResponse> getAllBrands() {
+        return getAllBrands(null);
+    }
+
+    /** Active brands; with a category, only those that have a listed product in it or in one of its sub-categories. */
+    @Transactional(readOnly = true)
+    public List<BrandResponse> getAllBrands(UUID categoryId) {
         // 1. Fetch all active brands
         List<Brand> brands = brandRepository.findByStatus(CatalogStatus.ACTIVE);
 
-        // 2. Map to response DTOs and add the image URLs
+        // 2. Keep the brands that sell in the category
+        if (categoryId != null) {
+            List<CatalogStatus> listed = List.of(CatalogStatus.ACTIVE);
+            Set<UUID> sellingBrandIds = new HashSet<>(productRepository.findListedBrandIds(
+                    listed, listed, categoryRepository.findSelfAndDescendantIds(categoryId)));
+            brands = brands.stream().filter(brand -> sellingBrandIds.contains(brand.getId())).toList();
+        }
+
+        // 3. Map to response DTOs and add the image URLs
         return withImageUrls(brandMapper.toResponseList(brands));
     }
 

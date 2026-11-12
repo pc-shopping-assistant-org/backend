@@ -46,8 +46,8 @@ public class BrandController {
     }
 
     @GetMapping
-    public ApiResponse<List<BrandResponse>> getAllBrands() {
-        return ApiResponse.success(brandService.getAllBrands());
+    public ApiResponse<List<BrandResponse>> getAllBrands(@RequestParam(required = false) UUID categoryId) {
+        return ApiResponse.success(brandService.getAllBrands(categoryId));
     }
 
     @GetMapping("/{id}")
