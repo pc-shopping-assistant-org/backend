@@ -101402,7 +101402,8 @@
         "ram_type": "DDR4",
         "capacity_gb": 16,
         "speed_mhz": 3200,
-        "form": "desktop"
+        "form": "desktop",
+        "kit_modules": 1
       },
       "description": "Sản phẩm Ram SSTC 16GB DDR4 3200MHz AMD/Intel (U3200A-C22). Tham khảo chi tiết thông số kỹ thuật bên dưới.",
       "status": "ACTIVE",
@@ -101526,7 +101527,8 @@
         "ram_type": "DDR4",
         "capacity_gb": 16,
         "speed_mhz": 3200,
-        "form": "desktop"
+        "form": "desktop",
+        "kit_modules": 1
       },
       "description": "Sản phẩm Ram SSTC 16GB Bus 3200Mhz DDR4 BLACK TẢN NHIỆT\t(FOR INTEL). Tham khảo chi tiết thông số kỹ thuật bên dưới.",
       "status": "ACTIVE",
@@ -101560,7 +101562,8 @@
         "ram_type": "DDR4",
         "capacity_gb": 16,
         "speed_mhz": 3200,
-        "form": "desktop"
+        "form": "desktop",
+        "kit_modules": 1
       },
       "description": "Sản phẩm RAM Kingspec 16GB Bus 3200MHz DDR4  Tản Nhiệt Đen. Tham khảo chi tiết thông số kỹ thuật bên dưới.",
       "status": "ACTIVE",
@@ -101882,7 +101885,8 @@
         "ram_type": "DDR5",
         "capacity_gb": 16,
         "speed_mhz": 5600,
-        "form": "desktop"
+        "form": "desktop",
+        "kit_modules": 1
       },
       "description": "Sản phẩm Ram AGI 16GB BUS 5600Mhz DDR5 (AGI560A16UD238-ST). Tham khảo chi tiết thông số kỹ thuật bên dưới.",
       "status": "ACTIVE",
@@ -102043,7 +102047,8 @@
         "capacity_gb": 16,
         "speed_mhz": 3200,
         "form": "desktop",
-        "cas_latency": 16
+        "cas_latency": 16,
+        "kit_modules": 1
       },
       "description": "Sản phẩm Ram HIKSEMI ARMOR 16GB Bus  3200MHZ DDR4 U10 U-DIMM. Tham khảo chi tiết thông số kỹ thuật bên dưới.",
       "status": "ACTIVE",
@@ -102095,7 +102100,8 @@
         "ram_type": "DDR4",
         "capacity_gb": 8,
         "speed_mhz": 3200,
-        "form": "desktop"
+        "form": "desktop",
+        "kit_modules": 1
       },
       "description": "Sản phẩm Ram SSTC 8GB Bus 3200Mhz DDR4 BLACK TẢN NHIỆT. Tham khảo chi tiết thông số kỹ thuật bên dưới.",
       "status": "ACTIVE",
@@ -193307,7 +193313,7 @@
     {
       "category_seo_name": "ram",
       "attribute_key": "kit_modules",
-      "required": false,
+      "required": true,
       "display_order": 5
     },
     {
