@@ -124,6 +124,27 @@ class ProductQueryServiceTest {
         verify(productRepository, never()).searchPage(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
     }
 
+    @Test
+    void snapshotsCarryPageTotalsAndSupportPriceSorting() {
+        ProductFilterRequest filter = new ProductFilterRequest();
+        filter.setLimit(15);
+        filter.setPage(1);
+        filter.setSort("price_asc");
+        List<Product> results = products(15);
+        when(productRepository.searchPageByPriceAsc(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(results, PageRequest.of(1, 15), 45));
+        when(assembler.details(any(), anyCollection())).thenReturn(List.of());
+
+        CursorPageResponse<ProductDetailResponse> page = service.getProductSnapshots(filter);
+
+        assertEquals(1, page.getPage());
+        assertEquals(45L, page.getTotalElements());
+        assertEquals(3, page.getTotalPages());
+        assertTrue(page.isHasNext());
+        verify(productRepository).searchPageByPriceAsc(eq(List.of(CatalogStatus.ACTIVE)), eq(List.of(CatalogStatus.ACTIVE)), eq(true), eq(null),
+                anyBoolean(), any(), any(), any(), any(), any(), eq(PageRequest.of(1, 15)));
+    }
+
     // ---- UC-ADM-PROD-001 / 002 ----
 
     @Test

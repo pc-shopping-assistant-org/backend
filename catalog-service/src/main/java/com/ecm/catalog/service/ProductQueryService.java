@@ -132,14 +132,15 @@ public class ProductQueryService {
             if (filter.getPage() < 0) {
                 throw new BusinessException(CommonErrorCode.BAD_REQUEST);
             }
-            PageRequest pageable = PageRequest.of(filter.getPage(), pageSize);
-            Page<Product> numbered = switch (filter.getSort() == null ? "" : filter.getSort()) {
+            PageRequest pageRequest = PageRequest.of(filter.getPage(), pageSize);
+            String sort = filter.getSort() != null ? filter.getSort().trim().toLowerCase(Locale.ROOT) : "";
+            Page<Product> numbered = switch (sort) {
                 case "price_asc" -> productRepository.searchPageByPriceAsc(productStatuses, variantStatuses, onlyWithVariants, null,
-                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageable);
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
                 case "price_desc" -> productRepository.searchPageByPriceDesc(productStatuses, variantStatuses, onlyWithVariants, null,
-                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageable);
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
                 default -> productRepository.searchPage(productStatuses, variantStatuses, onlyWithVariants, null,
-                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageable);
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
             };
             return new ProductPage(numbered.getContent(), numbered.hasNext(), null, numbered.getNumber(),
                     numbered.getTotalElements(), numbered.getTotalPages());

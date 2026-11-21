@@ -121,18 +121,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             Pageable pageable
     );
 
-    /** Brands that have at least one listed product in {@code categoryIds}. */
-    @Query("""
-            SELECT DISTINCT p.brandId FROM Product p
-            WHERE p.status IN :statuses
-              AND p.categoryId IN :categoryIds
-              AND EXISTS (SELECT x.id FROM ProductVariant x WHERE x.productId = p.id AND x.status IN :variantStatuses)
-            """)
-    List<UUID> findListedBrandIds(
-            @Param("statuses") Collection<CatalogStatus> statuses,
-            @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
-            @Param("categoryIds") Collection<UUID> categoryIds);
-
     /**
      * How many products the storefront lists in each category: active, with at least one variant in
      * {@code variantStatus}, the same rule the public product list applies. Categories without any are absent.
