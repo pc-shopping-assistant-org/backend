@@ -9,6 +9,7 @@ import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.BrandMapperImpl;
 import com.ecm.catalog.repository.BrandRepository;
+import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.common.exception.BusinessException;
 import com.ecm.common.exception.ResourceNotFoundException;
@@ -36,6 +37,7 @@ class BrandServiceTest {
 
     private BrandRepository brandRepository;
     private ProductRepository productRepository;
+    private CategoryRepository categoryRepository;
     private MediaFileResolver mediaFileResolver;
     private BrandService brandService;
 
@@ -43,8 +45,9 @@ class BrandServiceTest {
     void setUp() {
         brandRepository = mock(BrandRepository.class);
         productRepository = mock(ProductRepository.class);
+        categoryRepository = mock(CategoryRepository.class);
         mediaFileResolver = mock(MediaFileResolver.class);
-        brandService = new BrandService(brandRepository, new BrandMapperImpl(), productRepository, mediaFileResolver);
+        brandService = new BrandService(brandRepository, new BrandMapperImpl(), productRepository, categoryRepository, mediaFileResolver);
         when(brandRepository.save(any(Brand.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -170,5 +173,21 @@ class BrandServiceTest {
         when(mediaFileResolver.resolveUrls(any())).thenReturn(Map.of(IMAGE_ID, "https://cdn.example/asus.jpg"));
 
         assertEquals("https://cdn.example/asus.jpg", brandService.getBrandById(ID).getImageUrl());
+    }
+
+    @Test
+    void getAllBrandsWithCategoryIdFiltersByCategoryTree() {
+        UUID categoryId = UUID.randomUUID();
+        List<UUID> tree = List.of(categoryId, UUID.randomUUID());
+        when(categoryRepository.findSelfAndDescendantIds(categoryId)).thenReturn(tree);
+        when(brandRepository.findByStatusAndCategoryIds(CatalogStatus.ACTIVE, tree))
+                .thenReturn(List.of(brand("AMD", CatalogStatus.ACTIVE)));
+        when(mediaFileResolver.resolveUrls(any())).thenReturn(Map.of());
+
+        List<BrandResponse> brands = brandService.getAllBrands(categoryId);
+
+        assertEquals(1, brands.size());
+        assertEquals("AMD", brands.get(0).getName());
+        verify(brandRepository).findByStatusAndCategoryIds(CatalogStatus.ACTIVE, tree);
     }
 }

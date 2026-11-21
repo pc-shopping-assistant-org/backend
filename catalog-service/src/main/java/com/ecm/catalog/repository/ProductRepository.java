@@ -25,7 +25,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Optional<Product> findByIdAndStatusIn(UUID id, Collection<CatalogStatus> statuses);
 
-    String SEARCH_PRODUCTS = """
+    String SEARCH_PRODUCTS_WHERE = """
             SELECT p FROM Product p
             WHERE p.status IN :statuses
               AND (:cursor IS NULL OR p.id < :cursor)
@@ -41,7 +41,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                      AND v.status IN :variantStatuses
                      AND (:minPrice IS NULL OR v.price >= :minPrice)
                      AND (:maxPrice IS NULL OR v.price <= :maxPrice)))
-            ORDER BY p.id DESC
+            """;
+
+    String SEARCH_PRODUCTS = SEARCH_PRODUCTS_WHERE + " ORDER BY p.id DESC";
+
+    String SEARCH_PRODUCTS_PRICE_ASC = SEARCH_PRODUCTS_WHERE + """
+            ORDER BY (SELECT MIN(pv.price) FROM ProductVariant pv WHERE pv.productId = p.id AND pv.status IN :variantStatuses) ASC, p.id DESC
+            """;
+
+    String SEARCH_PRODUCTS_PRICE_DESC = SEARCH_PRODUCTS_WHERE + """
+            ORDER BY (SELECT MIN(pv.price) FROM ProductVariant pv WHERE pv.productId = p.id AND pv.status IN :variantStatuses) DESC, p.id DESC
             """;
 
     /**
@@ -68,6 +77,36 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     /** The same products as {@link #search}, but a numbered page (the cursor is ignored) with the total the storefront needs to number them. */
     @Query(SEARCH_PRODUCTS)
     Page<Product> searchPage(
+            @Param("statuses") Collection<CatalogStatus> statuses,
+            @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
+            @Param("onlyWithVariants") boolean onlyWithVariants,
+            @Param("cursor") UUID cursor,
+            @Param("anyCategory") boolean anyCategory,
+            @Param("categoryIds") Collection<UUID> categoryIds,
+            @Param("brandId") UUID brandId,
+            @Param("keyword") String keyword,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            Pageable pageable
+    );
+
+    @Query(SEARCH_PRODUCTS_PRICE_ASC)
+    Page<Product> searchPageByPriceAsc(
+            @Param("statuses") Collection<CatalogStatus> statuses,
+            @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
+            @Param("onlyWithVariants") boolean onlyWithVariants,
+            @Param("cursor") UUID cursor,
+            @Param("anyCategory") boolean anyCategory,
+            @Param("categoryIds") Collection<UUID> categoryIds,
+            @Param("brandId") UUID brandId,
+            @Param("keyword") String keyword,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            Pageable pageable
+    );
+
+    @Query(SEARCH_PRODUCTS_PRICE_DESC)
+    Page<Product> searchPageByPriceDesc(
             @Param("statuses") Collection<CatalogStatus> statuses,
             @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
             @Param("onlyWithVariants") boolean onlyWithVariants,

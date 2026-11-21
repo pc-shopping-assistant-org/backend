@@ -56,7 +56,8 @@ public class ProductQueryService {
         ProductPage page = selectPage(filter, PUBLIC_STATUSES, PUBLIC_STATUSES, true);
         List<ProductDetailResponse> items = assembler.details(page.products(), PUBLIC_STATUSES);
         return CursorPageResponse.<ProductDetailResponse>builder()
-                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
+                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size())
+                .page(page.number()).totalElements(page.totalElements()).totalPages(page.totalPages()).build();
     }
 
     @Transactional(readOnly = true)
@@ -131,9 +132,16 @@ public class ProductQueryService {
             if (filter.getPage() < 0) {
                 throw new BusinessException(CommonErrorCode.BAD_REQUEST);
             }
-            Page<Product> numbered = productRepository.searchPage(productStatuses, variantStatuses, onlyWithVariants, null,
-                    anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
-                    PageRequest.of(filter.getPage(), pageSize));
+            PageRequest pageRequest = PageRequest.of(filter.getPage(), pageSize);
+            String sort = filter.getSort() != null ? filter.getSort().trim().toLowerCase(Locale.ROOT) : "";
+            Page<Product> numbered = switch (sort) {
+                case "price_asc" -> productRepository.searchPageByPriceAsc(productStatuses, variantStatuses, onlyWithVariants, null,
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
+                case "price_desc" -> productRepository.searchPageByPriceDesc(productStatuses, variantStatuses, onlyWithVariants, null,
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
+                default -> productRepository.searchPage(productStatuses, variantStatuses, onlyWithVariants, null,
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
+            };
             return new ProductPage(numbered.getContent(), numbered.hasNext(), null, numbered.getNumber(),
                     numbered.getTotalElements(), numbered.getTotalPages());
         }
