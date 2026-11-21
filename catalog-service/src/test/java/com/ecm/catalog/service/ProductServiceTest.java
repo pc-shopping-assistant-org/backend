@@ -2,6 +2,7 @@ package com.ecm.catalog.service;
 
 import com.ecm.catalog.client.OrderServiceClient;
 import com.ecm.catalog.dto.request.CreateProductRequest;
+import com.ecm.catalog.dto.request.OrderedVariantsRequest;
 import com.ecm.catalog.dto.request.ProductImageRequest;
 import com.ecm.catalog.dto.request.UpdateProductRequest;
 import com.ecm.catalog.entity.CatalogStatus;
@@ -10,6 +11,7 @@ import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.ecm.catalog.repository.BrandRepository;
@@ -73,7 +75,7 @@ class ProductServiceTest {
         mediaResolver = mock(MediaFileResolver.class);
         assembler = mock(ProductAssembler.class);
         service = new ProductService(productRepository, variantRepository, imageRepository, brandRepository, categoryRepository,
-                orderServiceClient, specificationValidator, mediaResolver, assembler);
+                new OrderHistoryLookup(orderServiceClient), specificationValidator, mediaResolver, assembler);
 
         when(categoryRepository.existsByIdAndStatus(CATEGORY_ID, CatalogStatus.ACTIVE)).thenReturn(true);
         when(brandRepository.existsByIdAndStatus(BRAND_ID, CatalogStatus.ACTIVE)).thenReturn(true);
@@ -266,9 +268,6 @@ class ProductServiceTest {
 
     // ---- UC-ADM-PROD-005 delete product ----
 
-    private static ApiResponse<Boolean> history(boolean value) {
-        return ApiResponse.success(value);
-    }
 
     @Test
     void deleteSoftDeletesProductAndItsVariantsWhenNoStockAndNoOrders() {
@@ -277,7 +276,7 @@ class ProductServiceTest {
         ProductVariant second = variant(0);
         when(productRepository.findByIdAndStatusIn(eq(PRODUCT_ID), anyCollection())).thenReturn(Optional.of(product));
         when(variantRepository.findByProductIdAndStatusNot(PRODUCT_ID, CatalogStatus.DELETED)).thenReturn(List.of(first, second));
-        when(orderServiceClient.hasOrderHistory(any())).thenReturn(history(false));
+        when(orderServiceClient.findOrderedVariants(any())).thenReturn(ApiResponse.success(List.of()));
 
         service.deleteProduct(PRODUCT_ID, EMPLOYEE_ID);
 
@@ -305,7 +304,8 @@ class ProductServiceTest {
         Product product = existingProduct(CatalogStatus.ACTIVE);
         when(productRepository.findByIdAndStatusIn(eq(PRODUCT_ID), anyCollection())).thenReturn(Optional.of(product));
         when(variantRepository.findByProductIdAndStatusNot(PRODUCT_ID, CatalogStatus.DELETED)).thenReturn(List.of(variant(0)));
-        when(orderServiceClient.hasOrderHistory(any())).thenReturn(history(true));
+        when(orderServiceClient.findOrderedVariants(any()))
+                .thenAnswer(invocation -> ApiResponse.success(invocation.<OrderedVariantsRequest>getArgument(0).variantIds()));
 
         assertThrows(BusinessException.class, () -> service.deleteProduct(PRODUCT_ID, EMPLOYEE_ID));
         assertEquals(CatalogStatus.ACTIVE, product.getStatus());
@@ -321,6 +321,6 @@ class ProductServiceTest {
         service.deleteProduct(PRODUCT_ID, EMPLOYEE_ID);
 
         assertEquals(CatalogStatus.DELETED, product.getStatus());
-        verify(orderServiceClient, never()).hasOrderHistory(any());
+        verify(orderServiceClient, never()).findOrderedVariants(any());
     }
 }

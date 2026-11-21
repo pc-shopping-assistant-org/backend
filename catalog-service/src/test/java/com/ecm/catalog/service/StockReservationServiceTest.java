@@ -1,5 +1,6 @@
 package com.ecm.catalog.service;
 
+import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.messaging.rabbitmq.command.ReleaseStockCommand;
 import com.ecm.catalog.messaging.rabbitmq.command.ReserveStockCommand;
@@ -51,6 +52,17 @@ class StockReservationServiceTest {
 
     private static ReleaseStockCommand release(StockItem... items) {
         return new ReleaseStockCommand(UUID.randomUUID(), ORDER_ID, List.of(items));
+    }
+
+    @Test
+    void aVariantHiddenAfterTheOrderWasPlacedStillHasItsStockReserved() {
+        a.setStatus(CatalogStatus.INACTIVE);
+        b.setStatus(CatalogStatus.INACTIVE);
+
+        Optional<String> failure = service.reserve(reserve(new StockItem(VARIANT_A, 3)));
+
+        assertTrue(failure.isEmpty());
+        assertEquals(2, a.getQuantity());
     }
 
     @Test

@@ -154,4 +154,26 @@ class ProductSpecificationValidatorTest {
         assertEquals(Map.of(), bareValidator.validate(bare, null));
         assertThrows(BusinessException.class, () -> bareValidator.validate(bare, specs("anything", 1)));
     }
+
+    @Test
+    void validatesUpdatedRamCategoryWithKitModulesRequired() {
+        CategoryAttributeService templates = mock(CategoryAttributeService.class);
+        UUID ramCatId = UUID.randomUUID();
+        List<Item> ramItems = List.of(
+                item("capacity_gb", AttributeDataType.NUMBER, null, true, 0),
+                item("ram_type", AttributeDataType.ENUM, List.of("DDR4", "DDR5"), true, 1),
+                item("kit_modules", AttributeDataType.NUMBER, null, true, 2));
+        when(templates.getTemplate(ramCatId)).thenReturn(new CategoryAttributeTemplateResponse(ramCatId, ramItems));
+        ProductSpecificationValidator ramValidator = new ProductSpecificationValidator(templates);
+
+        // Missing kit_modules should fail
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> ramValidator.validate(ramCatId, specs("capacity_gb", 16, "ram_type", "DDR4")));
+        assertTrue(ex.getMessage().contains("kit_modules: is required"));
+
+        // With kit_modules should pass
+        Map<String, Object> valid = ramValidator.validate(ramCatId,
+                specs("capacity_gb", 16, "ram_type", "DDR4", "kit_modules", 1));
+        assertEquals(1, valid.get("kit_modules"));
+    }
 }

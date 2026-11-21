@@ -5,6 +5,7 @@ import com.ecm.catalog.dto.response.ProductDetailResponse;
 import com.ecm.catalog.service.ProductQueryService;
 import com.ecm.catalog.service.ProductService;
 import com.ecm.catalog.service.ProductVariantService;
+import com.ecm.catalog.service.ProductVariationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -29,7 +30,7 @@ class ProductSnapshotControllerTest {
                 .items(List.of(ProductDetailResponse.builder().id(id).name("CPU").status("ACTIVE").build()))
                 .hasNext(false).size(1).build());
         MockMvc mvc = MockMvcBuilders.standaloneSetup(new ProductController(
-                mock(ProductService.class), mock(ProductVariantService.class), query)).build();
+                mock(ProductService.class), mock(ProductVariantService.class), mock(ProductVariationService.class), query)).build();
 
         mvc.perform(get("/products/snapshot").param("limit", "100"))
                 .andExpect(status().isOk())

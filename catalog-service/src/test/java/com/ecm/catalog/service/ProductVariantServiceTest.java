@@ -12,7 +12,9 @@ import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.entity.VariantOption;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
+import com.ecm.catalog.helper.VariantOptionStore;
 import com.ecm.catalog.repository.OptionRepository;
 import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.repository.ProductVariantRepository;
@@ -24,7 +26,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,6 +53,7 @@ class ProductVariantServiceTest {
     private static final UUID PRODUCT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
     private static final UUID VARIANT_ID = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
     private static final UUID EMPLOYEE_ID = UUID.fromString("00000000-0000-0000-0000-0000000000b3");
+    private static final UUID OTHER_ID = UUID.fromString("00000000-0000-0000-0000-0000000000b4");
     private static final UUID FILE_ID = UUID.fromString("00000000-0000-0000-0000-0000000000f1");
 
     private ProductRepository productRepository;
@@ -53,8 +62,11 @@ class ProductVariantServiceTest {
     private VariantOptionRepository variantOptionRepository;
     private OrderServiceClient orderServiceClient;
     private MediaFileResolver mediaResolver;
-    private ProductAssembler assembler;
     private ProductVariantService service;
+
+    /** What the option tables hold, per variant, as the mocked repositories answer it. */
+    private final Map<UUID, List<Option>> storedOptions = new HashMap<>();
+    private final List<ProductVariant> activeVariants = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -64,9 +76,9 @@ class ProductVariantServiceTest {
         variantOptionRepository = mock(VariantOptionRepository.class);
         orderServiceClient = mock(OrderServiceClient.class);
         mediaResolver = mock(MediaFileResolver.class);
-        assembler = mock(ProductAssembler.class);
-        service = new ProductVariantService(productRepository, variantRepository, optionRepository, variantOptionRepository,
-                orderServiceClient, mediaResolver, assembler, new CatalogProperties());
+        VariantOptionStore optionStore = new VariantOptionStore(optionRepository, variantOptionRepository, variantRepository);
+        service = new ProductVariantService(productRepository, variantRepository, optionStore, new OrderHistoryLookup(orderServiceClient),
+                mediaResolver, mock(ProductAssembler.class), new CatalogProperties());
 
         when(productRepository.findByIdAndStatusIn(eq(PRODUCT_ID), anyCollection()))
                 .thenReturn(Optional.of(Product.builder().id(PRODUCT_ID).status(CatalogStatus.ACTIVE).build()));
@@ -77,20 +89,51 @@ class ProductVariantServiceTest {
             }
             return saved;
         });
-        when(optionRepository.save(any(Option.class))).thenAnswer(invocation -> {
-            Option option = invocation.getArgument(0);
-            option.setId(UUID.randomUUID());
-            return option;
+        when(variantRepository.findByProductIdAndStatusIn(eq(PRODUCT_ID), anyCollection())).thenAnswer(invocation -> activeVariants);
+        when(variantOptionRepository.findByProductVariantIdIn(anyCollection())).thenAnswer(invocation -> {
+            Collection<UUID> ids = invocation.getArgument(0);
+            return ids.stream().flatMap(id -> storedOptions.getOrDefault(id, List.of()).stream()
+                    .map(option -> VariantOption.builder().productVariantId(id).optionId(option.getId()).build())).toList();
         });
+        when(optionRepository.findAllById(anyCollection())).thenAnswer(invocation -> {
+            Collection<UUID> ids = invocation.getArgument(0);
+            return storedOptions.values().stream().flatMap(List::stream).filter(option -> ids.contains(option.getId())).distinct().toList();
+        });
+        when(optionRepository.findByNameAndValueIgnoringCase(anyString(), anyString())).thenAnswer(invocation ->
+                Optional.of(Option.builder().id(UUID.randomUUID()).name(invocation.getArgument(0)).value(invocation.getArgument(1)).build()));
+        when(orderServiceClient.findOrderedVariants(any())).thenReturn(ApiResponse.success(List.of()));
     }
 
     private static CreateVariantRequest createRequest(String sku, String barcode, UUID imageFileId, List<VariantOptionRequest> options) {
         return new CreateVariantRequest(1_000_000L, 5, sku, "M1", "desc", 36, barcode, null, imageFileId, options);
     }
 
+    private static UpdateVariantRequest updateRequest(String sku, List<VariantOptionRequest> options) {
+        return new UpdateVariantRequest(2_000_000L, sku, null, null, 24, null, null, FILE_ID, options);
+    }
+
     private static ProductVariant existingVariant(int quantity) {
         return ProductVariant.builder().id(VARIANT_ID).productId(PRODUCT_ID).sku("SKU-1").quantity(quantity)
                 .status(CatalogStatus.ACTIVE).createdBy(EMPLOYEE_ID).build();
+    }
+
+    private static VariantOptionRequest option(String name, String value) {
+        return new VariantOptionRequest(name, value);
+    }
+
+    /** Another ACTIVE variant of the product, holding these options. */
+    private void givenActiveVariant(UUID id, VariantOptionRequest... options) {
+        activeVariants.add(ProductVariant.builder().id(id).productId(PRODUCT_ID).status(CatalogStatus.ACTIVE).build());
+        givenOptions(id, options);
+    }
+
+    private void givenOptions(UUID id, VariantOptionRequest... options) {
+        storedOptions.put(id, Arrays.stream(options)
+                .map(option -> Option.builder().id(UUID.randomUUID()).name(option.name()).value(option.value()).build()).toList());
+    }
+
+    private void givenOrdered(UUID variantId) {
+        when(orderServiceClient.findOrderedVariants(any())).thenReturn(ApiResponse.success(List.of(variantId)));
     }
 
     // ---- UC-ADM-PROD-007 add variant ----
@@ -118,32 +161,72 @@ class ProductVariantServiceTest {
     }
 
     @Test
-    void createReusesExistingOptionAndCreatesMissingOne() {
-        Option blue = Option.builder().id(UUID.randomUUID()).name("Color").value("Blue").build();
-        when(optionRepository.findByNameIgnoreCaseAndValueIgnoreCase("color", "blue")).thenReturn(Optional.of(blue));
-
+    void createInsertsEachOptionIfAbsentAndLinksIt() {
         service.createVariant(PRODUCT_ID, createRequest("SKU-1", null, null,
-                List.of(new VariantOptionRequest(" color ", " blue "), new VariantOptionRequest("Storage", "16GB"))), EMPLOYEE_ID);
+                List.of(option(" color ", " blue "), option("Storage", "16GB"))), EMPLOYEE_ID);
 
-        ArgumentCaptor<Option> created = ArgumentCaptor.forClass(Option.class);
-        verify(optionRepository).save(created.capture());
-        assertEquals("Storage", created.getValue().getName());
+        verify(optionRepository).insertIfAbsent("color", "blue");
+        verify(optionRepository).insertIfAbsent("Storage", "16GB");
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<VariantOption>> links = ArgumentCaptor.forClass(List.class);
         verify(variantOptionRepository).saveAll(links.capture());
         assertEquals(2, links.getValue().size());
-        assertEquals(blue.getId(), links.getValue().get(0).getOptionId());
         assertEquals(VARIANT_ID, links.getValue().get(0).getProductVariantId());
     }
 
     @Test
     void createRejectsTwoOptionsWithTheSameNameIgnoringCaseAndSpaces() {
         BusinessException ex = assertThrows(BusinessException.class, () -> service.createVariant(PRODUCT_ID,
-                createRequest("SKU-1", null, null, List.of(new VariantOptionRequest("Color", "Blue"),
-                        new VariantOptionRequest(" color ", "Red"))), EMPLOYEE_ID));
+                createRequest("SKU-1", null, null, List.of(option("Color", "Blue"), option(" color ", "Red"))), EMPLOYEE_ID));
 
         assertEquals(CatalogErrorCode.INVALID_VARIANT_OPTIONS, ex.getErrorCode());
         verify(variantRepository, never()).save(any());
+    }
+
+    @Test
+    void createMustUseTheOptionNamesOfTheOtherActiveVariants() {
+        givenActiveVariant(OTHER_ID, option("Color", "Black"));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.createVariant(PRODUCT_ID,
+                createRequest("SKU-1", null, null, List.of(option("RAM", "16GB"))), EMPLOYEE_ID));
+
+        assertEquals(CatalogErrorCode.VARIANT_OPTIONS_MISMATCH, ex.getErrorCode());
+        verify(variantRepository, never()).save(any());
+    }
+
+    @Test
+    void createCannotAddOptionsToAProductWithoutGroups() {
+        givenActiveVariant(OTHER_ID);
+
+        assertEquals(CatalogErrorCode.VARIANT_OPTIONS_MISMATCH, assertThrows(BusinessException.class, () -> service.createVariant(PRODUCT_ID,
+                createRequest("SKU-1", null, null, List.of(option("Color", "Black"))), EMPLOYEE_ID)).getErrorCode());
+    }
+
+    @Test
+    void createRejectsACombinationAnotherActiveVariantHas() {
+        givenActiveVariant(OTHER_ID, option("Color", "Black"));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.createVariant(PRODUCT_ID,
+                createRequest("SKU-1", null, null, List.of(option(" color", "BLACK "))), EMPLOYEE_ID));
+
+        assertEquals(CatalogErrorCode.DUPLICATE_VARIANT_COMBINATION, ex.getErrorCode());
+    }
+
+    @Test
+    void createRejectsASecondVariantWithoutOptions() {
+        givenActiveVariant(OTHER_ID);
+
+        assertEquals(CatalogErrorCode.DUPLICATE_VARIANT_COMBINATION, assertThrows(BusinessException.class,
+                () -> service.createVariant(PRODUCT_ID, createRequest("SKU-1", null, null, null), EMPLOYEE_ID)).getErrorCode());
+    }
+
+    @Test
+    void createAcceptsANewCombinationOfTheSameOptionNames() {
+        givenActiveVariant(OTHER_ID, option("Color", "Black"));
+
+        service.createVariant(PRODUCT_ID, createRequest("SKU-1", null, null, List.of(option("Color", "White"))), EMPLOYEE_ID);
+
+        verify(variantRepository).save(any(ProductVariant.class));
     }
 
     @Test
@@ -175,18 +258,17 @@ class ProductVariantServiceTest {
                 () -> service.createVariant(PRODUCT_ID, createRequest("SKU-1", null, null, null), EMPLOYEE_ID));
     }
 
-    // ---- edit / status / delete ----
+    // ---- edit ----
 
     @Test
-    void updateReplacesFieldsImageAndOptions() {
+    void updateReplacesFieldsImageAndOptionsButNotStock() {
         ProductVariant variant = existingVariant(5);
         when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(variant));
 
-        service.updateVariant(PRODUCT_ID, VARIANT_ID, new UpdateVariantRequest(2_000_000L, 7, "SKU-9", null, null, 24, null, null, FILE_ID,
-                List.of(new VariantOptionRequest("Color", "Red"))), EMPLOYEE_ID);
+        service.updateVariant(PRODUCT_ID, VARIANT_ID, updateRequest("SKU-9", List.of(option("Color", "Red"))), EMPLOYEE_ID);
 
         assertEquals(2_000_000L, variant.getPrice());
-        assertEquals(7, variant.getQuantity());
+        assertEquals(5, variant.getQuantity());
         assertEquals("SKU-9", variant.getSku());
         assertEquals(FILE_ID, variant.getImageFileId());
         assertEquals(EMPLOYEE_ID, variant.getUpdatedBy());
@@ -199,10 +281,54 @@ class ProductVariantServiceTest {
         when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(5)));
         when(variantRepository.existsBySkuAndIdNotAndStatusNot("SKU-9", VARIANT_ID, CatalogStatus.DELETED)).thenReturn(true);
 
-        assertThrows(BusinessException.class, () -> service.updateVariant(PRODUCT_ID, VARIANT_ID,
-                new UpdateVariantRequest(1L, 1, "SKU-9", null, null, 12, null, null, null, null), EMPLOYEE_ID));
+        assertThrows(BusinessException.class, () -> service.updateVariant(PRODUCT_ID, VARIANT_ID, updateRequest("SKU-9", null), EMPLOYEE_ID));
         verify(variantOptionRepository, never()).deleteByProductVariantId(any());
     }
+
+    @Test
+    void updateCannotChangeTheOptionValueOfAnOrderedVariant() {
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(5)));
+        givenOptions(VARIANT_ID, option("Color", "Black"));
+        givenOrdered(VARIANT_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.updateVariant(PRODUCT_ID, VARIANT_ID,
+                updateRequest("SKU-1", List.of(option("Color", "Grey"))), EMPLOYEE_ID));
+
+        assertEquals(CatalogErrorCode.VARIANT_OPTIONS_LOCKED, ex.getErrorCode());
+        verify(variantOptionRepository, never()).deleteByProductVariantId(any());
+    }
+
+    @Test
+    void updateCanChangeTheOptionValueOfAVariantNeverOrdered() {
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(5)));
+        givenOptions(VARIANT_ID, option("Color", "Black"));
+
+        service.updateVariant(PRODUCT_ID, VARIANT_ID, updateRequest("SKU-1", List.of(option("Color", "Grey"))), EMPLOYEE_ID);
+
+        verify(variantOptionRepository).deleteByProductVariantId(VARIANT_ID);
+    }
+
+    @Test
+    void updateOfAnOrderedVariantMayKeepItsValuesWrittenDifferently() {
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(5)));
+        givenOptions(VARIANT_ID, option("Color", "Black"));
+        givenOrdered(VARIANT_ID);
+
+        service.updateVariant(PRODUCT_ID, VARIANT_ID, updateRequest("SKU-1", List.of(option(" color ", "BLACK"))), EMPLOYEE_ID);
+
+        verify(variantOptionRepository).deleteByProductVariantId(VARIANT_ID);
+    }
+
+    @Test
+    void updateMustKeepFittingTheOtherActiveVariants() {
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(5)));
+        givenActiveVariant(OTHER_ID, option("Color", "Black"));
+
+        assertEquals(CatalogErrorCode.DUPLICATE_VARIANT_COMBINATION, assertThrows(BusinessException.class, () -> service.updateVariant(
+                PRODUCT_ID, VARIANT_ID, updateRequest("SKU-1", List.of(option("Color", "Black"))), EMPLOYEE_ID)).getErrorCode());
+    }
+
+    // ---- status / stock / delete ----
 
     @Test
     void variantOfAnotherProductOrDeletedIsNotFound() {
@@ -225,10 +351,52 @@ class ProductVariantServiceTest {
     }
 
     @Test
+    void showingAHiddenVariantAgainMustFitTheCurrentOptionGroups() {
+        ProductVariant hidden = existingVariant(3);
+        hidden.setStatus(CatalogStatus.INACTIVE);
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(hidden));
+        givenActiveVariant(OTHER_ID, option("Color", "Black"));
+
+        assertEquals(CatalogErrorCode.VARIANT_OPTIONS_MISMATCH, assertThrows(BusinessException.class,
+                () -> service.updateVariantStatus(PRODUCT_ID, VARIANT_ID, CatalogStatus.ACTIVE, EMPLOYEE_ID)).getErrorCode());
+        assertEquals(CatalogStatus.INACTIVE, hidden.getStatus());
+    }
+
+    @Test
+    void hidingAVariantNeedsNoOptionCheck() {
+        ProductVariant variant = existingVariant(3);
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(variant));
+
+        service.updateVariantStatus(PRODUCT_ID, VARIANT_ID, CatalogStatus.INACTIVE, EMPLOYEE_ID);
+
+        assertEquals(CatalogStatus.INACTIVE, variant.getStatus());
+        verify(variantOptionRepository, never()).findByProductVariantIdIn(anyCollection());
+    }
+
+    @Test
+    void adjustStockAddsTheDeltaInTheDatabase() {
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(7)));
+        when(variantRepository.adjustQuantity(eq(VARIANT_ID), eq(20), any(), eq(EMPLOYEE_ID))).thenReturn(1);
+
+        service.adjustStock(PRODUCT_ID, VARIANT_ID, 20, EMPLOYEE_ID);
+
+        verify(variantRepository).adjustQuantity(eq(VARIANT_ID), eq(20), any(), eq(EMPLOYEE_ID));
+        verify(variantRepository, never()).save(any());
+    }
+
+    @Test
+    void adjustStockBelowZeroIsRejected() {
+        when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(existingVariant(1)));
+        when(variantRepository.adjustQuantity(eq(VARIANT_ID), eq(-2), any(), eq(EMPLOYEE_ID))).thenReturn(0);
+
+        assertEquals(CatalogErrorCode.STOCK_BELOW_ZERO, assertThrows(BusinessException.class,
+                () -> service.adjustStock(PRODUCT_ID, VARIANT_ID, -2, EMPLOYEE_ID)).getErrorCode());
+    }
+
+    @Test
     void deleteSoftDeletesVariantWithoutStockOrOrders() {
         ProductVariant variant = existingVariant(0);
         when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(variant));
-        when(orderServiceClient.hasOrderHistory(VARIANT_ID)).thenReturn(ApiResponse.success(false));
 
         service.deleteVariant(PRODUCT_ID, VARIANT_ID, EMPLOYEE_ID);
 
@@ -245,7 +413,7 @@ class ProductVariantServiceTest {
 
         ProductVariant ordered = existingVariant(0);
         when(variantRepository.findById(VARIANT_ID)).thenReturn(Optional.of(ordered));
-        when(orderServiceClient.hasOrderHistory(VARIANT_ID)).thenReturn(ApiResponse.success(true));
+        givenOrdered(VARIANT_ID);
         assertThrows(BusinessException.class, () -> service.deleteVariant(PRODUCT_ID, VARIANT_ID, EMPLOYEE_ID));
         assertEquals(CatalogStatus.ACTIVE, ordered.getStatus());
     }

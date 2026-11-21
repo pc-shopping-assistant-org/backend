@@ -9,6 +9,7 @@ import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
@@ -43,6 +44,7 @@ public class ProductQueryService {
     private final ProductVariantRepository productVariantRepository;
     private final CategoryRepository categoryRepository;
     private final ProductAssembler assembler;
+    private final OrderHistoryLookup orderHistory;
 
     @Transactional(readOnly = true)
     public CursorPageResponse<ProductSummaryResponse> getProducts(ProductFilterRequest filter) {
@@ -54,7 +56,8 @@ public class ProductQueryService {
         ProductPage page = selectPage(filter, PUBLIC_STATUSES, PUBLIC_STATUSES, true);
         List<ProductDetailResponse> items = assembler.details(page.products(), PUBLIC_STATUSES);
         return CursorPageResponse.<ProductDetailResponse>builder()
-                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size()).build();
+                .items(items).nextCursor(page.nextCursor()).hasNext(page.hasNext()).size(items.size())
+                .page(page.number()).totalElements(page.totalElements()).totalPages(page.totalPages()).build();
     }
 
     @Transactional(readOnly = true)
@@ -77,7 +80,9 @@ public class ProductQueryService {
     public ProductDetailResponse getAdminProductById(UUID id) {
         Product product = productRepository.findByIdAndStatusIn(id, ProductService.ADMIN_VISIBLE_STATUSES)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
-        return assembler.detail(product, ProductService.ADMIN_VISIBLE_STATUSES);
+        ProductDetailResponse detail = assembler.detail(product, ProductService.ADMIN_VISIBLE_STATUSES);
+        orderHistory.markOrdered(detail.getVariants());
+        return detail;
     }
 
     @Transactional(readOnly = true)
@@ -127,9 +132,16 @@ public class ProductQueryService {
             if (filter.getPage() < 0) {
                 throw new BusinessException(CommonErrorCode.BAD_REQUEST);
             }
-            Page<Product> numbered = productRepository.searchPage(productStatuses, variantStatuses, onlyWithVariants, null,
-                    anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(),
-                    PageRequest.of(filter.getPage(), pageSize));
+            PageRequest pageRequest = PageRequest.of(filter.getPage(), pageSize);
+            String sort = filter.getSort() != null ? filter.getSort().trim().toLowerCase(Locale.ROOT) : "";
+            Page<Product> numbered = switch (sort) {
+                case "price_asc" -> productRepository.searchPageByPriceAsc(productStatuses, variantStatuses, onlyWithVariants, null,
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
+                case "price_desc" -> productRepository.searchPageByPriceDesc(productStatuses, variantStatuses, onlyWithVariants, null,
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
+                default -> productRepository.searchPage(productStatuses, variantStatuses, onlyWithVariants, null,
+                        anyCategory, categoryIds, filter.getBrandId(), keywordPattern, filter.getMinPrice(), filter.getMaxPrice(), pageRequest);
+            };
             return new ProductPage(numbered.getContent(), numbered.hasNext(), null, numbered.getNumber(),
                     numbered.getTotalElements(), numbered.getTotalPages());
         }

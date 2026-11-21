@@ -18,7 +18,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
 
     List<OrderItem> findByOrderIdIn(Collection<UUID> orderIds);
 
-    boolean existsByProductVariantId(UUID productVariantId);
+    @Query("SELECT DISTINCT i.productVariantId FROM OrderItem i WHERE i.productVariantId IN :variantIds")
+    List<UUID> findOrderedVariantIds(@Param("variantIds") Collection<UUID> variantIds);
 
     /**
      * Best-selling variants among the orders completed in the period. The name, sku and label are the

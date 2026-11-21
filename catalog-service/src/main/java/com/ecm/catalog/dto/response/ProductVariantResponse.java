@@ -33,6 +33,9 @@ public class ProductVariantResponse {
     private String imageUrl;
     private String status;
 
+    /** Set on admin reads only: true when the variant has been ordered, so its option values can no longer change. */
+    private Boolean hasOrders;
+
     @Builder.Default
     private List<OptionResponse> options = new ArrayList<>();
 

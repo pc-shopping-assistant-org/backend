@@ -7,6 +7,7 @@ import com.ecm.catalog.dto.response.ProductDetailResponse;
 import com.ecm.catalog.entity.CatalogStatus;
 import com.ecm.catalog.entity.Product;
 import com.ecm.catalog.exception.CatalogErrorCode;
+import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.repository.CategoryRepository;
 import com.ecm.catalog.repository.ProductRepository;
@@ -47,6 +48,7 @@ class ProductQueryServiceTest {
     private ProductRepository productRepository;
     private CategoryRepository categoryRepository;
     private ProductAssembler assembler;
+    private OrderHistoryLookup orderHistory;
     private ProductQueryService service;
 
     @BeforeEach
@@ -54,7 +56,8 @@ class ProductQueryServiceTest {
         productRepository = mock(ProductRepository.class);
         categoryRepository = mock(CategoryRepository.class);
         assembler = mock(ProductAssembler.class);
-        service = new ProductQueryService(productRepository, mock(ProductVariantRepository.class), categoryRepository, assembler);
+        orderHistory = mock(OrderHistoryLookup.class);
+        service = new ProductQueryService(productRepository, mock(ProductVariantRepository.class), categoryRepository, assembler, orderHistory);
         when(assembler.summaries(any(), anyCollection(), anyBoolean())).thenReturn(List.of());
     }
 
@@ -119,6 +122,27 @@ class ProductQueryServiceTest {
 
         assertEquals(CommonErrorCode.BAD_REQUEST, ex.getErrorCode());
         verify(productRepository, never()).searchPage(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void snapshotsCarryPageTotalsAndSupportPriceSorting() {
+        ProductFilterRequest filter = new ProductFilterRequest();
+        filter.setLimit(15);
+        filter.setPage(1);
+        filter.setSort("price_asc");
+        List<Product> results = products(15);
+        when(productRepository.searchPageByPriceAsc(any(), any(), anyBoolean(), any(), anyBoolean(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(results, PageRequest.of(1, 15), 45));
+        when(assembler.details(any(), anyCollection())).thenReturn(List.of());
+
+        CursorPageResponse<ProductDetailResponse> page = service.getProductSnapshots(filter);
+
+        assertEquals(1, page.getPage());
+        assertEquals(45L, page.getTotalElements());
+        assertEquals(3, page.getTotalPages());
+        assertTrue(page.isHasNext());
+        verify(productRepository).searchPageByPriceAsc(eq(List.of(CatalogStatus.ACTIVE)), eq(List.of(CatalogStatus.ACTIVE)), eq(true), eq(null),
+                anyBoolean(), any(), any(), any(), any(), any(), eq(PageRequest.of(1, 15)));
     }
 
     // ---- UC-ADM-PROD-001 / 002 ----
@@ -329,9 +353,11 @@ class ProductQueryServiceTest {
         Product product = Product.builder().id(PRODUCT_ID).status(CatalogStatus.INACTIVE).build();
         when(productRepository.findByIdAndStatusIn(eq(PRODUCT_ID), eq(List.of(CatalogStatus.ACTIVE, CatalogStatus.INACTIVE))))
                 .thenReturn(Optional.of(product));
+        ProductDetailResponse detail = ProductDetailResponse.builder().id(PRODUCT_ID).build();
+        when(assembler.detail(product, List.of(CatalogStatus.ACTIVE, CatalogStatus.INACTIVE))).thenReturn(detail);
 
         service.getAdminProductById(PRODUCT_ID);
 
-        verify(assembler).detail(product, List.of(CatalogStatus.ACTIVE, CatalogStatus.INACTIVE));
+        verify(orderHistory).markOrdered(detail.getVariants());
     }
 }

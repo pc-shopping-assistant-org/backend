@@ -75,3 +75,4 @@ Lần đầu 14.600 file nguồn/17.237 gallery records có thể vượt thời
 chạy seed thủ công trước release đầu.
 Không ghi credentials vào JSON/JAR/Git. Spring/Maven không tự đọc `.env.docker`;
 Compose wrapper của infra inject env khi chạy image.
+

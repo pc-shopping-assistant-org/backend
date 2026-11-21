@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +17,20 @@ public interface BrandRepository extends JpaRepository<Brand, UUID> {
 
     @Query("SELECT b FROM Brand b WHERE b.status = :status ORDER BY b.name ASC")
     List<Brand> findByStatus(@Param("status") CatalogStatus status);
+
+    @Query("""
+            SELECT b FROM Brand b
+            WHERE b.status = :status
+              AND EXISTS (
+                  SELECT p.id FROM Product p
+                  WHERE p.brandId = b.id
+                    AND p.status = :status
+                    AND p.categoryId IN :categoryIds
+                    AND EXISTS (SELECT v.id FROM ProductVariant v WHERE v.productId = p.id AND v.status = :status)
+              )
+            ORDER BY b.name ASC
+            """)
+    List<Brand> findByStatusAndCategoryIds(@Param("status") CatalogStatus status, @Param("categoryIds") Collection<UUID> categoryIds);
 
     @Query("SELECT b FROM Brand b WHERE b.id = :id AND b.status = :status")
     Optional<Brand> findByIdAndStatus(@Param("id") UUID id, @Param("status") CatalogStatus status);

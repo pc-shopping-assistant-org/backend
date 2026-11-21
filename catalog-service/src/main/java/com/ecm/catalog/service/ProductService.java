@@ -1,6 +1,5 @@
 package com.ecm.catalog.service;
 
-import com.ecm.catalog.client.OrderServiceClient;
 import com.ecm.catalog.dto.request.CreateProductRequest;
 import com.ecm.catalog.dto.request.ProductImageRequest;
 import com.ecm.catalog.dto.request.UpdateProductRequest;
@@ -11,6 +10,7 @@ import com.ecm.catalog.entity.ProductImage;
 import com.ecm.catalog.entity.ProductVariant;
 import com.ecm.catalog.exception.CatalogErrorCode;
 import com.ecm.catalog.helper.MediaFileResolver;
+import com.ecm.catalog.helper.OrderHistoryLookup;
 import com.ecm.catalog.helper.ProductAssembler;
 import com.ecm.catalog.helper.ProductSpecificationValidator;
 import com.ecm.catalog.repository.BrandRepository;
@@ -45,7 +45,7 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
-    private final OrderServiceClient orderServiceClient;
+    private final OrderHistoryLookup orderHistory;
     private final ProductSpecificationValidator specificationValidator;
     private final MediaFileResolver mediaResolver;
     private final ProductAssembler assembler;
@@ -129,10 +129,9 @@ public class ProductService {
         // 1. A product that already received stock or was ordered can no longer be deleted (hide it instead)
         Product product = findLiveProduct(id);
         List<ProductVariant> variants = productVariantRepository.findByProductIdAndStatusNot(id, CatalogStatus.DELETED);
-        for (ProductVariant variant : variants) {
-            if (variant.getQuantity() > 0 || Boolean.TRUE.equals(orderServiceClient.hasOrderHistory(variant.getId()).getData())) {
-                throw new BusinessException(CatalogErrorCode.PRODUCT_IN_USE);
-            }
+        if (variants.stream().anyMatch(variant -> variant.getQuantity() > 0)
+                || !orderHistory.orderedAmong(variants.stream().map(ProductVariant::getId).toList()).isEmpty()) {
+            throw new BusinessException(CatalogErrorCode.PRODUCT_IN_USE);
         }
 
         // 2. Soft delete the product with its variants so their SKU, barcode and SEO name can be reused
