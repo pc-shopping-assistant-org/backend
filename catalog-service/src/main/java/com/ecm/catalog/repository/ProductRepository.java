@@ -25,8 +25,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Optional<Product> findByIdAndStatusIn(UUID id, Collection<CatalogStatus> statuses);
 
-    String SEARCH_PRODUCTS_WHERE = """
-            SELECT p FROM Product p
+    String SEARCH_FILTER = """
+            FROM Product p
             WHERE p.status IN :statuses
               AND (:cursor IS NULL OR p.id < :cursor)
               AND (:anyCategory = TRUE OR p.categoryId IN :categoryIds)
@@ -43,15 +43,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                      AND (:maxPrice IS NULL OR v.price <= :maxPrice)))
             """;
 
-    String SEARCH_PRODUCTS = SEARCH_PRODUCTS_WHERE + " ORDER BY p.id DESC";
+    String SEARCH_PRODUCTS = "SELECT p " + SEARCH_FILTER + " ORDER BY p.id DESC";
 
-    String SEARCH_PRODUCTS_PRICE_ASC = SEARCH_PRODUCTS_WHERE + """
-            ORDER BY (SELECT MIN(pv.price) FROM ProductVariant pv WHERE pv.productId = p.id AND pv.status IN :variantStatuses) ASC, p.id DESC
-            """;
+    /** The cheapest variant a product offers, which is the price a listing shows for it. */
+    String LOWEST_PRICE = "(SELECT MIN(lp.price) FROM ProductVariant lp WHERE lp.productId = p.id AND lp.status IN :variantStatuses)";
 
-    String SEARCH_PRODUCTS_PRICE_DESC = SEARCH_PRODUCTS_WHERE + """
-            ORDER BY (SELECT MIN(pv.price) FROM ProductVariant pv WHERE pv.productId = p.id AND pv.status IN :variantStatuses) DESC, p.id DESC
-            """;
+    String SEARCH_PRODUCTS_PRICE_ASC = "SELECT p " + SEARCH_FILTER + " ORDER BY " + LOWEST_PRICE + " ASC, p.id DESC";
+    String SEARCH_PRODUCTS_PRICE_DESC = "SELECT p " + SEARCH_FILTER + " ORDER BY " + LOWEST_PRICE + " DESC, p.id DESC";
+    String COUNT_PRODUCTS = "SELECT COUNT(p) " + SEARCH_FILTER;
 
     /**
      * Keyset page (newest first) of products whose status is one of {@code statuses}. A null cursor starts at the
@@ -90,7 +89,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             Pageable pageable
     );
 
-    @Query(SEARCH_PRODUCTS_PRICE_ASC)
+    /** A numbered page, cheapest first; products with the same lowest price keep the newest-first order. */
+    @Query(value = SEARCH_PRODUCTS_PRICE_ASC, countQuery = COUNT_PRODUCTS)
     Page<Product> searchPageByPriceAsc(
             @Param("statuses") Collection<CatalogStatus> statuses,
             @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,
@@ -105,7 +105,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             Pageable pageable
     );
 
-    @Query(SEARCH_PRODUCTS_PRICE_DESC)
+    /** A numbered page, most expensive first. */
+    @Query(value = SEARCH_PRODUCTS_PRICE_DESC, countQuery = COUNT_PRODUCTS)
     Page<Product> searchPageByPriceDesc(
             @Param("statuses") Collection<CatalogStatus> statuses,
             @Param("variantStatuses") Collection<CatalogStatus> variantStatuses,

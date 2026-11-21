@@ -31,7 +31,7 @@ public class ProductFilterRequest {
     /** Zero-based number of the page to return; when set, the response carries the totals and the cursor is ignored. */
     private Integer page;
 
-    /** Optional sort order for numbered pages (e.g. price_asc, price_desc). */
+    /** {@code price_asc} or {@code price_desc} orders a numbered page by the lowest variant price; anything else keeps newest first. */
     private String sort;
 
     /** A price below zero, or a minimum above the maximum, can match nothing. */

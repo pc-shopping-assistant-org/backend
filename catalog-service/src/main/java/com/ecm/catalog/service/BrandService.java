@@ -11,10 +11,10 @@ import com.ecm.catalog.helper.MediaFileResolver;
 import com.ecm.catalog.mapper.BrandMapper;
 import com.ecm.catalog.repository.BrandRepository;
 import com.ecm.catalog.repository.CategoryRepository;
+import com.ecm.catalog.repository.ProductRepository;
 import com.ecm.catalog.util.SeoNames;
 import com.ecm.common.exception.ResourceNotFoundException;
 import com.ecm.common.exception.BusinessException;
-import com.ecm.catalog.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -112,7 +112,7 @@ public class BrandService {
     public List<BrandResponse> getAllBrands() {
         return getAllBrands(null);
     }
-
+    /** Active brands; with a category, only those that have a listed product in it or in one of its sub-categories. */
     @Transactional(readOnly = true)
     public List<BrandResponse> getAllBrands(UUID categoryId) {
         List<Brand> brands;
