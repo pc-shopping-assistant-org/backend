@@ -193019,7 +193019,7 @@
     {
       "category_seo_name": "mainboard",
       "attribute_key": "m2_slots",
-      "required": true,
+      "required": false,
       "display_order": 6
     },
     {
