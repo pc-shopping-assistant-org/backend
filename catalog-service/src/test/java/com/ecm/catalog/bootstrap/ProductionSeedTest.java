@@ -10,10 +10,12 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,11 +35,20 @@ class ProductionSeedTest {
 
     @Test
     void configuredDatasetsMergeWithoutDuplicatingSharedMasterRows() throws Exception {
-        SeedData data = SeedData.loadAll("/seed/catalog_seed.json,/seed/pc_catalog_seed.json,/seed/gear_catalog_seed.json");
+        var files = List.of("/seed/catalog_seed.json", "/seed/pc_catalog_seed.json", "/seed/gear_catalog_seed.json");
+        var expectedProducts = new HashSet<UUID>();
+        var expectedVariants = new HashSet<UUID>();
+        for (String file : files) {
+            SeedData source = SeedData.load(file);
+            source.products().forEach(product -> expectedProducts.add(product.id()));
+            source.productVariants().forEach(variant -> expectedVariants.add(variant.id()));
+        }
+        SeedData data = SeedData.loadAll(String.join(",", files));
 
-        assertEquals(2_389, data.products().size());
-        assertEquals(2_389, data.productVariants().size());
-        assertEquals(20, data.categories().stream().map(SeedData.Category::hardwareType).distinct().count());
+        assertEquals(expectedProducts, data.products().stream().map(SeedData.Product::id).collect(Collectors.toSet()));
+        assertEquals(expectedProducts.size(), data.products().size());
+        assertEquals(expectedVariants, data.productVariants().stream().map(SeedData.Variant::id).collect(Collectors.toSet()));
+        assertEquals(expectedVariants.size(), data.productVariants().size());
         // SSD and HDD are hardware types of their own, not STORAGE
         assertEquals(Set.of("SSD", "HDD"), data.categories().stream().filter(category -> category.seoName().equals("ssd") || category.seoName().equals("hdd"))
                 .map(SeedData.Category::hardwareType).collect(java.util.stream.Collectors.toSet()));
@@ -88,6 +99,10 @@ class ProductionSeedTest {
                     assertEquals(21, scalar(database.connection, "SELECT count(*) FROM hardware_types"));
                     assertEquals(1, scalar(database.connection, "SELECT count(*) FROM categories WHERE seo_name = 'other'"));
                     assertEquals(0, scalar(database.connection, "SELECT count(*) FROM categories WHERE hardware_type_id IS NULL"));
+                    assertEquals(2, scalar(database.connection, """
+                            SELECT count(*) FROM categories child JOIN categories parent ON child.parent_id = parent.id
+                            WHERE child.seo_name IN ('ssd', 'hdd') AND parent.seo_name = 'storage'
+                            """));
                     assertEquals(data.productVariants().size(), scalar(database.connection,
                             "SELECT count(*) FROM product_variants WHERE status = 'ACTIVE' AND quantity = 0"));
                     try (var statement = database.connection.createStatement()) {

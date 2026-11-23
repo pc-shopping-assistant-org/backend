@@ -1,6 +1,7 @@
 package com.ecm.catalog.bootstrap;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,8 +16,7 @@ import static com.ecm.catalog.bootstrap.SeedDatabase.reference;
 final class CatalogDatasetSeed {
     private static final String STORAGE_CATEGORY = "storage";
     private static final String STORAGE_CATEGORY_NAME = "Ổ cứng";
-    /** The hardware types of the storage family; their categories sit under the "Ổ cứng" category. */
-    private static final java.util.Set<String> STORAGE_HARDWARE_TYPES = java.util.Set.of("STORAGE", "SSD", "HDD");
+    private static final Set<String> STORAGE_SUBTYPES = Set.of("SSD", "HDD");
     private final SeedDatabase catalog;
 
     CatalogDatasetSeed(SeedDatabase catalog) { this.catalog = catalog; }
@@ -131,34 +131,39 @@ final class CatalogDatasetSeed {
         UUID storageId = stored.getOrDefault(STORAGE_CATEGORY, byName.get(STORAGE_CATEGORY_NAME.toLowerCase(Locale.ROOT)));
         if (storageId != null) stored.put(STORAGE_CATEGORY, storageId);
         var mapped = new HashMap<UUID, UUID>();
-        for (var category : seeds) {
-            if (!hardwareTypes.containsKey(category.hardwareType())) {
-                throw new IllegalArgumentException("Unknown hardware type: " + category.hardwareType());
-            }
-            if (!stored.containsKey(category.seoName())) {
-                UUID named = byName.get(category.name().toLowerCase(Locale.ROOT));
-                if (named != null) stored.put(category.seoName(), named);
-            }
-            if (!stored.containsKey(category.seoName())) {
-                UUID parentId = category.parentId() == null ? null : mapped.get(category.parentId());
-                if (category.parentId() != null && parentId == null) {
-                    throw new IllegalArgumentException("Unknown parent category: " + category.seoName());
+        var pending = new ArrayList<>(seeds);
+        while (!pending.isEmpty()) {
+            int unresolved = pending.size();
+            for (var iterator = pending.iterator(); iterator.hasNext();) {
+                var category = iterator.next();
+                UUID hardwareTypeId = hardwareTypes.get(category.hardwareType());
+                if (hardwareTypeId == null) {
+                    throw new IllegalArgumentException("Unknown hardware type: " + category.hardwareType());
                 }
-                if (STORAGE_HARDWARE_TYPES.contains(category.hardwareType())) parentId = storageId;
-                if (STORAGE_HARDWARE_TYPES.contains(category.hardwareType()) && parentId == null) {
-                    throw new IllegalArgumentException("Missing storage parent category: " + category.seoName());
+                UUID id = stored.getOrDefault(category.seoName(), byName.get(category.name().toLowerCase(Locale.ROOT)));
+                if (id == null) {
+                    UUID parentId = mapped.get(category.parentId());
+                    if (category.parentId() != null && parentId == null) continue;
+                    if (category.parentId() == null && STORAGE_SUBTYPES.contains(category.hardwareType())) {
+                        parentId = stored.get(STORAGE_CATEGORY);
+                        if (parentId == null) continue;
+                    }
+                    catalog.insert("""
+                            INSERT INTO categories (id, name, seo_name, description, parent_id, hardware_type_id, display_order, status)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
+                            """, java.util.Collections.singletonList(new Object[] {category.id(), category.name(), category.seoName(),
+                            category.description(), parentId, hardwareTypeId, category.displayOrder(), category.status()}));
+                    stored.putAll(categoryIds());
+                    id = stored.get(category.seoName());
+                    if (id == null) throw new IllegalStateException("Category is missing or deleted: " + category.seoName());
                 }
-                catalog.insert("""
-                        INSERT INTO categories (id, name, seo_name, description, parent_id, hardware_type_id, display_order, status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
-                        """, java.util.Collections.singletonList(new Object[] {category.id(), category.name(), category.seoName(),
-                        category.description(), parentId, hardwareTypes.get(category.hardwareType()),
-                        category.displayOrder(), category.status()}));
-                stored.putAll(categoryIds());
+                stored.put(category.seoName(), id);
+                mapped.put(category.id(), id);
+                iterator.remove();
             }
-            UUID id = stored.get(category.seoName());
-            if (id == null) throw new IllegalStateException("Category is missing or deleted: " + category.seoName());
-            mapped.put(category.id(), id);
+            if (pending.size() == unresolved) {
+                throw new IllegalArgumentException("Missing or cyclic parent for seed category: " + pending.getFirst().seoName());
+            }
         }
         return new Categories(mapped, stored);
     }
